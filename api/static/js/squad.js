@@ -85,7 +85,7 @@
   // ---- Shared rendering helpers -----------------------------------------
   const emptyRow = () =>
     `<div class="pl"><span class="nm" style="color:var(--ink-faint)">- empty -</span></div>`;
-  const posLabel = (pos, n) => `${MODEL.labels[pos] || pos}${n > 1 ? ` ×${n}` : ''}`;
+  const posLabel = (pos, n) => `${MODEL.labels[pos] || pos}${n > 1 ? ` x${n}` : ''}`;
   const sectionTitle = (label, have, want) =>
     `<div class="sec-title"><span>${label}</span><span>${have}/${want}</span></div>`;
 
@@ -163,35 +163,152 @@
   }
 
   // =========================================================================
-  // OFDS — strict full rugby XV (positioned starters + positioned bench)
+  // OFDS — strict full rugby XV, laid out on a rugby-union pitch
   // =========================================================================
 
+  // The starting XV in 1–15 jersey order, each placed where it stands on the
+  // field: forwards packed near the top (own line), the back-line spreading
+  // toward the bottom. x/y are percentages of the pitch (token centre).
+  const OFDS_FORMATION = [
+    { pos: 'PR',  num: 1,  x: 30, y: 15 },   // loose-head prop
+    { pos: 'HK',  num: 2,  x: 50, y: 12 },   // hooker
+    { pos: 'PR',  num: 3,  x: 70, y: 15 },   // tight-head prop
+    { pos: 'LK',  num: 4,  x: 41, y: 27 },   // lock
+    { pos: 'LK',  num: 5,  x: 59, y: 27 },   // lock
+    { pos: 'LF',  num: 6,  x: 24, y: 38 },   // blind-side flanker
+    { pos: 'LF',  num: 7,  x: 76, y: 38 },   // open-side flanker
+    { pos: 'LF',  num: 8,  x: 50, y: 43 },   // number 8
+    { pos: 'SH',  num: 9,  x: 20, y: 55 },   // scrum-half
+    { pos: 'FH',  num: 10, x: 30, y: 65 },   // fly-half
+    { pos: 'MID', num: 12, x: 45, y: 70 },   // inside centre
+    { pos: 'MID', num: 13, x: 65, y: 75 },   // outside centre
+    { pos: 'OBK', num: 11, x: 16, y: 80 },   // left wing
+    { pos: 'OBK', num: 14, x: 84, y: 80 },   // right wing
+    { pos: 'OBK', num: 15, x: 50, y: 85 },   // full-back
+  ];
+
+  // Horizontal field lines (% from top) — try lines + posts, 22s, dashed 10s,
+  // and the halfway line, mirroring a real rugby-union pitch.
+  const PITCH_LINES = [
+    { y: 7,  dash: false, posts: true },
+    { y: 12, dash: true },
+    { y: 29, dash: false },
+    { y: 40, dash: true },
+    { y: 50, dash: false },
+    { y: 60, dash: true },
+    { y: 71, dash: false },
+    { y: 87, dash: true },
+    { y: 93, dash: false, posts: true },
+  ];
+
+  // Pitch on the left with the XV in formation; replacements stacked in a
+  // vertical column on the right (like a matchday bench beside the field).
   function renderPositionedSquad(starters, bench) {
-    return sectionTitle('Starting XV', starters.length, MODEL.starter_count)
-      + `<div class="ofds-card">${fillPositionedSlots(starters, MODEL.starters)}</div>`
-      + sectionTitle('Bench', bench.length, MODEL.bench_count)
-      + `<div class="ofds-card">${fillPositionedSlots(bench, MODEL.bench)}</div>`;
+    const usedS = new Set();
+    const tokens = OFDS_FORMATION.map((slot) => {
+      const p = starters.find((x) => x.position === slot.pos && !usedS.has(x.player_id));
+      if (p) { usedS.add(p.player_id); return fieldToken(p, slot); }
+      return emptyFieldToken(slot);
+    }).join('');
+
+    const markings = PITCH_LINES.map((l) =>
+      `<div class="pitch-line${l.dash ? ' dash' : ''}" style="top:${l.y}%"></div>`
+      + (l.posts ? `<div class="pitch-posts pitch-posts--${l.y < 50 ? 'top' : 'bottom'}" style="top:${l.y}%"><i></i></div>` : '')
+    ).join('');
+
+    const benchExtra = [];
+    let html = sectionTitle('Starting XV', starters.length, MODEL.starter_count)
+      + `<div class="field-layout">`
+      +   `<div class="pitch-wrap"><div class="pitch" role="img"`
+      +     ` aria-label="Starting XV in rugby formation">${markings}${tokens}</div></div>`
+      +   `<aside class="bench-col">`
+      +     `<div class="bench-col-head"><span>Replacements</span>`
+      +       `<span>${bench.length}/${MODEL.bench_count}</span></div>`
+      +     renderBenchChips(bench, benchExtra)
+      +   `</aside>`
+      + `</div>`;
+
+    // Surplus / wrong-position players (an in-progress XV) — flagged full width.
+    html += overLimitCard(starters.filter((p) => !usedS.has(p.player_id)));
+    html += overLimitCard(benchExtra);
+    return html;
   }
 
-  // Render exactly `slotsByPos[pos]` rows per position; flag anything surplus.
-  function fillPositionedSlots(group, slotsByPos) {
+  // Replacements 16–23, in forward-to-back order, as a vertical bench column;
+  // any player beyond a position's bench quota is pushed onto `extraOut`.
+  function renderBenchChips(bench, extraOut) {
     const used = new Set();
-    let html = '';
+    let num = 16;
+    let chips = '';
     (MODEL.order || []).forEach((pos) => {
-      const n = slotsByPos[pos] || 0;
-      if (!n) return;
-      html += `<div class="slot-label">${posLabel(pos, n)}</div>`;
-      for (let i = 0; i < n; i++) {
-        const p = group.find((x) => x.position === pos && !used.has(x.player_id));
-        if (p) { used.add(p.player_id); html += playerRow(p); } else html += emptyRow();
+      const n = (MODEL.bench || {})[pos] || 0;
+      for (let i = 0; i < n; i++, num++) {
+        const p = bench.find((x) => x.position === pos && !used.has(x.player_id));
+        if (p) { used.add(p.player_id); chips += benchToken(p, num); }
+        else chips += emptyBenchToken(num, pos);
       }
     });
-    const extra = group.filter((p) => !used.has(p.player_id));
-    if (extra.length) {
-      html += `<div class="slot-label" style="color:var(--danger)">Over the limit</div>`
-        + extra.map(playerRow).join('');
-    }
-    return html;
+    bench.filter((p) => !used.has(p.player_id)).forEach((p) => extraOut.push(p));
+    return chips;
+  }
+
+  // A full-width warning card listing players beyond their position's quota.
+  function overLimitCard(extra) {
+    if (!extra.length) return '';
+    return `<div class="ofds-card"><div class="slot-label" style="color:var(--danger)">Over the limit</div>`
+      + extra.map(playerRow).join('') + `</div>`;
+  }
+
+  // One player standing on the field: tap the shirt to (un)captain, tap "Sub"
+  // to swap to the bench. Shirt carries the jersey number, captain badge and a
+  // real-match lineup dot.
+  function fieldToken(p, slot) {
+    const disabled = isLocked ? 'disabled' : '';
+    const capTitle = p.is_captain ? 'remove captain' : 'make captain';
+    return `<div class="fp${p.is_captain ? ' is-cap' : ''}" style="left:${slot.x}%;top:${slot.y}%">
+      <button class="fp-shirt" data-act="cap" data-id="${p.player_id}" ${disabled}
+        title="${esc(p.name)} — tap to ${capTitle}">
+        ${slot.num}${statusDotHtml(p)}${p.is_captain ? '<span class="fp-c">C</span>' : ''}
+      </button>
+      <div class="fp-name">${esc(p.name)}</div>
+      <button class="fp-sub" data-act="bench" data-id="${p.player_id}" ${disabled}>Sub</button>
+    </div>`;
+  }
+
+  function emptyFieldToken(slot) {
+    return `<div class="fp fp--empty" style="left:${slot.x}%;top:${slot.y}%">
+      <div class="fp-shirt fp-shirt--empty">${slot.num}</div>
+      <div class="fp-name">${MODEL.labels[slot.pos] || slot.pos}</div>
+    </div>`;
+  }
+
+  function benchToken(p, num) {
+    const disabled = isLocked ? 'disabled' : '';
+    const capTitle = p.is_captain ? 'remove captain' : 'make captain';
+    return `<div class="bp${p.is_captain ? ' is-cap' : ''}">
+      <button class="bp-shirt" data-act="cap" data-id="${p.player_id}" ${disabled}
+        title="${esc(p.name)} — tap to ${capTitle}">
+        ${num}${statusDotHtml(p)}${p.is_captain ? '<span class="fp-c">C</span>' : ''}
+      </button>
+      <div class="bp-name"><b>${esc(p.name)}</b><small>${esc(p.real_team || '')}</small></div>
+      <button class="ofds-btn ofds-btn--ghost ofds-btn--sm bench-btn" data-act="bench" data-id="${p.player_id}" ${disabled}>Start</button>
+    </div>`;
+  }
+
+  function emptyBenchToken(num, pos) {
+    return `<div class="bp bp--empty">
+      <div class="bp-shirt bp-shirt--empty">${num}</div>
+      <div class="bp-name"><b>${MODEL.labels[pos] || pos}</b><small>—</small></div>
+    </div>`;
+  }
+
+  // Real-match lineup status, shown as a small dot on the shirt (shared by the
+  // field tokens and bench chips); mirrors the legend on the page.
+  function statusDotHtml(p) {
+    const stat = statusByPid[p.player_id];
+    const cls = stat === 'S' ? 's' : (stat === 'B' ? 'b' : '');
+    const title = stat === 'S' ? 'Starting' : (stat === 'B' ? 'On bench' : 'Not named');
+    return `<span class="fp-dot ${cls}" title="${title}"></span>`;
   }
 
   // Swap the clicked player with the same-position player on the opposite side

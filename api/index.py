@@ -387,7 +387,7 @@ def inject_theme():
             'theme': league['theme'], 'brand': league['brand'],
             'brand_sub': league['comp_name'], 'league_slug': slug,
         }
-    return {'theme': 'forest', 'brand': 'Meatyboys', 'brand_sub': 'Rugby Fantasy',
+    return {'theme': 'forest', 'brand': 'Meatyboys Inc', 'brand_sub': 'Rugby Fantasy',
             'league_slug': None}
 
 
