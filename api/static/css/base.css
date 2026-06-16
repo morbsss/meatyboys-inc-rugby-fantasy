@@ -27,9 +27,11 @@
   --warning:       #C97A1F;
   --danger:        #B33A2E;
 
-  /* Typography */
-  --font-display:  'Barlow Condensed', 'Arial Narrow', sans-serif;
+  /* Typography — one family (Inter) across the whole app. --font-display is
+     kept as an alias so existing display rules keep their sizes/weights/colours,
+     they just render in Inter now. */
   --font-body:     'Inter', system-ui, -apple-system, sans-serif;
+  --font-display:  var(--font-body);
 
   /* Spacing */
   --s-1: 4px;  --s-2: 8px;  --s-3: 12px;

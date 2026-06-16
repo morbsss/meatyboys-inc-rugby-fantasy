@@ -32,7 +32,7 @@ LEAGUES = {
         # (spec §3, §8.6); these are best-effort hooks for the live adapter.
         'espn_league_id':   '270557',   # ESPN Super Rugby Pacific (best-effort)
         'superbru_table':   None,        # no confirmed SuperBru table id yet
-        'joinable':         False,       # parked while OFDS is developed
+        'joinable':         True,       # parked while OFDS is developed
     },
     'ofds': {
         'slug':        'ofds',
@@ -266,7 +266,7 @@ def squad_quotas(model: dict) -> dict[str, int]:
 
 
 def _fmt_counts(counts: dict[str, int]) -> str:
-    return ', '.join(f"{n}×{POSITION_LABELS.get(p, p)}"
+    return ', '.join(f"{n}x{POSITION_LABELS.get(p, p)}"
                      for p, n in sorted(counts.items(), key=lambda kv: POSITION_ORDER.index(kv[0])))
 
 

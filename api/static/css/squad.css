@@ -1,4 +1,4 @@
-.content { max-width: 760px; margin: 0 auto; padding: 20px 16px 96px; width: 100%; }
+.content { max-width: 830px; margin: 0 auto; padding: 20px 16px 96px; width: 100%; }
 @media (max-width: 768px) { .content { padding: 14px 10px calc(var(--bottom-nav-h,56px) + 96px); } }
 
 .sq-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
@@ -23,7 +23,7 @@
 .pl .status-dot.s { background: var(--success); }
 .pl .status-dot.b { background: var(--amber); }
 .pl .nm { flex: 1; min-width: 0; }
-.pl .nm b { font-family: var(--font-display); font-weight: 800; color: var(--forest); }
+.pl .nm b { font-family: var(--font-display); font-weight: 400; color: var(--forest); }
 .pl .nm small { color: var(--ink-faint); font-weight: 500; }
 .pl .marks { display: flex; gap: 4px; }
 .ck-btn { width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--border-strong);
@@ -37,7 +37,11 @@
   text-transform: uppercase; letter-spacing: .03em; margin-bottom: 8px; }
 .empty p { color: var(--ink-muted); font-size: 13px; margin-bottom: 14px; }
 
-.legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 12px; font-size: 11px; font-weight: 600; color: var(--ink-muted); }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; text-align: center;
+  margin-top: 12px; font-size: 11px; font-weight: 600; color: var(--ink-muted);
+  /* Align the legend's centre with the pitch, which is offset left of the
+     content centre by the bench column (92px) + its gap (10px). */
+  padding-right: 102px; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .legend i { width: 11px; height: 11px; border-radius: 50%; }
 
@@ -47,6 +51,184 @@
 @media (max-width: 768px) { .save-bar { bottom: var(--bottom-nav-h,56px); } }
 .save-status { flex: 1; font-size: 12px; font-weight: 600; color: var(--ink-muted); }
 .save-status .bad { color: var(--danger); }
+
+/* =============================================================================
+ * OFDS pitch view — the starting XV laid out on a rugby-union field.
+ * ========================================================================== */
+/* Pitch on the left, replacements column on the right. */
+.field-layout { display: flex; align-items: flex-start; gap: 10px; margin: 4px 0 10px; }
+.pitch-wrap { flex: 1 1 auto; min-width: 0; }
+.pitch {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  aspect-ratio: 7 / 10;
+  border-radius: var(--r-lg, 14px);
+  overflow: hidden;
+  /* mown grass stripes */
+  background: repeating-linear-gradient(
+    to bottom,
+    #2f8f43 0, #2f8f43 8.333%,
+    #279a3f 8.333%, #279a3f 16.666%);
+  box-shadow: inset 0 0 0 3px rgba(255,255,255,.85), 0 8px 22px rgba(11,59,46,.20);
+}
+
+/* Starting XV title overlaid inside the pitch: label top-left, count top-right. */
+.pitch-head {
+  position: absolute; left: 0; right: 0; top: 4%; z-index: 3;
+  margin: 0; padding: 0 12px; transform: translateY(-50%);
+  color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.5);
+}
+
+/* White field markings: try lines, 22s, dashed 10s, halfway. */
+.pitch-line {
+  position: absolute; left: 0; right: 0; height: 2px;
+  background: rgba(255,255,255,.85); transform: translateY(-50%);
+}
+.pitch-line.dash {
+  height: 0; background: none;
+  border-top: 2px dashed rgba(255,255,255,.7);
+}
+/* Goal posts on the two try lines (H-shape: two uprights + crossbar). */
+.pitch-posts {
+  position: absolute; left: 50%; width: 34px; height: 22px;
+}
+.pitch-posts--top    { transform: translate(-50%, -100%); }  /* above the top try line */
+.pitch-posts--bottom { transform: translate(-50%, 0); }      /* below the bottom try line */
+.pitch-posts::before, .pitch-posts::after {
+  content: ''; position: absolute; top: 0; bottom: 0; width: 3px;
+  background: rgba(255,255,255,.9);
+}
+.pitch-posts::before { left: 7px; }
+.pitch-posts::after  { right: 7px; }
+.pitch-posts i {
+  position: absolute; left: 7px; right: 7px; top: 7px; height: 3px;
+  background: rgba(255,255,255,.9);
+}
+
+/* A player standing on the field. */
+.fp {
+  position: absolute; transform: translate(-50%, -50%); z-index: 2;
+  display: flex; flex-direction: column; align-items: center; gap: 3px; width: 84px;
+}
+.fp-shirt {
+  position: relative; width: 45px; height: 45px; border-radius: 50%;
+  border: 2px solid #fff; background: var(--forest); color: var(--cream);
+  font-family: var(--font-display); font-weight: 800; font-size: 20px;
+  display: grid; place-items: center; cursor: pointer; padding: 0;
+  box-shadow: 0 2px 5px rgba(0,0,0,.28);
+}
+.fp-shirt:disabled { cursor: default; }
+.fp.is-cap .fp-shirt { box-shadow: 0 0 0 3px var(--amber), 0 2px 5px rgba(0,0,0,.28); }
+.fp-shirt--empty {
+  background: rgba(255,255,255,.16); border-style: dashed;
+  color: rgba(255,255,255,.85); cursor: default;
+}
+.fp-name {
+  font-size: 14px; font-weight: 700; color: #fff; text-align: center;
+  line-height: 1.05; width: 100%; text-shadow: 0 1px 2px rgba(0,0,0,.55);
+  /* Long surnames (e.g. "Nawaqanitawase,A") wrap inside the token instead of
+     overflowing onto neighbours; capped at two lines, ellipsis past that. */
+  overflow-wrap: anywhere; word-break: break-word;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.fp--empty .fp-name { font-weight: 600; opacity: .9; }
+
+/* Captain badge + lineup-status dot — shared by field tokens and bench chips. */
+.fp-c {
+  position: absolute; top: -6px; right: -6px; width: 16px; height: 16px;
+  border-radius: 50%; background: var(--amber); color: var(--forest-deep);
+  font-size: 9px; font-weight: 800; display: grid; place-items: center;
+  border: 1.5px solid #fff;
+}
+.fp-dot {
+  position: absolute; bottom: -2px; left: -2px; width: 10px; height: 10px;
+  border-radius: 50%; background: var(--border-strong); border: 1.5px solid #fff;
+}
+.fp-dot.s { background: var(--success); }
+.fp-dot.b { background: var(--amber); }
+
+/* Replacements 16–23 — a vertical bench column beside the pitch. */
+.bench-col {
+  flex: 0 0 auto; width: 92px; display: flex; flex-direction: column; gap: 7px;
+}
+.bench-col-head {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 4px;
+  font-family: var(--font-display); font-size: 11px; font-weight: 800;
+  letter-spacing: .05em; text-transform: uppercase; color: var(--ink-muted);
+  padding: 0 2px 2px;
+}
+/* Same card format as the on-field players (.fp): a round forest shirt with
+   the jersey number + name below; only the name colour is darkened so it reads
+   on the light bench column rather than the green pitch. */
+.bp {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+}
+.bp-shirt {
+  position: relative; width: 45px; height: 45px; border-radius: 50%;
+  border: 2px solid #fff; background: var(--forest); color: var(--cream);
+  font-family: var(--font-display); font-weight: 800; font-size: 20px;
+  display: grid; place-items: center; cursor: pointer; padding: 0;
+  box-shadow: 0 2px 5px rgba(0,0,0,.28);
+}
+.bp-shirt:disabled { cursor: default; }
+.bp.is-cap .bp-shirt { box-shadow: 0 0 0 3px var(--amber), 0 2px 5px rgba(0,0,0,.28); }
+.bp-shirt--empty {
+  background: var(--surface-2); border-style: dashed; border-color: var(--border-strong);
+  color: var(--ink-faint); cursor: default; box-shadow: none;
+}
+.bp-name { text-align: center; line-height: 1.05; width: 100%; max-width: 88px; }
+.bp-name b {
+  font-family: var(--font-display); font-weight: 700; font-size: 13px; color: var(--forest);
+  overflow-wrap: anywhere; word-break: break-word;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.bp-name small { color: var(--ink-faint); font-size: 11px; }
+.bp--empty .bp-name b { color: var(--ink-faint); }
+
+/* Player card — opened by tapping a shirt: recent points + captain/bench. */
+.pc-overlay {
+  position: fixed; inset: 0; z-index: 200; background: rgba(11,33,26,.55);
+  display: grid; place-items: center; padding: 20px;
+}
+.pc-card {
+  position: relative; width: 100%; max-width: 340px; padding: 16px;
+  background: var(--surface); border-radius: var(--r-lg, 14px);
+  box-shadow: 0 14px 40px rgba(0,0,0,.35);
+}
+.pc-x {
+  position: absolute; top: 6px; right: 10px; border: none; background: none;
+  font-size: 24px; line-height: 1; color: var(--ink-faint); cursor: pointer;
+}
+.pc-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding-right: 22px; }
+.pc-name { font-family: var(--font-display); font-weight: 800; font-size: 18px; color: var(--forest); }
+.pc-cap {
+  font-size: 11px; font-weight: 800; background: var(--amber); color: var(--forest-deep);
+  border-radius: var(--r-full); padding: 1px 7px; vertical-align: middle;
+}
+.pc-team { font-size: 12px; font-weight: 600; color: var(--ink-muted); }
+.pc-sub {
+  font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--ink-faint); margin-bottom: 8px;
+}
+.pc-pts {
+  display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px;
+  max-height: 244px; overflow-y: auto;
+}
+.pc-pt {
+  display: flex; align-items: baseline; gap: 8px;
+  background: var(--surface-2); border-radius: 8px; padding: 6px 10px;
+}
+.pc-rd { flex: 0 0 auto; font-size: 11px; font-weight: 700; color: var(--ink-faint); }
+.pc-opp {
+  flex: 1 1 auto; min-width: 0; font-size: 11px; font-weight: 600; color: var(--ink-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pc-pt b { flex: 0 0 auto; font-family: var(--font-display); font-size: 15px; color: var(--forest); }
+.pc-none { font-size: 13px; color: var(--ink-muted); margin-bottom: 16px; }
+.pc-actions { display: flex; gap: 8px; }
+.pc-actions .ofds-btn { flex: 1; }
 
 /* Advisory helper chips — what the ideal XV still wants (never blocks a save) */
 .needs-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 14px 4px 2px;

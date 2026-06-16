@@ -387,7 +387,7 @@ def inject_theme():
             'theme': league['theme'], 'brand': league['brand'],
             'brand_sub': league['comp_name'], 'league_slug': slug,
         }
-    return {'theme': 'forest', 'brand': 'Meatyboys', 'brand_sub': 'Rugby Fantasy',
+    return {'theme': 'forest', 'brand': 'Meatyboys Inc', 'brand_sub': 'Rugby Fantasy',
             'league_slug': None}
 
 
@@ -963,6 +963,7 @@ def my_picks():
     ''', (team_name, team_name, next_round))
     picks = [dict(r) for r in cursor.fetchall()]
     cursor.close()
+    _attach_recent_points(conn, league_id, picks, next_round)
     fr = _team_front_row_view(conn, league_id, team_name, next_round)
     model_payload = _model_payload(_roster_model(conn, league_id))
     conn.close()
@@ -970,6 +971,52 @@ def my_picks():
                     'fr_club': fr['club'], 'fr_players': fr['players'],
                     'fr_is_captain': fr['is_captain'], 'fr_is_bench': fr['is_bench'],
                     'roster_model': model_payload})
+
+
+def _attach_recent_points(conn, league_id, picks, next_round):
+    """Attach `recent_points` ([{round, points}, ...]) to each pick — every
+    completed round (1 .. next_round-1). weekly_stats.total_points is cumulative,
+    so a round's own points are its total minus the previous round's."""
+    pids = [p['player_id'] for p in picks if isinstance(p.get('player_id'), int)]
+    if not pids:
+        for p in picks:
+            p['recent_points'] = []
+        return
+    cursor = _get_cursor(conn)
+    ph = ','.join(['?'] * len(pids))
+    cursor.execute(
+        f'SELECT player_id, round, total_points FROM weekly_stats '
+        f'WHERE league_id = ? AND player_id IN ({ph}) AND round < ? '
+        f'ORDER BY player_id, round',
+        (league_id, *pids, next_round))
+    hist: dict[int, list[tuple[int, float]]] = {}
+    for r in cursor.fetchall():
+        d = dict(r) if not isinstance(r, dict) else r
+        hist.setdefault(d['player_id'], []).append((d['round'], d['total_points'] or 0.0))
+
+    # Real fixtures: {round: {team: (opponent, is_home)}} so we can show who each
+    # player faced that round.
+    cursor.execute('SELECT round, home_team, away_team FROM real_fixtures WHERE league_id = ?',
+                   (league_id,))
+    fixtures: dict[int, dict[str, tuple[str, bool]]] = {}
+    for r in cursor.fetchall():
+        d = dict(r) if not isinstance(r, dict) else r
+        by_team = fixtures.setdefault(d['round'], {})
+        by_team[d['home_team']] = (d['away_team'], True)
+        by_team[d['away_team']] = (d['home_team'], False)
+    cursor.close()
+
+    for p in picks:
+        team = p.get('real_team')
+        deltas, prev = [], 0.0
+        for rnd, tot in hist.get(p['player_id'], []):
+            entry = {'round': rnd, 'points': round(tot - prev, 1)}
+            opp = fixtures.get(rnd, {}).get(team)
+            if opp:
+                entry['opponent'], entry['home'] = opp
+            deltas.append(entry)
+            prev = tot
+        p['recent_points'] = deltas
 
 
 def _model_payload(model: dict) -> dict:
