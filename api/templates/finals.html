@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block page_title %}OFDS Fantasy — Finals Series{% endblock %}
+
+{% block extra_styles %}<link rel="stylesheet" href="/static/css/finals.css">{% endblock %}
+
+{% block header_controls %}
+  <span class="ofds-round-badge"><span>Round</span><strong id="round-badge">—</strong></span>
+{% endblock %}
+
+{% block content %}
+<div class="content">
+
+  <div class="page-head">
+    <div class="page-title">Finals Series</div>
+    <div class="page-sub">Two-legged semis (Wk 16-17) · Grand final (Wk 18)</div>
+  </div>
+  <div class="finals-status" id="finals-status"></div>
+
+  <div id="brackets"><div class="finals-loading">Loading…</div></div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/finals.js"></script>
+{% endblock %}

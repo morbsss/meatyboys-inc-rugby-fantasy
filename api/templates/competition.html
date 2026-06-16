@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block page_title %}OFDS Fantasy — League Table{% endblock %}
+
+{% block extra_styles %}<link rel="stylesheet" href="/static/css/competition.css">{% endblock %}
+
+{% block header_controls %}
+  <span class="ofds-round-badge"><span>Round</span><strong id="round-badge">—</strong></span>
+{% endblock %}
+
+{% block content %}
+<div class="content">
+
+  <div class="page-head">
+    <div class="page-title">League Table</div>
+    <div class="page-sub">Top 4 · Championship Bracket — Bottom 4 · Sacko Bracket</div>
+  </div>
+
+  <div class="ofds-card lt-card" id="table-wrap">
+    <div class="lt-loading">Loading…</div>
+  </div>
+
+  <div class="lt-legend" id="lt-legend" hidden>
+    <span><i class="swatch swatch--champ"></i> Championship Bracket — top 4</span>
+    <span><i class="swatch swatch--sacko"></i> Sacko Bracket — bottom 4</span>
+    <span>↑ ↓ vs last round · tap a team for their weekly points</span>
+  </div>
+
+  <div class="ofds-card ph-card" id="ph-card" hidden>
+    <div class="ph-head">
+      <span class="ph-title">Position over the season</span>
+      <span class="ph-note">Lower line = better rank · tap a team to highlight</span>
+    </div>
+    <div id="ph-chart-wrap"></div>
+    <div class="ph-legend" id="ph-legend"></div>
+  </div>
+
+  <a href="/finals" class="ofds-btn ofds-btn--ghost ofds-btn--sm finals-link">View Finals Series →</a>
+
+</div>
+
+<!-- ========== TEAM DETAIL SHEET ========== -->
+<div class="ofds-sheet team-sheet" id="team-sheet" role="dialog" aria-labelledby="team-sheet-name">
+  <div class="ofds-sheet-backdrop" onclick="closeTeamSheet()"></div>
+  <div class="ofds-sheet-panel">
+    <div class="ofds-sheet-handle" aria-hidden="true"></div>
+    <div class="team-sheet-head">
+      <div class="ts-rank" id="ts-rank">—</div>
+      <div class="team-id">
+        <div class="team-sheet-name" id="team-sheet-name">—</div>
+        <div class="team-sheet-record" id="ts-record">—</div>
+      </div>
+    </div>
+    <div class="team-sheet-stats" id="ts-stats"></div>
+    <div class="team-sheet-body" id="ts-body"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/competition.js"></script>
+{% endblock %}

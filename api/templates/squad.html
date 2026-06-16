@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block page_title %}Squad — {{ brand }} Fantasy{% endblock %}
+
+{% block extra_styles %}<link rel="stylesheet" href="/static/css/squad.css">{% endblock %}
+
+{% block header_controls %}
+  <span class="ofds-lock-pill" id="lock-pill"><span id="lock-text">—</span></span>
+{% endblock %}
+
+{% block content %}
+<div class="content">
+  <div class="sq-head">
+    <div class="page-title">Squad</div>
+    <div class="sq-team" id="team-name"></div>
+  </div>
+  <div class="page-sub" id="sub">Round <span id="round-badge">—</span></div>
+
+  <div id="squad-body"><div class="empty"><p>Loading your squad…</p></div></div>
+
+  <div class="legend" id="legend" hidden>
+    <span><i style="background:var(--success)"></i> Starting (real match)</span>
+    <span><i style="background:var(--amber)"></i> Bench (real match)</span>
+    <span><i style="background:var(--border-strong)"></i> Not named / out</span>
+    <span>C = captain (2×) · kicking always counts</span>
+  </div>
+</div>
+
+<div class="save-bar" id="save-bar" hidden>
+  <span class="save-status" id="save-status"></span>
+  <button class="ofds-btn ofds-btn--ghost ofds-btn--sm" id="reset-btn">Reset</button>
+  <button class="ofds-btn ofds-btn--primary ofds-btn--sm" id="save-btn" disabled>Save squad</button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/squad.js"></script>
+{% endblock %}

@@ -1,0 +1,361 @@
+/* ============================================================
+   HEADER CONTROL — round badge (mirrors squad screen)
+   ============================================================ */
+.ofds-round-badge {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--cream);
+  opacity: .85;
+}
+.ofds-round-badge strong {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--amber);
+  letter-spacing: .02em;
+}
+@media (max-width: 768px) {
+  .ofds-round-badge { font-size: 10px; }
+  .ofds-round-badge strong { font-size: 13px; }
+  .ofds-round-badge > span:first-child { display: none; }
+}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.content {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 22px 16px 48px;
+  width: 100%;
+}
+@media (max-width: 768px) {
+  .content { padding: 14px 10px calc(var(--bottom-nav-h, 56px) + 28px); }
+}
+
+.page-head { margin-bottom: 16px; }
+.page-title {
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  color: var(--forest);
+  line-height: 1;
+}
+.page-sub {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+@media (max-width: 768px) {
+  .page-title { font-size: 24px; }
+}
+
+/* ============================================================
+   LEAGUE TABLE
+   ============================================================ */
+.lt-card { overflow: hidden; }
+.lt-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.lt-wrap::-webkit-scrollbar { height: 6px; }
+
+.lt {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 540px;
+}
+.lt th, .lt td {
+  padding: 11px 10px;
+  text-align: right;
+  white-space: nowrap;
+}
+.lt thead th {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--ink-muted);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border-strong);
+}
+/* Column roles (class-based so the side spine column doesn't shift indices) */
+.lt .c-side { width: 30px; padding: 0; }
+.lt .c-rank { text-align: center; width: 34px; }
+.lt .c-team { text-align: left; }
+.lt .c-chev { width: 26px; padding-left: 0; padding-right: 12px; }
+
+.lt tbody td {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  border-bottom: 1px solid var(--border);
+}
+.lt-rank { color: var(--ink-faint); font-size: 13px; }
+.lt-team {
+  display: inline-block;
+  vertical-align: middle;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: .01em;
+  color: var(--forest);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
+}
+.lt-muted { color: var(--ink-muted); font-weight: 700; }
+.lt-pts { color: var(--forest); font-weight: 800; font-size: 17px; }
+
+/* Movement vs last week (spec §7) */
+.lt .c-move { width: 26px; text-align: center; padding-left: 0; padding-right: 4px; }
+.lt-move { display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; line-height: 1; }
+.lt-move--up   { color: var(--success); }
+.lt-move--down { color: var(--danger); }
+.lt-move--same { color: var(--ink-faint); }
+.lt-pd-pos { color: var(--success); }
+.lt-pd-neg { color: var(--danger); }
+.lt-chev { color: var(--ink-faint); transition: transform var(--motion-fast), color var(--motion-fast); }
+
+/* Clickable rows */
+.lt-row { cursor: pointer; transition: background var(--motion-fast); }
+.lt-row.in-champ { background: rgba(46,125,79,.035); }
+.lt-row.in-sacko { background: rgba(179,58,46,.03); }
+.lt-row.is-leader { background: rgba(232,155,44,.09); }
+.lt-row.is-leader .lt-rank::before { content: '★'; color: var(--amber); font-size: 12px; }
+.lt-row:hover { background: var(--surface-2); }
+.lt-row:hover .lt-chev { color: var(--forest); transform: translateX(2px); }
+.lt-row:last-child td { border-bottom: none; }
+
+/* ── Bracket spine (vertical label down the side of each band) ── */
+.lt-side {
+  text-align: center;
+  vertical-align: middle;
+  padding: 0;
+}
+.lt-side span {
+  display: inline-block;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  padding: 6px 0;
+}
+.lt-side--champ { background: rgba(46,125,79,.12); color: var(--success); box-shadow: inset 4px 0 0 var(--success); }
+.lt-side--sacko { background: rgba(179,58,46,.10); color: var(--danger);  box-shadow: inset 4px 0 0 var(--danger); }
+.lt-side--none  { background: transparent; }
+
+.lt-loading, .lt-empty {
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+.lt-empty h3 {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--forest);
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  margin-bottom: 6px;
+}
+
+/* Legend */
+.lt-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 14px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+.lt-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.lt-legend .swatch { width: 12px; height: 12px; border-radius: 3px; }
+.lt-legend .swatch--champ { background: var(--success); }
+.lt-legend .swatch--sacko { background: var(--danger); }
+
+/* Compact table on mobile: hide secondary columns (BP, PF, PA, PD) and
+   switch to fixed layout so the essentials (#, team, P/W/D/L, Pts) always fit. */
+@media (max-width: 768px) {
+  .c-hide { display: none; }
+  /* Fixed layout guarantees Pts fits without horizontal scroll; the team
+     column flexes and truncates long names with an ellipsis. */
+  .lt { min-width: 0; width: 100%; table-layout: fixed; }
+  .lt th, .lt td { padding: 10px 4px; }
+  .lt .c-side { width: 26px; }
+  .lt .c-rank { width: 24px; }
+  .lt .c-chev { width: 22px; padding-right: 8px; }
+  .lt .c-team { width: 33%; }
+  .lt-team { max-width: 100%; font-size: 15px; }
+  .lt-side span { letter-spacing: .08em; }
+}
+
+/* ============================================================
+   TEAM DETAIL SHEET — weekly points chart
+   ============================================================ */
+.team-sheet .ofds-sheet-panel { max-width: 540px; margin: 0 auto; }
+.team-sheet-head {
+  padding: 16px 20px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.ts-rank {
+  width: 46px; height: 46px;
+  border-radius: var(--r-md);
+  background: var(--forest);
+  color: var(--cream);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.ts-rank.is-champ  { background: var(--success); }
+.ts-rank.is-sacko  { background: var(--danger); }
+.ts-rank.is-leader { background: var(--amber); color: var(--forest-deep); }
+.team-id { flex: 1; min-width: 0; }
+.team-sheet-name {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1.1;
+  letter-spacing: .01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.team-sheet-record {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.ts-bracket-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 9px;
+  border-radius: var(--r-full);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+.ts-bracket-tag.is-champ { background: rgba(46,125,79,.14); color: var(--success); }
+.ts-bracket-tag.is-sacko { background: rgba(179,58,46,.12); color: var(--danger); }
+
+.team-sheet-stats {
+  padding: 14px 20px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.ts-stat {
+  text-align: center;
+  padding: 8px 4px;
+  background: var(--surface-2);
+  border-radius: var(--r-md);
+}
+.ts-stat-value {
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--forest);
+  line-height: 1;
+}
+.ts-stat-value.amber { color: var(--amber-deep); }
+.ts-stat-label {
+  margin-top: 5px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.team-sheet-body { padding: 14px 16px 24px; }
+.ts-section-title {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin: 0 4px 8px;
+}
+
+/* Chart */
+.ts-chart { width: 100%; height: auto; display: block; }
+.ts-axis    { stroke: var(--border-strong); stroke-width: 1; }
+.ts-grid    { stroke: var(--border); stroke-width: 1; stroke-dasharray: 2 3; }
+.ts-area    { fill: rgba(11,59,46,.08); }
+.ts-line    { fill: none; stroke: var(--forest); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.ts-dot     { fill: var(--forest); }
+.ts-dot--hi { fill: var(--amber); }
+.ts-avg     { stroke: var(--amber); stroke-width: 2; stroke-dasharray: 5 4; }
+.ts-xlabel  { fill: var(--ink-muted); font-size: 9px; font-family: var(--font-body); }
+.ts-ylabel  { fill: var(--ink-faint); font-size: 9px; font-family: var(--font-body); }
+.ts-avg-label { fill: var(--amber-deep); font-size: 10px; font-weight: 700; font-family: var(--font-body); }
+
+.ts-chart-caption {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  margin-top: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+.ts-chart-caption .key { display: inline-flex; align-items: center; gap: 7px; }
+.ts-chart-caption .key i { width: 16px; height: 0; border-top: 3px solid var(--forest); border-radius: 2px; }
+.ts-chart-caption .key.avg i { border-top: 3px dashed var(--amber); }
+
+/* ============================================================
+   POSITION-HISTORY CHART (spec §7 — lower line = better rank)
+   ============================================================ */
+.ph-card { margin-top: 18px; padding: 16px 14px 10px; }
+.ph-head { display: flex; align-items: baseline; justify-content: space-between; margin: 0 4px 8px; gap: 8px; flex-wrap: wrap; }
+.ph-title { font-family: var(--font-display); font-size: 15px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--forest); }
+.ph-note { font-size: 11px; font-weight: 600; color: var(--ink-muted); }
+.ph-chart { width: 100%; height: auto; display: block; }
+.ph-grid { stroke: var(--border); stroke-width: 1; stroke-dasharray: 2 3; }
+.ph-axis { stroke: var(--border-strong); stroke-width: 1; }
+.ph-ylabel, .ph-xlabel { fill: var(--ink-faint); font-size: 9px; font-family: var(--font-body); }
+.ph-line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; opacity: .55; transition: opacity var(--motion-fast), stroke-width var(--motion-fast); }
+.ph-line.hl { opacity: 1; stroke-width: 3.5; }
+.ph-line.dim { opacity: .15; }
+.ph-legend { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.ph-key {
+  display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+  font-size: 11px; font-weight: 600; color: var(--ink-muted);
+  padding: 3px 8px; border-radius: var(--r-full); border: 1px solid var(--border);
+}
+.ph-key i { width: 14px; height: 3px; border-radius: 2px; }
+.ph-key.on { color: var(--ink); border-color: var(--border-strong); }
+
+/* Link to the dedicated Finals page */
+.finals-link { margin-top: 16px; }

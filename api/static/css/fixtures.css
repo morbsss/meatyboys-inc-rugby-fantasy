@@ -1,0 +1,68 @@
+/* ── Round filter bar ── */
+.filter-bar {
+  padding: 10px 16px; background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  position: sticky; top: var(--header-h); z-index: 20;
+}
+.round-chip {
+  padding: 5px 12px; border-radius: var(--r-full); font-size: 12px; font-weight: 700;
+  cursor: pointer; border: 1px solid var(--border); background: var(--surface);
+  color: var(--ink-muted); transition: color var(--motion-fast), background var(--motion-fast), border-color var(--motion-fast);
+  min-height: 32px;
+}
+.round-chip:hover { color: var(--ink); border-color: var(--border-strong); }
+.round-chip.active { background: var(--forest); border-color: var(--forest); color: var(--cream); }
+.round-chip.played { border-color: rgba(46,125,79,.4); color: var(--success); }
+.round-chip.played.active { background: var(--forest); border-color: var(--forest); color: var(--cream); }
+.round-chip.upcoming { border-color: var(--border); color: var(--ink-faint); }
+
+.content { max-width: 1100px; margin: 0 auto; padding: 18px 16px 64px; }
+@media (max-width: 768px) { .content { padding: 14px 10px calc(var(--bottom-nav-h,56px) + 28px); } }
+.page-title { font-family: var(--font-display); font-size: 26px; font-weight: 800;
+  letter-spacing: .02em; text-transform: uppercase; color: var(--forest); margin-bottom: 14px; }
+
+.weeks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(440px, 1fr)); gap: 14px; }
+@media (max-width: 520px) { .weeks-grid { grid-template-columns: 1fr; } }
+.single-round { max-width: 640px; margin: 0 auto; }
+
+.week-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow-1); }
+.week-card-header {
+  padding: 9px 14px; font-family: var(--font-display);
+  font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em;
+  color: var(--ink-muted); background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.week-status { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: var(--r-full);
+  text-transform: uppercase; letter-spacing: .04em; }
+.week-status.played   { color: var(--success); background: rgba(46,125,79,.12); }
+.week-status.upcoming { color: var(--ink-faint); background: var(--surface-2); border: 1px solid var(--border); }
+
+.match-row, .upcoming-row {
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px;
+  padding: 11px 16px; border-bottom: 1px solid var(--border); font-size: 14px;
+}
+.match-row:last-child, .upcoming-row:last-child { border-bottom: none; }
+.match-home { font-weight: 600; color: var(--ink); }
+.match-away { font-weight: 600; text-align: right; color: var(--ink); }
+.match-home.winner, .match-away.winner { color: var(--success); font-weight: 800; }
+.match-score-wrap { display: flex; align-items: center; gap: 4px; white-space: nowrap; justify-content: center; }
+.match-score { font-family: var(--font-display); font-weight: 800; font-size: 15px; min-width: 36px; text-align: center; color: var(--ink); }
+.match-score.winner { color: var(--success); }
+.match-vsep { color: var(--ink-faint); font-size: 12px; }
+.bp-tag { font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 4px;
+  color: var(--amber-deep); border: 1px solid var(--amber-soft); background: rgba(232,155,44,.10); }
+.bp-spacer { display: inline-block; min-width: 22px; }
+
+.upcoming-row { color: var(--ink-muted); }
+.upcoming-row .away-name { text-align: right; }
+.upcoming-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: var(--r-full);
+  background: rgba(11,59,46,.06); color: var(--forest); border: 1px solid var(--border); white-space: nowrap; }
+
+.bye-row { padding: 11px 16px; font-size: 13px; color: var(--ink-muted); border-bottom: 1px solid var(--border); }
+.bye-row:last-child { border-bottom: none; }
+.bye-avg-score { color: var(--ink-muted) !important; font-style: italic; }
+.bye-label { color: var(--ink-muted); font-style: italic; font-size: 12px; }
+
+.loading { padding: 40px; text-align: center; color: var(--ink-muted); }

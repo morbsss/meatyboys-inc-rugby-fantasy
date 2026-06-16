@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block page_title %}Player Hub — {{ brand }} Fantasy{% endblock %}
+
+{% block extra_styles %}<link rel="stylesheet" href="/static/css/player-hub.css">{% endblock %}
+
+{% block content %}
+<div class="content">
+  <div class="page-title">Player Hub</div>
+  <div class="page-sub" id="comp-sub">—</div>
+
+  <div class="ofds-card pending-card" id="pending-card" hidden>
+    <div class="pending-title">Pending trades</div>
+    <div id="pending-list"></div>
+  </div>
+
+  <div class="filters">
+    <input class="ph-search" id="search" type="search" placeholder="Search players or clubs…" autocomplete="off">
+    <select id="team-filter" title="Team"></select>
+    <select id="round-filter" title="Round"></select>
+    <span class="metric-toggle">
+      <button id="m-total" class="on" data-metric="total">Total</button>
+      <button id="m-form" data-metric="form">Form</button>
+    </span>
+  </div>
+  <div class="ph-chips" id="pos-chips"></div>
+
+  <div class="ofds-card tbl-card">
+    <div class="tbl-wrap"><div id="table" class="ph-loading">Loading players…</div></div>
+  </div>
+</div>
+
+<div class="ofds-sheet trade-sheet" id="trade-sheet" role="dialog" aria-label="Trade">
+  <div class="ofds-sheet-backdrop" onclick="closeTradeSheet()"></div>
+  <div class="ofds-sheet-panel">
+    <div class="ofds-sheet-handle" aria-hidden="true"></div>
+    <div class="ts-head"><div class="ts-title" id="ts-title">—</div><div class="ts-note" id="ts-note"></div></div>
+    <div class="ts-body" id="ts-body"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/player-hub.js"></script>
+{% endblock %}

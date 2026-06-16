@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block page_title %}Fixtures — {{ brand }} Fantasy{% endblock %}
+
+{% block extra_styles %}<link rel="stylesheet" href="/static/css/fixtures.css">{% endblock %}
+
+{% block header_controls %}
+  <span style="font-family:var(--font-display);font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--cream);opacity:.85;">Round <strong id="round-badge" style="color:var(--amber);font-size:16px;">—</strong></span>
+{% endblock %}
+
+{% block content %}
+<div class="filter-bar" id="filter-bar">
+  <button class="round-chip active" data-week="ALL">All</button>
+</div>
+
+<div class="content">
+  <div class="page-title">Fixtures</div>
+  <div id="fixtures-wrap"><div class="loading">Loading…</div></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/fixtures.js"></script>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block page_title %}Match Up — {{ brand }} Fantasy{% endblock %}
+
+{% block extra_styles %}<link rel="stylesheet" href="/static/css/matchup.css">{% endblock %}
+
+{% block content %}
+<div class="content">
+  <div class="page-title">Match Up</div>
+  <div class="controls">
+    <select id="week-filter" title="Round"></select>
+    <select id="fixture-filter" title="Fixture"></select>
+  </div>
+  <div class="ofds-card" id="mu-card"><div class="mu-loading">Loading fixtures…</div></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/matchup.js"></script>
+{% endblock %}

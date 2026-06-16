@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block page_title %}Draft — {{ brand }} Fantasy{% endblock %}
+
+{% block extra_styles %}<link rel="stylesheet" href="/static/css/draft.css">{% endblock %}
+
+{% block content %}
+<div class="draft-wrap">
+  <div class="ofds-card draft-status" id="status-bar">
+    <span class="muted">Loading draft…</span>
+  </div>
+
+  <div id="commish-panel"></div>
+
+  <div class="draft-grid">
+    <div>
+      <div class="section-title">Available players</div>
+      <div class="ofds-card pool">
+        <div class="pool-filters" id="pool-filters"></div>
+        <div id="pool-list"></div>
+      </div>
+    </div>
+    <div>
+      <div class="section-title">Your squad <span id="roster-count" class="muted"></span></div>
+      <div class="ofds-card" id="roster-list" style="padding:12px;"></div>
+      <div class="section-title" style="margin-top:16px;">Draft board</div>
+      <div class="ofds-card board" id="board"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/draft.js"></script>
+{% endblock %}
