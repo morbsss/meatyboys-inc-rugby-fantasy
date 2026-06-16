@@ -390,6 +390,19 @@ def _ensure_league_schema(conn, cursor) -> None:
         )
     ''')
 
+    # Real-life fixtures per round (who each real team played) — used to show a
+    # player's opponent alongside their per-round points.
+    cursor.execute(f'''
+        CREATE TABLE IF NOT EXISTS real_fixtures (
+            id {serial},
+            league_id INTEGER NOT NULL,
+            round INTEGER NOT NULL,
+            home_team TEXT NOT NULL,
+            away_team TEXT NOT NULL,
+            UNIQUE(league_id, round, home_team)
+        )
+    ''')
+
     # Previous-season archive — one row per player carrying last season's final
     # totals. Populated at season rollover (round selections + weekly_stats are
     # reset for the fresh season); read by the draft to rank the player pool by

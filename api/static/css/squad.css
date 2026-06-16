@@ -37,7 +37,11 @@
   text-transform: uppercase; letter-spacing: .03em; margin-bottom: 8px; }
 .empty p { color: var(--ink-muted); font-size: 13px; margin-bottom: 14px; }
 
-.legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 12px; font-size: 11px; font-weight: 600; color: var(--ink-muted); }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; text-align: center;
+  margin-top: 12px; font-size: 11px; font-weight: 600; color: var(--ink-muted);
+  /* Align the legend's centre with the pitch, which is offset left of the
+     content centre by the bench column (92px) + its gap (10px). */
+  padding-right: 102px; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .legend i { width: 11px; height: 11px; border-radius: 50%; }
 
@@ -106,7 +110,7 @@
 /* A player standing on the field. */
 .fp {
   position: absolute; transform: translate(-50%, -50%); z-index: 2;
-  display: flex; flex-direction: column; align-items: center; gap: 3px; width: 76px;
+  display: flex; flex-direction: column; align-items: center; gap: 3px; width: 84px;
 }
 .fp-shirt {
   position: relative; width: 45px; height: 45px; border-radius: 50%;
@@ -122,8 +126,12 @@
   color: rgba(255,255,255,.85); cursor: default;
 }
 .fp-name {
-  font-size: 15px; font-weight: 700; color: #fff; text-align: center;
-  line-height: 1.05; max-width: 80px; text-shadow: 0 1px 2px rgba(0,0,0,.55);
+  font-size: 14px; font-weight: 700; color: #fff; text-align: center;
+  line-height: 1.05; width: 100%; text-shadow: 0 1px 2px rgba(0,0,0,.55);
+  /* Long surnames (e.g. "Nawaqanitawase,A") wrap inside the token instead of
+     overflowing onto neighbours; capped at two lines, ellipsis past that. */
+  overflow-wrap: anywhere; word-break: break-word;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
 .fp--empty .fp-name { font-weight: 600; opacity: .9; }
 
@@ -170,10 +178,11 @@
   background: var(--surface-2); border-style: dashed; border-color: var(--border-strong);
   color: var(--ink-faint); cursor: default; box-shadow: none;
 }
-.bp-name { text-align: center; line-height: 1.05; max-width: 88px; }
+.bp-name { text-align: center; line-height: 1.05; width: 100%; max-width: 88px; }
 .bp-name b {
-  display: block; font-family: var(--font-display); font-weight: 700;
-  font-size: 13px; color: var(--forest);
+  font-family: var(--font-display); font-weight: 700; font-size: 13px; color: var(--forest);
+  overflow-wrap: anywhere; word-break: break-word;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
 .bp-name small { color: var(--ink-faint); font-size: 11px; }
 .bp--empty .bp-name b { color: var(--ink-faint); }
@@ -203,13 +212,20 @@
   font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
   color: var(--ink-faint); margin-bottom: 8px;
 }
-.pc-pts { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
-.pc-pt {
-  flex: 1 1 auto; min-width: 42px; text-align: center;
-  background: var(--surface-2); border-radius: 8px; padding: 6px 4px;
+.pc-pts {
+  display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px;
+  max-height: 244px; overflow-y: auto;
 }
-.pc-pt span { display: block; font-size: 10px; font-weight: 700; color: var(--ink-faint); }
-.pc-pt b { font-family: var(--font-display); font-size: 16px; color: var(--forest); }
+.pc-pt {
+  display: flex; align-items: baseline; gap: 8px;
+  background: var(--surface-2); border-radius: 8px; padding: 6px 10px;
+}
+.pc-rd { flex: 0 0 auto; font-size: 11px; font-weight: 700; color: var(--ink-faint); }
+.pc-opp {
+  flex: 1 1 auto; min-width: 0; font-size: 11px; font-weight: 600; color: var(--ink-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pc-pt b { flex: 0 0 auto; font-family: var(--font-display); font-size: 15px; color: var(--forest); }
 .pc-none { font-size: 13px; color: var(--ink-muted); margin-bottom: 16px; }
 .pc-actions { display: flex; gap: 8px; }
 .pc-actions .ofds-btn { flex: 1; }

@@ -121,7 +121,11 @@
     closePlayerCard();
     const pts = p.recent_points || [];
     const ptsHtml = pts.length
-      ? pts.map((r) => `<div class="pc-pt"><span>R${r.round}</span><b>${r.points}</b></div>`).join('')
+      ? pts.map((r) => {
+          const opp = r.opponent ? `${r.home ? 'v' : '@'} ${esc(r.opponent)}` : '';
+          return `<div class="pc-pt"><span class="pc-rd">R${r.round}</span>`
+            + `<span class="pc-opp">${opp}</span><b>${r.points}</b></div>`;
+        }).join('')
       : `<div class="pc-none">No points from previous rounds yet.</div>`;
     const onField = !p.is_bench;
     const disabled = isLocked ? 'disabled' : '';

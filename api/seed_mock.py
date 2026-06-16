@@ -27,7 +27,8 @@ from datetime import datetime, timezone
 
 from .db import get_connection, ensure_schema, _ph, _league_id_for_slug
 from .leagues import (
-    LEAGUES, STARTER_SLOTS, SLOT_POSITIONS, BENCH_COUNT, ROSTER_SIZE,
+    LEAGUES, POSITION_ORDER, roster_model,
+    model_starter_count, model_bench_count,
 )
 from .datasource.mock import MockAdapter
 
@@ -49,45 +50,53 @@ def _snake_order(teams: list[str], n_rounds: int) -> list[str]:
     return order
 
 
-def _draft(players: list[dict], teams: list[str]) -> dict[str, dict]:
-    """Greedy snake draft. Returns {team: {'starters': {slot: [p,...]}, 'bench': [p,...]}}.
+def _draft(players: list[dict], teams: list[str], model: dict) -> dict[str, dict]:
+    """Greedy snake draft honouring `model`'s roster shape. Returns
+    {team: {'starters': [p,...], 'bench': [p,...]}}.
 
-    On each pick a team takes the highest-rate available player it can still use:
-    unfilled starter slot first (scarcest handled by the eligibility graph),
-    otherwise the bench. The seed pool is balanced enough that greedy never
-    strands a team without a valid 17.
+    Each pick takes the highest-rate available player that fills an open starter
+    slot for the team's position quota, else an open bench slot (positioned
+    bench → per-position quota, e.g. OFDS; flexible bench → any position, e.g.
+    meatyboys). The seed pool is balanced enough that greedy fills every team.
     """
+    starter_q = dict(model['starters'])                       # {pos: count}
+    positioned_bench = bool(model.get('positioned_bench'))
+    bench_q = dict(model['bench']) if positioned_bench else {}
+    bench_cap = model_bench_count(model)
+    starter_cap = model_starter_count(model)
+    roster_size = starter_cap + bench_cap
+
     available = sorted(players, key=lambda p: (-p['rate'], p['id']))
-    rosters = {t: {'starters': {s: [] for s in STARTER_SLOTS}, 'bench': []} for t in teams}
+    rosters = {t: {'starters': [], 'bench': []} for t in teams}
+    s_filled = {t: {} for t in teams}                         # per-pos starters taken
+    b_filled = {t: {} for t in teams}                         # per-pos bench taken
 
-    def needs_starter(team, p) -> str | None:
-        for slot, want in STARTER_SLOTS.items():
-            if p['position'] in SLOT_POSITIONS[slot] and len(rosters[team]['starters'][slot]) < want:
-                return slot
-        return None
+    def open_starter(team, p) -> bool:
+        pos = p['position']
+        return s_filled[team].get(pos, 0) < starter_q.get(pos, 0)
 
-    def roster_full(team) -> bool:
-        filled = sum(len(v) for v in rosters[team]['starters'].values()) + len(rosters[team]['bench'])
-        return filled >= ROSTER_SIZE
+    def open_bench(team, p) -> bool:
+        if len(rosters[team]['bench']) >= bench_cap:
+            return False
+        if positioned_bench:
+            pos = p['position']
+            return b_filled[team].get(pos, 0) < bench_q.get(pos, 0)
+        return True
 
-    for team in _snake_order(teams, ROSTER_SIZE):
-        if roster_full(team):
+    for team in _snake_order(teams, roster_size):
+        if len(rosters[team]['starters']) + len(rosters[team]['bench']) >= roster_size:
             continue
-        starters_filled = sum(len(v) for v in rosters[team]['starters'].values())
         pick = None
-        if starters_filled < sum(STARTER_SLOTS.values()):
-            # Still filling the starting XI — take the best player that fits a slot.
-            for p in available:
-                slot = needs_starter(team, p)
-                if slot:
-                    rosters[team]['starters'][slot].append(p)
-                    pick = p
-                    break
-        if pick is None and len(rosters[team]['bench']) < BENCH_COUNT:
-            # Bench: any position.
-            pick = available[0] if available else None
-            if pick:
+        if len(rosters[team]['starters']) < starter_cap:
+            pick = next((p for p in available if open_starter(team, p)), None)
+            if pick is not None:
+                rosters[team]['starters'].append(pick)
+                s_filled[team][pick['position']] = s_filled[team].get(pick['position'], 0) + 1
+        if pick is None:
+            pick = next((p for p in available if open_bench(team, p)), None)
+            if pick is not None:
                 rosters[team]['bench'].append(pick)
+                b_filled[team][pick['position']] = b_filled[team].get(pick['position'], 0) + 1
         if pick is not None:
             available.remove(pick)
     return rosters
@@ -99,7 +108,7 @@ def _draft(players: list[dict], teams: list[str]) -> dict[str, dict]:
 
 def _wipe_league(cur, league_id: int) -> None:
     for table in ('weekly_stats', 'team_selections', 'rounds', 'match_lineups',
-                  'draft_picks', 'players'):
+                  'real_fixtures', 'draft_picks', 'players'):
         _exec(cur, f'DELETE FROM {table} WHERE league_id = ?', (league_id,))
     _exec(cur, 'DELETE FROM draft_state WHERE league_id = ?', (league_id,))
 
@@ -128,6 +137,11 @@ def seed_league(conn, cur, slug: str, adapter: MockAdapter) -> dict:
         _exec(cur, 'INSERT INTO rounds (round_number, first_kickoff, last_kickoff, league_id) '
                    'VALUES (?, ?, ?, ?)',
               (rd.round_number, rd.first_kickoff, rd.last_kickoff, league_id))
+        # Real-life fixtures (home/away) for the round — shown on the player card.
+        for m in rd.matches:
+            _exec(cur, 'INSERT INTO real_fixtures (league_id, round, home_team, away_team) '
+                       'VALUES (?, ?, ?, ?)',
+                  (league_id, rd.round_number, m.home, m.away))
     n_rounds = len(rounds)
 
     # --- weekly_stats (cumulative scores per round) -----------------------
@@ -154,32 +168,31 @@ def seed_league(conn, cur, slug: str, adapter: MockAdapter) -> dict:
                   (r, e.player_name, e.real_team, e.jersey, e.is_bench, NOW, league_id))
 
     # --- mock draft → rosters --------------------------------------------
+    model = roster_model(slug)
+    roster_size = model_starter_count(model) + model_bench_count(model)
     pool = [{'id': p.name + '|' + p.team, 'name': p.name, 'team': p.team,
              'position': p.position, 'rate': adapter_rate(adapter, competition, p),
              'pid': pid_map[(p.name, p.team, p.position)]}
             for p in players]
     fantasy_teams = adapter.fantasy_teams(competition)
-    rosters = _draft(pool, fantasy_teams)
+    rosters = _draft(pool, fantasy_teams, model)
 
     # draft_state + draft_picks (record of the draft)
     _exec(cur, 'INSERT INTO draft_state (league_id, status, current_pick, started_at, completed_at) '
                'VALUES (?, ?, ?, ?, ?)',
-          (league_id, 'complete', len(fantasy_teams) * ROSTER_SIZE, NOW, NOW))
+          (league_id, 'complete', len(fantasy_teams) * roster_size, NOW, NOW))
 
     pick_no = 0
     # Materialise rosters into team_selections for every scored round.
     for team, roster in rosters.items():
-        flat = []  # (pid, is_bench, jersey)
-        jersey = 1
-        for slot in STARTER_SLOTS:
-            for p in roster['starters'][slot]:
-                flat.append((p['pid'], 0, jersey)); jersey += 1
-        for p in roster['bench']:
-            flat.append((p['pid'], 1, jersey)); jersey += 1
-        # captain = highest-rate starter; kicker = highest-rate FH/SH/OBK in roster
-        all_players = [p for s in roster['starters'].values() for p in s] + roster['bench']
-        captain_pid = max(all_players, key=lambda p: p['rate'])['pid'] if all_players else None
-        kickers = [p for p in all_players if p['position'] in ('FH', 'SH', 'OBK')]
+        # Jerseys 1..N, forward-to-back: starters first, then bench.
+        starters = sorted(roster['starters'], key=lambda p: POSITION_ORDER.index(p['position']))
+        bench = sorted(roster['bench'], key=lambda p: POSITION_ORDER.index(p['position']))
+        flat = [(pid, is_bench, i + 1) for i, (pid, is_bench) in enumerate(
+            [(p['pid'], 0) for p in starters] + [(p['pid'], 1) for p in bench])]
+        # captain = highest-rate starter; kicker = highest-rate FH/SH/OBK in squad
+        captain_pid = max(starters, key=lambda p: p['rate'])['pid'] if starters else None
+        kickers = [p for p in starters + bench if p['position'] in ('FH', 'SH', 'OBK')]
         kicker_pid = max(kickers, key=lambda p: p['rate'])['pid'] if kickers else captain_pid
 
         # draft_picks (one row per drafted player, provenance)
