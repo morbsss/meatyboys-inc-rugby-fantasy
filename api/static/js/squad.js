@@ -109,9 +109,63 @@
   function act(kind, id) {
     const p = picks.find((x) => String(x.player_id) === String(id));
     if (!p) return;
+    if (kind === 'info') { openPlayerCard(p); return; }   // pitch/bench tap → card
     if (kind === 'cap') setCaptain(p);
     else if (kind === 'bench') toggleBench(p);
     render();
+  }
+
+  // Tapping a player on the pitch (or bench) opens a card with their recent
+  // per-round points and the captain / bench actions.
+  function openPlayerCard(p) {
+    closePlayerCard();
+    const pts = p.recent_points || [];
+    const ptsHtml = pts.length
+      ? pts.map((r) => `<div class="pc-pt"><span>R${r.round}</span><b>${r.points}</b></div>`).join('')
+      : `<div class="pc-none">No points from previous rounds yet.</div>`;
+    const onField = !p.is_bench;
+    const disabled = isLocked ? 'disabled' : '';
+
+    const overlay = document.createElement('div');
+    overlay.className = 'pc-overlay';
+    overlay.innerHTML = `
+      <div class="pc-card" role="dialog" aria-modal="true" aria-label="${esc(p.name)}">
+        <button class="pc-x" data-pc="close" aria-label="Close">&times;</button>
+        <div class="pc-head">
+          <span class="ofds-pos">${p.position}</span>
+          <div class="pc-id">
+            <div class="pc-name">${esc(p.name)}${p.is_captain ? ' <span class="pc-cap">C</span>' : ''}</div>
+            <div class="pc-team">${esc(p.real_team || '')}</div>
+          </div>
+        </div>
+        <div class="pc-sub">Previous rounds</div>
+        <div class="pc-pts">${ptsHtml}</div>
+        <div class="pc-actions">
+          <button class="ofds-btn ofds-btn--secondary ofds-btn--sm" data-pc="cap" ${disabled}>
+            ${p.is_captain ? 'Remove captain' : 'Make captain'}</button>
+          <button class="ofds-btn ofds-btn--primary ofds-btn--sm" data-pc="bench" ${disabled}>
+            ${onField ? 'Move to bench' : 'Move to starting XV'}</button>
+        </div>
+      </div>`;
+
+    overlay.addEventListener('click', (e) => {
+      const hit = e.target.closest('[data-pc]');
+      if (e.target === overlay || (hit && hit.dataset.pc === 'close')) { closePlayerCard(); return; }
+      if (!hit) return;
+      if (hit.dataset.pc === 'cap') setCaptain(p);
+      else if (hit.dataset.pc === 'bench') toggleBench(p);
+      closePlayerCard();
+      render();
+    });
+    document.addEventListener('keydown', onCardKey);
+    document.body.appendChild(overlay);
+  }
+
+  function onCardKey(e) { if (e.key === 'Escape') closePlayerCard(); }
+  function closePlayerCard() {
+    document.removeEventListener('keydown', onCardKey);
+    const ex = document.querySelector('.pc-overlay');
+    if (ex) ex.remove();
   }
 
   function setCaptain(p) {
@@ -216,11 +270,15 @@
       + (l.posts ? `<div class="pitch-posts pitch-posts--${l.y < 50 ? 'top' : 'bottom'}" style="top:${l.y}%"><i></i></div>` : '')
     ).join('');
 
+    // The Starting XV title sits inside the pitch near the top (label top-left,
+    // count top-right) rather than as a heading above the field.
+    const head = `<div class="sec-title pitch-head"><span>Starting XV</span>`
+      + `<span>${starters.length}/${MODEL.starter_count}</span></div>`;
+
     const benchExtra = [];
-    let html = sectionTitle('Starting XV', starters.length, MODEL.starter_count)
-      + `<div class="field-layout">`
+    let html = `<div class="field-layout">`
       +   `<div class="pitch-wrap"><div class="pitch" role="img"`
-      +     ` aria-label="Starting XV in rugby formation">${markings}${tokens}</div></div>`
+      +     ` aria-label="Starting XV in rugby formation">${head}${markings}${tokens}</div></div>`
       +   `<aside class="bench-col">`
       +     `<div class="bench-col-head"><span>Replacements</span>`
       +       `<span>${bench.length}/${MODEL.bench_count}</span></div>`
@@ -263,19 +321,16 @@
       + extra.map(playerRow).join('') + `</div>`;
   }
 
-  // One player standing on the field: tap the shirt to (un)captain, tap "Sub"
-  // to swap to the bench. Shirt carries the jersey number, captain badge and a
-  // real-match lineup dot.
+  // One player standing on the field: tap the shirt to open their card (recent
+  // points + captain / bench actions). Shirt carries the jersey number, captain
+  // badge and a real-match lineup dot.
   function fieldToken(p, slot) {
-    const disabled = isLocked ? 'disabled' : '';
-    const capTitle = p.is_captain ? 'remove captain' : 'make captain';
     return `<div class="fp${p.is_captain ? ' is-cap' : ''}" style="left:${slot.x}%;top:${slot.y}%">
-      <button class="fp-shirt" data-act="cap" data-id="${p.player_id}" ${disabled}
-        title="${esc(p.name)} — tap to ${capTitle}">
+      <button class="fp-shirt" data-act="info" data-id="${p.player_id}"
+        title="${esc(p.name)} — tap for points & options">
         ${slot.num}${statusDotHtml(p)}${p.is_captain ? '<span class="fp-c">C</span>' : ''}
       </button>
       <div class="fp-name">${esc(p.name)}</div>
-      <button class="fp-sub" data-act="bench" data-id="${p.player_id}" ${disabled}>Sub</button>
     </div>`;
   }
 
@@ -287,15 +342,12 @@
   }
 
   function benchToken(p, num) {
-    const disabled = isLocked ? 'disabled' : '';
-    const capTitle = p.is_captain ? 'remove captain' : 'make captain';
     return `<div class="bp${p.is_captain ? ' is-cap' : ''}">
-      <button class="bp-shirt" data-act="cap" data-id="${p.player_id}" ${disabled}
-        title="${esc(p.name)} — tap to ${capTitle}">
+      <button class="bp-shirt" data-act="info" data-id="${p.player_id}"
+        title="${esc(p.name)} — tap for points & options">
         ${num}${statusDotHtml(p)}${p.is_captain ? '<span class="fp-c">C</span>' : ''}
       </button>
       <div class="bp-name"><b>${esc(p.name)}</b><small>${esc(p.real_team || '')}</small></div>
-      <button class="ofds-btn ofds-btn--ghost ofds-btn--sm bench-btn" data-act="bench" data-id="${p.player_id}" ${disabled}>Start</button>
     </div>`;
   }
 

@@ -963,6 +963,7 @@ def my_picks():
     ''', (team_name, team_name, next_round))
     picks = [dict(r) for r in cursor.fetchall()]
     cursor.close()
+    _attach_recent_points(conn, league_id, picks, next_round)
     fr = _team_front_row_view(conn, league_id, team_name, next_round)
     model_payload = _model_payload(_roster_model(conn, league_id))
     conn.close()
@@ -970,6 +971,35 @@ def my_picks():
                     'fr_club': fr['club'], 'fr_players': fr['players'],
                     'fr_is_captain': fr['is_captain'], 'fr_is_bench': fr['is_bench'],
                     'roster_model': model_payload})
+
+
+def _attach_recent_points(conn, league_id, picks, next_round, window=6):
+    """Attach `recent_points` ([{round, points}, ...]) to each pick — the last
+    `window` completed rounds. weekly_stats.total_points is cumulative, so a
+    round's own points are its total minus the previous round's."""
+    pids = [p['player_id'] for p in picks if isinstance(p.get('player_id'), int)]
+    if not pids:
+        for p in picks:
+            p['recent_points'] = []
+        return
+    cursor = _get_cursor(conn)
+    ph = ','.join(['?'] * len(pids))
+    cursor.execute(
+        f'SELECT player_id, round, total_points FROM weekly_stats '
+        f'WHERE league_id = ? AND player_id IN ({ph}) AND round < ? '
+        f'ORDER BY player_id, round',
+        (league_id, *pids, next_round))
+    hist: dict[int, list[tuple[int, float]]] = {}
+    for r in cursor.fetchall():
+        d = dict(r) if not isinstance(r, dict) else r
+        hist.setdefault(d['player_id'], []).append((d['round'], d['total_points'] or 0.0))
+    cursor.close()
+    for p in picks:
+        deltas, prev = [], 0.0
+        for rnd, tot in hist.get(p['player_id'], []):
+            deltas.append({'round': rnd, 'points': round(tot - prev, 1)})
+            prev = tot
+        p['recent_points'] = deltas[-window:]
 
 
 def _model_payload(model: dict) -> dict:
