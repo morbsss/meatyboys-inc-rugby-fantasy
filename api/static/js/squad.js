@@ -234,13 +234,17 @@
     return html;
   }
 
-  // Replacements 16–23, in forward-to-back order, as a vertical bench column;
-  // any player beyond a position's bench quota is pushed onto `extraOut`.
+  // Replacement jersey order: the hooker covers the front row first (16), then
+  // the props (17/18), then the rest forward-to-back — as on a real bench.
+  const BENCH_ORDER = ['HK', 'PR', 'LK', 'LF', 'SH', 'FH', 'MID', 'OBK'];
+
+  // Replacements 16–23, in bench order, as a vertical bench column; any player
+  // beyond a position's bench quota is pushed onto `extraOut`.
   function renderBenchChips(bench, extraOut) {
     const used = new Set();
     let num = 16;
     let chips = '';
-    (MODEL.order || []).forEach((pos) => {
+    BENCH_ORDER.forEach((pos) => {
       const n = (MODEL.bench || {})[pos] || 0;
       for (let i = 0; i < n; i++, num++) {
         const p = bench.find((x) => x.position === pos && !used.has(x.player_id));
@@ -312,13 +316,17 @@
   }
 
   // Swap the clicked player with the same-position player on the opposite side
-  // (starter <-> bench). Returns true if a swap happened.
+  // (starter <-> bench). It's a true like-for-like: the two also trade places in
+  // `picks`, so the player coming on inherits the exact field slot — and jersey
+  // number — of the one going off (and vice-versa). Returns true if swapped.
   function swapSamePosition(p) {
-    const counterpart = picks.find((x) =>
+    const i = picks.findIndex((x) => x === p);
+    const j = picks.findIndex((x) =>
       x.position === p.position && x.is_bench !== p.is_bench
       && String(x.player_id) !== String(p.player_id));
-    if (!counterpart) return false;
-    [p.is_bench, counterpart.is_bench] = [counterpart.is_bench, p.is_bench];
+    if (j === -1) return false;
+    [picks[i].is_bench, picks[j].is_bench] = [picks[j].is_bench, picks[i].is_bench];
+    [picks[i], picks[j]] = [picks[j], picks[i]];
     return true;
   }
 
