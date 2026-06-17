@@ -5,7 +5,7 @@
 {% block extra_styles %}<link rel="stylesheet" href="/static/css/competition.css">{% endblock %}
 
 {% block header_controls %}
-  <span class="ofds-round-badge"><span>Round</span><strong id="round-badge">—</strong></span>
+  <span class="mtyby-round-badge"><span>Round</span><strong id="round-badge">—</strong></span>
 {% endblock %}
 
 {% block content %}
@@ -18,11 +18,11 @@
     </div>
   </div>
 
-  <div class="ofds-card lt-card" id="table-wrap">
+  <div class="mtyby-card lt-card" id="table-wrap">
     <div class="lt-loading">Loading…</div>
   </div>
 
-  <div class="ofds-card ph-card" id="ph-card" hidden>
+  <div class="mtyby-card ph-card" id="ph-card" hidden>
     <div class="ph-head">
       <span class="ph-title">Position over the season</span>
       <span class="ph-note">Select a team to highlight</span>
@@ -31,15 +31,15 @@
     <div class="ph-legend" id="ph-legend"></div>
   </div>
 
-  <a href="/finals" class="ofds-btn ofds-btn--ghost ofds-btn--sm finals-link">View Finals Series →</a>
+  <a href="/finals" class="mtyby-btn mtyby-btn--ghost mtyby-btn--sm finals-link">View Finals Series →</a>
 
 </div>
 
 <!-- ========== TEAM DETAIL SHEET ========== -->
-<div class="ofds-sheet team-sheet" id="team-sheet" role="dialog" aria-labelledby="team-sheet-name">
-  <div class="ofds-sheet-backdrop" onclick="closeTeamSheet()"></div>
-  <div class="ofds-sheet-panel">
-    <div class="ofds-sheet-handle" aria-hidden="true"></div>
+<div class="mtyby-sheet team-sheet" id="team-sheet" role="dialog" aria-labelledby="team-sheet-name">
+  <div class="mtyby-sheet-backdrop" onclick="closeTeamSheet()"></div>
+  <div class="mtyby-sheet-panel">
+    <div class="mtyby-sheet-handle" aria-hidden="true"></div>
     <div class="team-sheet-head">
       <div class="ts-rank" id="ts-rank">—</div>
       <div class="team-id">

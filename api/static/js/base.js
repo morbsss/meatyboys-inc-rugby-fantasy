@@ -2,7 +2,7 @@
  * base.js — the shared app chrome, loaded on every page (via base.html).
  *
  * Owns the bits that live in the shared layout, not any one page:
- *   • toast notifications (window.ofdsToast)
+ *   • toast notifications (window.mtybyToast)
  *   • the signed-in user chip + the slide-up Profile sheet
  *   • profile actions: rename team, commissioner toggle, change password
  *   • logout
@@ -12,17 +12,17 @@
  * ========================================================================== */
 
 /** Show a transient toast. `kind` is '' | 'ok' | 'err' (styles the pill). */
-window.ofdsToast = function (msg, kind) {
-  const el = document.getElementById('ofds-toast');
+window.mtybyToast = function (msg, kind) {
+  const el = document.getElementById('mtyby-toast');
   if (!el) return;
   el.textContent = msg;
-  el.className = 'ofds-toast' + (kind ? ' ofds-toast--' + kind : '') + ' is-visible';
-  clearTimeout(window.__ofdsToastT);
-  window.__ofdsToastT = setTimeout(() => { el.classList.remove('is-visible'); }, 3000);
+  el.className = 'mtyby-toast' + (kind ? ' mtyby-toast--' + kind : '') + ' is-visible';
+  clearTimeout(window.__mtybyToastT);
+  window.__mtybyToastT = setTimeout(() => { el.classList.remove('is-visible'); }, 3000);
 };
 
 // The currently signed-in user (from /api/auth/user); null when logged out.
-window.__ofdsUser = null;
+window.__mtybyUser = null;
 
 // ---- Session + profile sheet ----------------------------------------------
 
@@ -56,7 +56,7 @@ async function checkUserSession() {
 
 /** Paint the profile sheet (team name, commissioner toggle) from a user. */
 function renderProfile(user) {
-  window.__ofdsUser = user;
+  window.__mtybyUser = user;
 
   // Team name + (conditionally shown) rename control.
   const nameEl = document.getElementById('profile-team-name');
@@ -89,7 +89,7 @@ function startTeamRename() {
   document.getElementById('profile-team-view').style.display = 'none';
   document.getElementById('profile-team-edit').style.display = '';
   const input = document.getElementById('profile-team-input');
-  input.value = (window.__ofdsUser && window.__ofdsUser.team_name) || '';
+  input.value = (window.__mtybyUser && window.__mtybyUser.team_name) || '';
   input.focus();
 }
 
@@ -102,23 +102,23 @@ function cancelTeamRename() {
 
 async function saveTeamRename() {
   const name = document.getElementById('profile-team-input').value.trim();
-  if (!name) { ofdsToast('Enter a team name', 'error'); return; }
+  if (!name) { mtybyToast('Enter a team name', 'error'); return; }
   const { ok, data } = await apiFetch('/api/auth/team-name', { team_name: name });
-  if (ok) { ofdsToast('Team name updated'); await checkUserSession(); }
-  else ofdsToast((data && data.error) || 'Could not rename team', 'error');
+  if (ok) { mtybyToast('Team name updated'); await checkUserSession(); }
+  else mtybyToast((data && data.error) || 'Could not rename team', 'error');
 }
 
 // ---- Profile action: commissioner toggle ----------------------------------
 
 async function toggleCommissioner() {
-  const user = window.__ofdsUser || {};
+  const user = window.__mtybyUser || {};
   const action = user.is_commissioner ? 'resign' : 'claim';
   if (action === 'resign' && !confirm('Step down as commissioner?')) return;
   const { ok, data } = await apiFetch('/api/league/commissioner', { action });
   if (ok) {
-    ofdsToast(action === 'resign' ? 'You stepped down' : 'You are now the commissioner');
+    mtybyToast(action === 'resign' ? 'You stepped down' : 'You are now the commissioner');
     await checkUserSession();
-  } else ofdsToast((data && data.error) || 'Could not update commissioner', 'error');
+  } else mtybyToast((data && data.error) || 'Could not update commissioner', 'error');
 }
 
 // ---- Profile action: change password --------------------------------------
@@ -141,11 +141,11 @@ function cancelPwChange() {
 async function savePwChange() {
   const current = document.getElementById('profile-pw-current').value;
   const next = document.getElementById('profile-pw-new').value;
-  if (!current) { ofdsToast('Enter your current password', 'error'); return; }
-  if (next.length < 6) { ofdsToast('New password must be at least 6 characters', 'error'); return; }
+  if (!current) { mtybyToast('Enter your current password', 'error'); return; }
+  if (next.length < 6) { mtybyToast('New password must be at least 6 characters', 'error'); return; }
   const { ok, data } = await apiFetch('/api/auth/password', { current_password: current, new_password: next });
-  if (ok) { ofdsToast('Password updated'); cancelPwChange(); }
-  else ofdsToast((data && data.error) || 'Could not change password', 'error');
+  if (ok) { mtybyToast('Password updated'); cancelPwChange(); }
+  else mtybyToast((data && data.error) || 'Could not change password', 'error');
 }
 
 // ---- Trade-offer notification ---------------------------------------------

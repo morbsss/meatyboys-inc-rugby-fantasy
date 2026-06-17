@@ -35,16 +35,16 @@ async function apiFetch(path, body) {
  * and who they played, fetched from /api/player/points. Used by the Player Hub
  * and Match Up (the Squad pitch has its own card with captain/bench actions).
  * ------------------------------------------------------------------------- */
-function ofdsClosePlayerCard() {
-  document.removeEventListener('keydown', _ofdsCardKey);
+function mtybyClosePlayerCard() {
+  document.removeEventListener('keydown', _mtybyCardKey);
   const ex = document.querySelector('.pc-overlay');
   if (ex) ex.remove();
 }
-function _ofdsCardKey(e) { if (e.key === 'Escape') ofdsClosePlayerCard(); }
+function _mtybyCardKey(e) { if (e.key === 'Escape') mtybyClosePlayerCard(); }
 
-async function ofdsPlayerCard(playerId) {
+async function mtybyPlayerCard(playerId) {
   if (!playerId) return;
-  ofdsClosePlayerCard();
+  mtybyClosePlayerCard();
   let p = null;
   try { p = await (await fetch('/api/player/points?id=' + encodeURIComponent(playerId))).json(); }
   catch (_) { return; }
@@ -65,7 +65,7 @@ async function ofdsPlayerCard(playerId) {
     <div class="pc-card" role="dialog" aria-modal="true" aria-label="${esc(p.name)}">
       <button class="pc-x" data-pc="close" aria-label="Close">&times;</button>
       <div class="pc-head">
-        <span class="ofds-pos">${esc(p.position || '')}</span>
+        <span class="mtyby-pos">${esc(p.position || '')}</span>
         <div class="pc-id">
           <div class="pc-name">${esc(p.name)}</div>
           <div class="pc-team">${esc(p.real_team || '')}</div>
@@ -75,8 +75,8 @@ async function ofdsPlayerCard(playerId) {
       <div class="pc-pts">${rows}</div>
     </div>`;
   overlay.addEventListener('click', (e) => {
-    if (e.target === overlay || e.target.closest('[data-pc="close"]')) ofdsClosePlayerCard();
+    if (e.target === overlay || e.target.closest('[data-pc="close"]')) mtybyClosePlayerCard();
   });
-  document.addEventListener('keydown', _ofdsCardKey);
+  document.addEventListener('keydown', _mtybyCardKey);
   document.body.appendChild(overlay);
 }

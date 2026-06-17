@@ -15,97 +15,97 @@
 </head>
 <body>
 
-<div class="ofds-app">
+<div class="mtyby-app">
 
-  <header class="ofds-header">
-    <a href="/" class="ofds-brand" aria-label="{{ brand | default('Meatyboys') }} Fantasy home">
-      <span class="ofds-brand-mark">{{ brand | default('Meatyboys Inc') }}<span class="accent">.</span></span>
-      <span class="ofds-brand-sub">{{ brand_sub | default('Rugby Fantasy') }}</span>
+  <header class="mtyby-header">
+    <a href="/" class="mtyby-brand" aria-label="{{ brand | default('Meatyboys') }} Fantasy home">
+      <span class="mtyby-brand-mark">{{ brand | default('Meatyboys Inc') }}<span class="accent">.</span></span>
+      <span class="mtyby-brand-sub">{{ brand_sub | default('Rugby Fantasy') }}</span>
     </a>
-    <div class="ofds-header-center">
+    <div class="mtyby-header-center">
       {% block header_controls %}{% endblock %}
     </div>
-    <div class="ofds-header-end">
-      <a class="ofds-trade-notif" id="trade-notif" href="/transfers" style="display:none;" title="Trade offers" aria-label="Trade offers — tap to review">
+    <div class="mtyby-header-end">
+      <a class="mtyby-trade-notif" id="trade-notif" href="/transfers" style="display:none;" title="Trade offers" aria-label="Trade offers — tap to review">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4 3 8l4 4"/><path d="M3 8h14"/><path d="m17 20 4-4-4-4"/><path d="M21 16H7"/></svg>
-        <span class="ofds-trade-count" id="trade-count">0</span>
+        <span class="mtyby-trade-count" id="trade-count">0</span>
       </a>
-      <div class="ofds-user-chip" id="user-chip" style="display:none; cursor:pointer;" role="button" tabindex="0" title="Your profile"
+      <div class="mtyby-user-chip" id="user-chip" style="display:none; cursor:pointer;" role="button" tabindex="0" title="Your profile"
            onclick="document.getElementById('profile-sheet').classList.add('is-open');"
            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('profile-sheet').classList.add('is-open');}">
         <span class="avatar" id="user-avatar">?</span>
         <span class="name" id="user-info"></span>
       </div>
-      <button class="ofds-logout" id="logout-btn" onclick="logout()" style="display:none;">Logout</button>
+      <button class="mtyby-logout" id="logout-btn" onclick="logout()" style="display:none;">Logout</button>
     </div>
   </header>
 
   {% if current_page != 'auth' %}
-  <nav class="ofds-tabs" aria-label="Primary">
+  <nav class="mtyby-tabs" aria-label="Primary">
     {# Primary tabs (spec §7): Squad · Fixtures · League Table · Player Hub · Transfers #}
-    <a href="/squad" class="ofds-tab {% if current_page == 'squad' %}is-active{% endif %}">Squad</a>
-    <a href="/matchup" class="ofds-tab {% if current_page == 'matchup' %}is-active{% endif %}">Match Up</a>
-    <a href="/competition" class="ofds-tab {% if current_page == 'competition' %}is-active{% endif %}">League Table</a>
-    <a href="/fixtures" class="ofds-tab {% if current_page == 'fixtures' %}is-active{% endif %}">Fixtures</a>
-    <a href="/finals" class="ofds-tab {% if current_page == 'finals' %}is-active{% endif %}">Finals</a>
-    <a href="/players" class="ofds-tab {% if current_page == 'players' %}is-active{% endif %}">Player Hub</a>
-    <a href="/transfers" class="ofds-tab {% if current_page == 'transfers' %}is-active{% endif %}">Transfers</a>
+    <a href="/squad" class="mtyby-tab {% if current_page == 'squad' %}is-active{% endif %}">Squad</a>
+    <a href="/matchup" class="mtyby-tab {% if current_page == 'matchup' %}is-active{% endif %}">Match Up</a>
+    <a href="/competition" class="mtyby-tab {% if current_page == 'competition' %}is-active{% endif %}">League Table</a>
+    <a href="/fixtures" class="mtyby-tab {% if current_page == 'fixtures' %}is-active{% endif %}">Fixtures</a>
+    <a href="/finals" class="mtyby-tab {% if current_page == 'finals' %}is-active{% endif %}">Finals</a>
+    <a href="/players" class="mtyby-tab {% if current_page == 'players' %}is-active{% endif %}">Player Hub</a>
+    <a href="/transfers" class="mtyby-tab {% if current_page == 'transfers' %}is-active{% endif %}">Transfers</a>
     {# Secondary screens #}
-    <a href="/draft" class="ofds-tab {% if current_page == 'draft' %}is-active{% endif %}">Draft</a>
+    <a href="/draft" class="mtyby-tab {% if current_page == 'draft' %}is-active{% endif %}">Draft</a>
     
   </nav>
   {% endif %}
 
-  <main class="ofds-main">
+  <main class="mtyby-main">
     {% block content %}{% endblock %}
   </main>
 
   {% if current_page != 'auth' %}
-  <nav class="ofds-bottom-nav" aria-label="Mobile navigation">
-    <a href="/squad" class="ofds-bottom-nav-item {% if current_page == 'squad' %}is-active{% endif %}" data-nav="squad">
-      <span class="ofds-bottom-nav-icon" aria-hidden="true">
+  <nav class="mtyby-bottom-nav" aria-label="Mobile navigation">
+    <a href="/squad" class="mtyby-bottom-nav-item {% if current_page == 'squad' %}is-active{% endif %}" data-nav="squad">
+      <span class="mtyby-bottom-nav-icon" aria-hidden="true">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4 4 7l2 3 1.5-.5V20h9V9.5L18 10l2-3-3-3-2.5 1a3 3 0 0 1-5 0z"/></svg>
       </span>
       <span>Squad</span>
       <span class="dot"></span>
     </a>
-    <a href="/fixtures" class="ofds-bottom-nav-item {% if current_page == 'fixtures' %}is-active{% endif %}" data-nav="fixtures">
-      <span class="ofds-bottom-nav-icon" aria-hidden="true">
+    <a href="/fixtures" class="mtyby-bottom-nav-item {% if current_page == 'fixtures' %}is-active{% endif %}" data-nav="fixtures">
+      <span class="mtyby-bottom-nav-icon" aria-hidden="true">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg>
       </span>
       <span>Fixtures</span>
       <span class="dot"></span>
     </a>
-    <a href="/competition" class="ofds-bottom-nav-item {% if current_page == 'competition' %}is-active{% endif %}" data-nav="league">
-      <span class="ofds-bottom-nav-icon" aria-hidden="true">
+    <a href="/competition" class="mtyby-bottom-nav-item {% if current_page == 'competition' %}is-active{% endif %}" data-nav="league">
+      <span class="mtyby-bottom-nav-icon" aria-hidden="true">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18M5 5v6a7 7 0 0 0 14 0V5M9 19h6M12 14v5"/></svg>
       </span>
       <span>League</span>
       <span class="dot"></span>
     </a>
-    <a href="/players" class="ofds-bottom-nav-item {% if current_page == 'players' %}is-active{% endif %}" data-nav="players">
-      <span class="ofds-bottom-nav-icon" aria-hidden="true">
+    <a href="/players" class="mtyby-bottom-nav-item {% if current_page == 'players' %}is-active{% endif %}" data-nav="players">
+      <span class="mtyby-bottom-nav-icon" aria-hidden="true">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 6a3 3 0 0 1 0 6M21 20a6 6 0 0 0-5-5.9"/></svg>
       </span>
       <span>Players</span>
       <span class="dot"></span>
     </a>
-    <a href="/matchup" class="ofds-bottom-nav-item {% if current_page == 'matchup' %}is-active{% endif %}" data-nav="matchup">
-      <span class="ofds-bottom-nav-icon" aria-hidden="true">
+    <a href="/matchup" class="mtyby-bottom-nav-item {% if current_page == 'matchup' %}is-active{% endif %}" data-nav="matchup">
+      <span class="mtyby-bottom-nav-icon" aria-hidden="true">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5v14M20 5v14M4 12h6M14 12h6M10 8v8M14 8v8"/></svg>
       </span>
       <span>Match Up</span>
       <span class="dot"></span>
     </a>
-    <a href="/transfers" class="ofds-bottom-nav-item {% if current_page == 'transfers' %}is-active{% endif %}" data-nav="transfers">
-      <span class="ofds-bottom-nav-icon" aria-hidden="true">
+    <a href="/transfers" class="mtyby-bottom-nav-item {% if current_page == 'transfers' %}is-active{% endif %}" data-nav="transfers">
+      <span class="mtyby-bottom-nav-icon" aria-hidden="true">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4 3 8l4 4"/><path d="M3 8h14"/><path d="m17 20 4-4-4-4"/><path d="M21 16H7"/></svg>
       </span>
       <span>Transfers</span>
       <span class="dot"></span>
     </a>
-    <a href="#profile" class="ofds-bottom-nav-item" data-nav="profile" onclick="event.preventDefault(); document.getElementById('profile-sheet').classList.add('is-open');">
-      <span class="ofds-bottom-nav-icon" aria-hidden="true">
+    <a href="#profile" class="mtyby-bottom-nav-item" data-nav="profile" onclick="event.preventDefault(); document.getElementById('profile-sheet').classList.add('is-open');">
+      <span class="mtyby-bottom-nav-icon" aria-hidden="true">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
       </span>
       <span>Profile</span>
@@ -113,10 +113,10 @@
     </a>
   </nav>
 
-  <div class="ofds-sheet" id="profile-sheet" role="dialog" aria-label="Profile">
-    <div class="ofds-sheet-backdrop" onclick="document.getElementById('profile-sheet').classList.remove('is-open');"></div>
-    <div class="ofds-sheet-panel">
-      <div class="ofds-sheet-handle" aria-hidden="true"></div>
+  <div class="mtyby-sheet" id="profile-sheet" role="dialog" aria-label="Profile">
+    <div class="mtyby-sheet-backdrop" onclick="document.getElementById('profile-sheet').classList.remove('is-open');"></div>
+    <div class="mtyby-sheet-panel">
+      <div class="mtyby-sheet-handle" aria-hidden="true"></div>
       <div style="padding: 12px 20px 20px;">
         <div style="display:flex; align-items:center; gap:12px; margin-bottom: 18px;">
           <span class="avatar" id="user-avatar-sheet" style="width:36px; height:36px; border-radius:50%; background:var(--amber); color:var(--forest-deep); display:grid; place-items:center; font-family:var(--font-display); font-weight:800; font-size:18px;">?</span>
@@ -128,14 +128,14 @@
           <div style="font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-muted); margin-bottom:8px;">Your team</div>
           <div id="profile-team-view" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
             <span id="profile-team-name" style="font-weight:700; font-size:15px; color:var(--ink);"></span>
-            <button class="ofds-btn ofds-btn--ghost ofds-btn--sm" id="profile-team-edit-btn" onclick="startTeamRename()" style="display:none;">Rename</button>
+            <button class="mtyby-btn mtyby-btn--ghost mtyby-btn--sm" id="profile-team-edit-btn" onclick="startTeamRename()" style="display:none;">Rename</button>
           </div>
           <div id="profile-team-edit" style="display:none; margin-top:8px;">
             <input type="text" id="profile-team-input" maxlength="40" placeholder="Team name"
                    style="width:100%; padding:10px 12px; background:var(--surface); border:1px solid var(--border); border-radius:var(--r-md); color:var(--ink); font-size:14px; min-height:42px;">
             <div style="display:flex; gap:8px; margin-top:8px;">
-              <button class="ofds-btn ofds-btn--primary ofds-btn--sm" onclick="saveTeamRename()">Save</button>
-              <button class="ofds-btn ofds-btn--ghost ofds-btn--sm" onclick="cancelTeamRename()">Cancel</button>
+              <button class="mtyby-btn mtyby-btn--primary mtyby-btn--sm" onclick="saveTeamRename()">Save</button>
+              <button class="mtyby-btn mtyby-btn--ghost mtyby-btn--sm" onclick="cancelTeamRename()">Cancel</button>
             </div>
           </div>
           <div id="profile-team-locked" style="display:none; margin-top:6px; font-size:12px; color:var(--ink-faint);">Locked for the season — names can only change before round 1.</div>
@@ -144,15 +144,15 @@
         <!-- Password -->
         <div style="margin-bottom: 18px;">
           <div style="font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-muted); margin-bottom:8px;">Password</div>
-          <button class="ofds-btn ofds-btn--ghost ofds-btn--sm" id="profile-pw-edit-btn" onclick="startPwChange()">Change password</button>
+          <button class="mtyby-btn mtyby-btn--ghost mtyby-btn--sm" id="profile-pw-edit-btn" onclick="startPwChange()">Change password</button>
           <div id="profile-pw-edit" style="display:none; margin-top:8px;">
             <input type="password" id="profile-pw-current" placeholder="Current password" autocomplete="current-password"
                    style="width:100%; padding:10px 12px; background:var(--surface); border:1px solid var(--border); border-radius:var(--r-md); color:var(--ink); font-size:14px; min-height:42px;">
             <input type="password" id="profile-pw-new" placeholder="New password (min 6 characters)" autocomplete="new-password"
                    style="width:100%; padding:10px 12px; background:var(--surface); border:1px solid var(--border); border-radius:var(--r-md); color:var(--ink); font-size:14px; min-height:42px; margin-top:8px;">
             <div style="display:flex; gap:8px; margin-top:8px;">
-              <button class="ofds-btn ofds-btn--primary ofds-btn--sm" onclick="savePwChange()">Update password</button>
-              <button class="ofds-btn ofds-btn--ghost ofds-btn--sm" onclick="cancelPwChange()">Cancel</button>
+              <button class="mtyby-btn mtyby-btn--primary mtyby-btn--sm" onclick="savePwChange()">Update password</button>
+              <button class="mtyby-btn mtyby-btn--ghost mtyby-btn--sm" onclick="cancelPwChange()">Cancel</button>
             </div>
           </div>
         </div>
@@ -160,20 +160,20 @@
         <!-- Commissioner -->
         <div style="margin-bottom: 18px;">
           <div style="font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-muted); margin-bottom:8px;">League commissioner</div>
-          <button type="button" class="ofds-toggle" id="profile-commish-toggle" role="switch" aria-checked="false" onclick="toggleCommissioner()">
-            <span class="ofds-toggle-track"><span class="ofds-toggle-thumb"></span></span>
-            <span class="ofds-toggle-label">Make me the commissioner</span>
+          <button type="button" class="mtyby-toggle" id="profile-commish-toggle" role="switch" aria-checked="false" onclick="toggleCommissioner()">
+            <span class="mtyby-toggle-track"><span class="mtyby-toggle-thumb"></span></span>
+            <span class="mtyby-toggle-label">Make me the commissioner</span>
           </button>
           <div id="profile-commish-status" style="font-size:12px; color:var(--ink-muted); margin-top:8px;"></div>
         </div>
 
-        <button class="ofds-btn ofds-btn--ghost ofds-btn--block" onclick="logout()">Sign out</button>
+        <button class="mtyby-btn mtyby-btn--ghost mtyby-btn--block" onclick="logout()">Sign out</button>
       </div>
     </div>
   </div>
   {% endif %}
 
-  <div class="ofds-toast" id="ofds-toast" role="status" aria-live="polite"></div>
+  <div class="mtyby-toast" id="mtyby-toast" role="status" aria-live="polite"></div>
 
 </div>
 

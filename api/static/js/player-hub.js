@@ -4,7 +4,7 @@
  * ========================================================================== */
 
 // Position filter chips come from the shared league model (see leagues.js):
-// OFDS lists individual props/hookers; meatyboys lists the club FR unit.
+// OFDS lists individual props/hookers; mtyby lists the club FR unit.
 const positionChips = () => Leagues.positionFilters(rosterModel);
 let ALL = [], myRoster = [], myTeam = null, isLocked = false, teamsList = [], roundsList = [], maxRound = 0;
 let rosterModel = null;
@@ -68,15 +68,15 @@ function renderPending(tr) {
     html += `<div class="offer">
       <span class="desc">From <b>${esc(t.from_team)}</b>: you get <span class="you-get">${pl(t.out_player)}</span>,
         give <span class="you-give">${pl(t.in_player)}</span></span>
-      <button class="ofds-btn ofds-btn--primary ofds-btn--sm" data-act="accept" data-id="${t.id}" ${isLocked?'disabled':''}>Accept</button>
-      <button class="ofds-btn ofds-btn--ghost ofds-btn--sm" data-act="reject" data-id="${t.id}">Reject</button>
+      <button class="mtyby-btn mtyby-btn--primary mtyby-btn--sm" data-act="accept" data-id="${t.id}" ${isLocked?'disabled':''}>Accept</button>
+      <button class="mtyby-btn mtyby-btn--ghost mtyby-btn--sm" data-act="reject" data-id="${t.id}">Reject</button>
     </div>`;
   });
   out.forEach(t => {
     html += `<div class="offer">
       <span class="desc">To <b>${esc(t.to_team)}</b>: you give <span class="you-give">${pl(t.out_player)}</span>,
         get <span class="you-get">${pl(t.in_player)}</span> <em>(awaiting reply)</em></span>
-      <button class="ofds-btn ofds-btn--ghost ofds-btn--sm" data-act="cancel" data-id="${t.id}">Cancel</button>
+      <button class="mtyby-btn mtyby-btn--ghost mtyby-btn--sm" data-act="cancel" data-id="${t.id}">Cancel</button>
     </div>`;
   });
   list.innerHTML = html;
@@ -93,14 +93,14 @@ async function respond(action, id, btn) {
   else { url = '/api/trades/respond'; body = {trade_id: id, action}; }
   const res = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
   const data = await res.json();
-  ofdsToast(res.ok ? `Trade ${data.status}` : (data.error || 'Failed'), res.ok ? 'ok' : 'err');
+  mtybyToast(res.ok ? `Trade ${data.status}` : (data.error || 'Failed'), res.ok ? 'ok' : 'err');
   if (res.ok) init();
 }
 
 function renderChips() {
   document.getElementById('pos-chips').innerHTML = positionChips().map(p =>
-    `<button class="ofds-chip ${p === pos ? 'is-active' : ''}" data-pos="${p}">${p}</button>`).join('');
-  document.querySelectorAll('#pos-chips .ofds-chip').forEach(c =>
+    `<button class="mtyby-chip ${p === pos ? 'is-active' : ''}" data-pos="${p}">${p}</button>`).join('');
+  document.querySelectorAll('#pos-chips .mtyby-chip').forEach(c =>
     c.addEventListener('click', () => { pos = c.dataset.pos; renderChips(); render(); }));
 }
 
@@ -140,7 +140,7 @@ function render() {
   el.querySelectorAll('tr[data-player]').forEach(tr =>
     tr.addEventListener('click', (e) => {
       if (e.target.closest('button, [data-trade]')) return;
-      ofdsPlayerCard(+tr.dataset.player);
+      mtybyPlayerCard(+tr.dataset.player);
     }));
 }
 
@@ -148,8 +148,8 @@ function actionCell(r) {
   if (r.is_fr) return `<span class="ph-team">club unit</span>`;   // FR units not individually tradeable (yet)
   if (!myTeam) return '';
   if (r.fantasy_team === myTeam) return `<span class="yours-tag">Yours</span>`;
-  if (!r.fantasy_team) return `<button class="ofds-btn ofds-btn--primary ofds-btn--sm" data-trade="${r.player_id}">Pick up</button>`;
-  return `<button class="ofds-btn ofds-btn--secondary ofds-btn--sm" data-trade="${r.player_id}">Trade</button>`;
+  if (!r.fantasy_team) return `<button class="mtyby-btn mtyby-btn--primary mtyby-btn--sm" data-trade="${r.player_id}">Pick up</button>`;
+  return `<button class="mtyby-btn mtyby-btn--secondary mtyby-btn--sm" data-trade="${r.player_id}">Trade</button>`;
 }
 
 // Season total shows whole points; per-round and form values keep one decimal.
@@ -175,7 +175,7 @@ function rowHTML(r) {
     : `<span class="ph-owner" style="color:var(--success)">Free</span>`;
   return `<tr${r.player_id ? ` data-player="${r.player_id}" class="ph-clickable"` : ''}>
     <td class="c-name"><span class="ph-name">${esc(r.name)}</span> <span class="ph-team">${esc(r.real_team||'')}</span></td>
-    <td><span class="ofds-pos">${r.position}</span></td>
+    <td><span class="mtyby-pos">${r.position}</span></td>
     <td class="c-next">${nextHTML(r)}</td>
     <td class="c-owner">${owner}</td>
     <td class="ph-val">${fmtVal(r.value)}</td>
@@ -192,7 +192,7 @@ function openTrade(playerId) {
   document.getElementById('ts-title').textContent =
     (isFree ? 'Pick up ' : 'Trade for ') + target.name + ' (' + target.position + ')';
   // Like-for-like squads (OFDS) can only swap same-position players, so only
-  // show those; flexible squads (meatyboys) show everyone, same-position first.
+  // show those; flexible squads (mtyby) show everyone, same-position first.
   let mine = myRoster.slice();
   if (likeForLike) mine = mine.filter(p => p.position === target.position);
   else mine.sort((a,b) => (a.position===target.position?0:1) - (b.position===target.position?0:1));
@@ -208,15 +208,15 @@ function openTrade(playerId) {
   } else {
     body.innerHTML = mine.map(p =>
       `<div class="ts-row" data-mine="${p.player_id}">
-        <span class="ofds-pos">${p.position}</span>
+        <span class="mtyby-pos">${p.position}</span>
         <span class="nm"><b>${esc(p.name)}</b> <span class="ph-team">${esc(p.real_team||'')}</span></span>
-        <span class="ofds-btn ofds-btn--ghost ofds-btn--sm">${isFree?'Drop':'Offer'}</span>
+        <span class="mtyby-btn mtyby-btn--ghost mtyby-btn--sm">${isFree?'Drop':'Offer'}</span>
       </div>`).join('');
     body.querySelectorAll('.ts-row').forEach(row =>
       row.addEventListener('click', () => doTrade(target, +row.dataset.mine, isFree)));
   }
   document.getElementById('trade-sheet').classList.add('is-open');
-  document.body.classList.add('ofds-no-scroll');
+  document.body.classList.add('mtyby-no-scroll');
 }
 
 async function doTrade(target, myId, isFree) {
@@ -235,13 +235,13 @@ async function doTrade(target, myId, isFree) {
       body: JSON.stringify({to_team: target.fantasy_team, give_id: myId, receive_id: target.player_id})});
   }
   const data = await res.json();
-  ofdsToast(res.ok ? (isFree ? 'Picked up' : 'Trade proposed') : (data.error || 'Failed'), res.ok ? 'ok' : 'err');
+  mtybyToast(res.ok ? (isFree ? 'Picked up' : 'Trade proposed') : (data.error || 'Failed'), res.ok ? 'ok' : 'err');
   if (res.ok) init();
 }
 
 function closeTradeSheet() {
   document.getElementById('trade-sheet').classList.remove('is-open');
-  document.body.classList.remove('ofds-no-scroll');
+  document.body.classList.remove('mtyby-no-scroll');
 }
 window.closeTradeSheet = closeTradeSheet;
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTradeSheet(); });

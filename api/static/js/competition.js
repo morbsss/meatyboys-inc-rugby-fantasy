@@ -355,11 +355,11 @@ function buildChart(series, avg) {
    ============================================================ */
 function openSheet() {
   document.getElementById('team-sheet').classList.add('is-open');
-  document.body.classList.add('ofds-no-scroll');
+  document.body.classList.add('mtyby-no-scroll');
 }
 function closeTeamSheet() {
   document.getElementById('team-sheet').classList.remove('is-open');
-  document.body.classList.remove('ofds-no-scroll');
+  document.body.classList.remove('mtyby-no-scroll');
 }
 window.openTeamSheet = openTeamSheet;
 window.closeTeamSheet = closeTeamSheet;
