@@ -6,7 +6,7 @@
  *
  *   OFDS (positioned)  — a strict rugby XV: exact positions, like-for-like
  *                        bench swaps, exactly one captain.
- *   mtyby (flex)   — an optional club FRONT-ROW UNIT + flexible individual
+ *   mtyby (flex)       — an optional club FRONT-ROW UNIT + flexible individual
  *                        starters + an any-position bench.
  *
  * Layout of this file:  state → load → render dispatch → shared helpers →
@@ -42,8 +42,10 @@
     el('lock-text').textContent = isLocked ? 'Locked' : 'Open';
 
     MODEL = (mp && mp.roster_model) || MODEL;
+    // mtyby has no captain (rule 1) — drop any captain flag the data carries.
+    const hasCaptain = Leagues.isOfds(MODEL);
     picks = ((mp && mp.picks) || []).map((p) => ({
-      ...p, is_bench: !!p.is_bench, is_captain: !!p.is_captain,
+      ...p, is_bench: !!p.is_bench, is_captain: hasCaptain && !!p.is_captain,
     }));
     frClub = (Leagues.isMtyby(MODEL) && mp) ? mp.fr_club : null;
     if (frClub) addFrontRowUnitPick(mp);
@@ -67,7 +69,7 @@
 
     body.innerHTML = Leagues.isOfds(MODEL)
       ? renderPositionedSquad(starters, bench)   // OFDS
-      : renderFlexibleSquad(starters, bench);    // mtyby
+      : renderFlexiblePitch(starters, bench);    // mtyby
 
     body.querySelectorAll('[data-act]').forEach((btn) =>
       btn.addEventListener('click', () => act(btn.dataset.act, btn.dataset.id)));
@@ -83,12 +85,6 @@
   }
 
   // ---- Shared rendering helpers -----------------------------------------
-  const emptyRow = () =>
-    `<div class="pl"><span class="nm" style="color:var(--ink-faint)">- empty -</span></div>`;
-  const posLabel = (pos, n) => `${MODEL.labels[pos] || pos}${n > 1 ? ` x${n}` : ''}`;
-  const sectionTitle = (label, have, want) =>
-    `<div class="sec-title"><span>${label}</span><span>${have}/${want}</span></div>`;
-
   function playerRow(p) {
     const stat = statusByPid[p.player_id];
     const dot = stat === 'S' ? 's' : (stat === 'B' ? 'b' : '');
@@ -129,6 +125,14 @@
       : `<div class="pc-none">No points from previous rounds yet.</div>`;
     const onField = !p.is_bench;
     const disabled = isLocked ? 'disabled' : '';
+    const hasCaptain = Leagues.isOfds(MODEL);   // OFDS only — mtyby has no captain
+    const capBadge = (hasCaptain && p.is_captain) ? ' <span class="pc-cap">C</span>' : '';
+    const capBtn = hasCaptain
+      ? `<button class="mtyby-btn mtyby-btn--secondary mtyby-btn--sm" data-pc="cap" ${disabled}>`
+        + `${p.is_captain ? 'Remove captain' : 'Make captain'}</button>`
+      : '';
+    const benchLabel = onField ? 'Move to bench'
+      : (hasCaptain ? 'Move to starting XV' : 'Move to starting team');
 
     const overlay = document.createElement('div');
     overlay.className = 'pc-overlay';
@@ -138,17 +142,16 @@
         <div class="pc-head">
           <span class="mtyby-pos">${p.position}</span>
           <div class="pc-id">
-            <div class="pc-name">${esc(p.name)}${p.is_captain ? ' <span class="pc-cap">C</span>' : ''}</div>
+            <div class="pc-name">${esc(p.name)}${capBadge}</div>
             <div class="pc-team">${esc(p.real_team || '')}</div>
           </div>
         </div>
         <div class="pc-sub">Previous rounds</div>
         <div class="pc-pts">${ptsHtml}</div>
         <div class="pc-actions">
-          <button class="mtyby-btn mtyby-btn--secondary mtyby-btn--sm" data-pc="cap" ${disabled}>
-            ${p.is_captain ? 'Remove captain' : 'Make captain'}</button>
+          ${capBtn}
           <button class="mtyby-btn mtyby-btn--primary mtyby-btn--sm" data-pc="bench" ${disabled}>
-            ${onField ? 'Move to bench' : 'Move to starting XV'}</button>
+            ${benchLabel}</button>
         </div>
       </div>`;
 
@@ -182,6 +185,17 @@
     // OFDS: a benched starter is swapped with the same-position player on the
     // other side, so the XV always stays a valid 15 (see "OFDS section").
     if (Leagues.isOfds(MODEL) && swapSamePosition(p)) return;
+    
+    // mtyby: check if moving from bench to starters would exceed the limit
+    if (Leagues.isMtyby(MODEL) && p.is_bench) {
+      const starterTarget = MODEL.starter_count + 1;
+      const currentStarters = picks.filter((x) => !x.is_bench).length;
+      if (currentStarters >= starterTarget) {
+        window.mtybyToast(`Cannot have a starting squad of more than ${starterTarget} players`, 'err');
+        return;
+      }
+    }
+    
     p.is_bench = !p.is_bench;               // mtyby (or no counterpart): plain toggle
   }
 
@@ -198,7 +212,8 @@
     const ordered = realPicks.filter((p) => !p.is_bench).concat(realPicks.filter((p) => p.is_bench));
     const jerseys = {};
     ordered.forEach((p, i) => { jerseys[p.player_id] = i + 1; });
-    const captain = realPicks.find((p) => p.is_captain);
+    // Captain is an OFDS-only concept; mtyby never sends one.
+    const captain = Leagues.isOfds(MODEL) ? realPicks.find((p) => p.is_captain) : null;
 
     const teamName = el('team-name').textContent || 'me';
     const { ok, data } = await apiFetch(`/api/team/${encodeURIComponent(teamName)}/picks`, {
@@ -206,7 +221,7 @@
       bench_ids: realPicks.filter((p) => p.is_bench).map((p) => p.player_id),
       jerseys,
       captain_id: captain && captain.player_id,
-      fr_is_captain: frPick ? frPick.is_captain : false,
+      fr_is_captain: false,
       fr_is_bench: frPick ? frPick.is_bench : false,
     });
 
@@ -416,36 +431,123 @@
     picks.push({
       player_id: 'FR', is_fr: true, position: 'FR',
       name: `${frClub} FR`, real_team: frClub,
-      is_bench: !!(mp && mp.fr_is_bench), is_captain: !!(mp && mp.fr_is_captain),
+      is_bench: !!(mp && mp.fr_is_bench), is_captain: false,   // mtyby: no captain
     });
   }
 
-  function renderFlexibleSquad(starters, bench) {
-    const starterTarget = MODEL.starter_count + (Leagues.isMtyby(MODEL) ? 1 : 0);
-    let html = sectionTitle('Starters', starters.length, starterTarget) + `<div class="mtyby-card">`;
+  // mtyby pitch: the club FRONT-ROW UNIT up top, then the individual starters
+  // flowing down to the outside backs. Not a strict 1–15, so shirts carry the
+  // position code rather than a jersey number. x/y are % of the pitch (centre).
+  const MTYBY_FORMATION = [
+    { pos: 'FR',  x: 50, y: 7  },   // FR Unit
+    { pos: 'LK',  x: 50, y: 24 },   // lock
+    { pos: 'LF',  x: 33, y: 36 },   // loose forward
+    { pos: 'LF',  x: 67, y: 36 },   // loose forward
+    { pos: 'SH',  x: 40, y: 49 },   // half back
+    { pos: 'FH',  x: 58, y: 61 },   // fly half
+    { pos: 'MID', x: 38, y: 73 },   // midfielder
+    { pos: 'MID', x: 62, y: 73 },   // midfielder
+    { pos: 'OBK', x: 18, y: 87 },   // outside back
+    { pos: 'OBK', x: 50, y: 91 },   // outside back
+    { pos: 'OBK', x: 82, y: 87 },   // outside back
+  ];
+
+  function renderFlexiblePitch(starters, bench) {
+    const starterTarget = MODEL.starter_count + 1;   // 10 individuals + the FR unit
+
+    const frStarter = starters.find((p) => p.is_fr);
+    const indiv = starters.filter((p) => !p.is_fr);
 
     const used = new Set();
-    const slots = (Leagues.isMtyby(MODEL) ? ['FR'] : [])
-      .concat((MODEL.order || []).filter((p) => MODEL.starters[p]));
-    slots.forEach((pos) => {
-      const n = pos === 'FR' ? 1 : (MODEL.starters[pos] || 0);
-      html += `<div class="slot-label">${pos === 'FR' ? 'Front Row' : posLabel(pos, n)}</div>`;
-      const inSlot = starters.filter((p) => p.position === pos && !used.has(p.player_id)).slice(0, n);
-      inSlot.forEach((p) => used.add(p.player_id));
-      html += inSlot.map(playerRow).join('') || emptyRow();
-    });
-    const leftover = starters.filter((p) => !used.has(p.player_id));
-    if (leftover.length) {
-      html += `<div class="slot-label" style="color:var(--danger)">Extra (move to bench)</div>`
-        + leftover.map(playerRow).join('');
-    }
-    html += `</div>`;
+    const tokens = MTYBY_FORMATION.map((slot) => {
+      const p = indiv.find((x) => x.position === slot.pos && !used.has(x.player_id));
+      if (p) { used.add(p.player_id); return flexFieldToken(p, slot); }
+      return emptyFlexToken(slot);
+    }).join('');
+    const frHtml = frStarter ? frFieldToken(frStarter) : emptyFrToken();
 
-    html += sectionTitle('Bench', bench.length, MODEL.bench_count) + `<div class="mtyby-card">`;
-    html += bench.map(playerRow).join('')
-      || `<div class="pl"><span class="nm" style="color:var(--ink-muted)">No bench players</span></div>`;
-    html += `</div>`;
+    const markings = PITCH_LINES.map((l) =>
+      `<div class="pitch-line${l.dash ? ' dash' : ''}" style="top:${l.y}%"></div>`
+      + (l.posts ? `<div class="pitch-posts pitch-posts--${l.y < 50 ? 'top' : 'bottom'}" style="top:${l.y}%"><i></i></div>` : '')
+    ).join('');
+
+    const head = `<div class="sec-title pitch-head"><span>Starters</span>`
+      + `<span>${starters.length}/${starterTarget}</span></div>`;
+
+    let html = `<div class="field-layout">`
+      +   `<div class="pitch-wrap"><div class="pitch" role="img" aria-label="Starting line-up">`
+      +     `${head}${markings}${frHtml}${tokens}</div></div>`
+      +   `<aside class="bench-col"><div class="bench-col-head"><span>Bench</span>`
+      +     `<span>${bench.length}</span></div>`
+      +     renderFlexBench(bench)
+      +   `</aside>`
+      + `</div>`;
+
+    // mtyby is a soft model — surplus starters are now blocked at interaction time.
+    const extra = indiv.filter((p) => !used.has(p.player_id));
+    if (extra.length) {
+      html += `<div class="mtyby-card"><div class="slot-label" style="color:var(--warning)">`
+        + `Extra starters — advisory, move some to the bench</div>`
+        + extra.map(playerRow).join('') + `</div>`;
+    }
     return html;
+  }
+
+  // A mtyby field token: position code on the shirt (no fixed jersey numbers).
+  function flexFieldToken(p, slot) {
+    return `<div class="fp" style="left:${slot.x}%;top:${slot.y}%">
+      <button class="fp-shirt fp-shirt--code" data-act="info" data-id="${p.player_id}"
+        title="${esc(p.name)} — tap for points & options">
+        <span class="fp-code">${p.position}</span>${statusDotHtml(p)}
+      </button>
+      <div class="fp-name">${esc(p.name)}</div>
+    </div>`;
+  }
+
+  function emptyFlexToken(slot) {
+    return `<div class="fp fp--empty" style="left:${slot.x}%;top:${slot.y}%">
+      <div class="fp-shirt fp-shirt--empty fp-shirt--code"><span class="fp-code">${slot.pos}</span></div>
+      <div class="fp-name">${MODEL.labels[slot.pos] || slot.pos}</div>
+    </div>`;
+  }
+
+  // The club front-row UNIT — a single distinct (amber) token atop the pitch.
+  function frFieldToken(p) {
+    return `<div class="fp fp--fr" style="left:50%;top:11%">
+      <button class="fp-shirt fp-shirt--fr" data-act="info" data-id="${p.player_id}"
+        title="${esc(p.real_team || '')} front row — tap for options">
+        FR${statusDotHtml(p)}
+      </button>
+      <div class="fp-name">${esc(p.name)}</div>
+    </div>`;
+  }
+
+  function emptyFrToken() {
+    return `<div class="fp fp--empty fp--fr" style="left:50%;top:11%">
+      <div class="fp-shirt fp-shirt--empty fp-shirt--code"><span class="fp-code">FR</span></div>
+      <div class="fp-name">No front row</div>
+    </div>`;
+  }
+
+  // Flexible (any-position) bench column; pads empty slots up to the cap.
+  function renderFlexBench(bench) {
+    let chips = bench.map(flexBenchToken).join('');
+    for (let i = bench.length; i < MODEL.bench_count; i++) {
+      chips += `<div class="bp bp--empty"><div class="bp-shirt bp-shirt--empty fp-shirt--code">`
+        + `<span class="fp-code">+</span></div><div class="bp-name"><b>Empty</b><small>&mdash;</small></div></div>`;
+    }
+    return chips;
+  }
+
+  function flexBenchToken(p) {
+    const code = p.is_fr ? 'FR' : p.position;
+    return `<div class="bp">
+      <button class="bp-shirt bp-shirt--code" data-act="info" data-id="${p.player_id}"
+        title="${esc(p.name)} — tap for points & options">
+        <span class="fp-code">${code}</span>${statusDotHtml(p)}
+      </button>
+      <div class="bp-name"><b>${esc(p.name)}</b><small>${esc(p.is_fr ? '' : (p.real_team || ''))}</small></div>
+    </div>`;
   }
 
   // mtyby validity: composition is advisory; only the squad cap + one captain.
@@ -453,9 +555,9 @@
     const total = picks.filter((p) => !p.is_fr).length;
     const cap = MODEL.starter_count + MODEL.bench_count;
     let msg = '';
-    if (captains !== 1) msg = 'Pick exactly one captain.';
+    if (captains !== 1 && Leagues.isOfds(MODEL)) msg = 'Pick exactly one captain.';
     else if (total > cap) msg = `Too many players (max ${cap}).`;
-    return { valid: captains === 1 && total <= cap, msg };
+    return { valid: (captains !== 1 && Leagues.isOfds(MODEL)) && total <= cap, msg };
   }
 
   // ---- Save bar (dispatch to the right league's validation) --------------

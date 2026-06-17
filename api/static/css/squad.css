@@ -125,6 +125,13 @@
   background: rgba(255,255,255,.16); border-style: dashed;
   color: rgba(255,255,255,.85); cursor: default;
 }
+/* mtyby pitch: shirts carry a position code (not a 1-15 jersey number), and
+   the club front-row UNIT gets a distinct amber token at the top. */
+.fp-shirt--code, .bp-shirt--code { font-size: 13px; }
+.fp-code { font-weight: 800; letter-spacing: .03em; }
+.fp-shirt--fr { background: var(--amber); color: var(--forest-deep); border-color: #fff; }
+.bp-shirt--fr { background: var(--amber); color: var(--forest-deep); border-color: var(--amber); }
+.fp--fr .fp-name { font-weight: 800; }
 .fp-name {
   font-size: 14px; font-weight: 700; color: #fff; text-align: center;
   line-height: 1.05; width: 100%; text-shadow: 0 1px 2px rgba(0,0,0,.55);
