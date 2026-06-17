@@ -125,7 +125,7 @@ function render() {
     `<th class="${cls} ${sortKey === key ? 'sorted' : ''}" data-key="${key}">${label}${sortKey === key ? (sortDir < 0 ? ' ▾' : ' ▴') : ''}</th>`;
   el.innerHTML = `<table class="ph"><thead><tr>
       ${th('name','Player','c-name')} ${th('position','Pos')} ${th('value', valLabel)}
-      ${th('fantasy_team','Owner')} <th class="c-act"></th>
+      ${th('fantasy_team','Owner')} <th class="c-next">Next</th> <th class="c-lineup">Line Up</th> <th class="c-act"></th>
     </tr></thead><tbody>${rows.slice(0,80).map(rowHTML).join('')}</tbody></table>`;
   el.querySelectorAll('th[data-key]').forEach(h => h.addEventListener('click', () => {
     const k = h.dataset.key;
@@ -134,6 +134,12 @@ function render() {
   }));
   el.querySelectorAll('button[data-trade]').forEach(b =>
     b.addEventListener('click', () => openTrade(+b.dataset.trade)));
+  // Tap a row (but not its action button) → player card with recent points.
+  el.querySelectorAll('tr[data-player]').forEach(tr =>
+    tr.addEventListener('click', (e) => {
+      if (e.target.closest('button, [data-trade]')) return;
+      ofdsPlayerCard(+tr.dataset.player);
+    }));
 }
 
 function actionCell(r) {
@@ -146,15 +152,31 @@ function actionCell(r) {
 
 function fmtVal(v) { return metric === 'form' ? (v ?? 0).toFixed(1) : (v ?? 0).toFixed(0); }
 
+// Who the player's real team faces next (v = home, @ = away).
+function nextHTML(r) {
+  return r.next
+    ? `<span class="ph-next">${r.next.home ? 'v' : '@'} ${esc(r.next.opp)}</span>`
+    : `<span class="ph-na">—</span>`;
+}
+
+// Real matchday status for the upcoming round: Starting / Bench / Out.
+const LINEUP_LABEL = { S: ['Starting', 's'], B: ['Bench', 'b'], O: ['Out', 'o'] };
+function lineupHTML(r) {
+  const e = LINEUP_LABEL[r.lineup];
+  return e ? `<span class="lu lu--${e[1]}">${e[0]}</span>` : `<span class="ph-na">—</span>`;
+}
+
 function rowHTML(r) {
   const owner = r.fantasy_team
     ? `<span class="ph-owner" style="color:var(--danger)">${esc(r.fantasy_team)}</span>`
     : `<span class="ph-owner" style="color:var(--success)">Free</span>`;
-  return `<tr>
+  return `<tr${r.player_id ? ` data-player="${r.player_id}" class="ph-clickable"` : ''}>
     <td class="c-name"><span class="ph-name">${esc(r.name)}</span> <span class="ph-team">${esc(r.real_team||'')}</span></td>
     <td><span class="ofds-pos">${r.position}</span></td>
     <td class="ph-val">${fmtVal(r.value)}</td>
     <td>${owner}</td>
+    <td class="c-next">${nextHTML(r)}</td>
+    <td class="c-lineup">${lineupHTML(r)}</td>
     <td class="c-act">${actionCell(r)}</td>
   </tr>`;
 }

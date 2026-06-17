@@ -148,6 +148,29 @@ async function savePwChange() {
   else ofdsToast((data && data.error) || 'Could not change password', 'error');
 }
 
+// ---- Trade-offer notification ---------------------------------------------
+
+/** Show the header trade badge when another team has an offer pending for you. */
+async function checkTradeOffers() {
+  const el = document.getElementById('trade-notif');
+  if (!el) return;
+  try {
+    const res = await fetch('/api/trades');
+    if (!res.ok) { el.style.display = 'none'; return; }
+    const data = await res.json();
+    const n = (data.incoming || []).length;
+    const cnt = document.getElementById('trade-count');
+    if (n > 0) {
+      el.style.display = '';
+      if (cnt) cnt.textContent = n;
+      el.title = `${n} trade offer${n === 1 ? '' : 's'} — tap to review`;
+    } else {
+      el.style.display = 'none';
+    }
+  } catch (err) { /* offline / not logged in — leave hidden */ }
+}
+window.checkTradeOffers = checkTradeOffers;
+
 // ---- Logout ----------------------------------------------------------------
 
 async function logout() {
@@ -162,3 +185,4 @@ async function logout() {
 
 // ---- Boot ------------------------------------------------------------------
 checkUserSession();
+checkTradeOffers();

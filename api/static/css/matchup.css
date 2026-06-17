@@ -19,6 +19,8 @@
 .mu-p { display: flex; align-items: center; gap: 8px; padding: 6px 12px; font-size: 13px; }
 .mu-col.away .mu-p { flex-direction: row-reverse; text-align: right; }
 .mu-p.alt { background: color-mix(in srgb, var(--forest-soft) 10%, transparent); }   /* zebra: every even row */
+.mu-p.mu-clickable { cursor: pointer; }
+.mu-p.mu-clickable:hover { background: color-mix(in srgb, var(--forest-soft) 20%, transparent); }
 .mu-p .nm { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 5px; }
 .mu-p .nm b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   font-family: var(--font-display); font-weight: 700; color: var(--ink); }

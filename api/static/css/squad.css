@@ -187,49 +187,6 @@
 .bp-name small { color: var(--ink-faint); font-size: 11px; }
 .bp--empty .bp-name b { color: var(--ink-faint); }
 
-/* Player card — opened by tapping a shirt: recent points + captain/bench. */
-.pc-overlay {
-  position: fixed; inset: 0; z-index: 200; background: rgba(11,33,26,.55);
-  display: grid; place-items: center; padding: 20px;
-}
-.pc-card {
-  position: relative; width: 100%; max-width: 340px; padding: 16px;
-  background: var(--surface); border-radius: var(--r-lg, 14px);
-  box-shadow: 0 14px 40px rgba(0,0,0,.35);
-}
-.pc-x {
-  position: absolute; top: 6px; right: 10px; border: none; background: none;
-  font-size: 24px; line-height: 1; color: var(--ink-faint); cursor: pointer;
-}
-.pc-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding-right: 22px; }
-.pc-name { font-family: var(--font-display); font-weight: 800; font-size: 18px; color: var(--forest); }
-.pc-cap {
-  font-size: 11px; font-weight: 800; background: var(--amber); color: var(--forest-deep);
-  border-radius: var(--r-full); padding: 1px 7px; vertical-align: middle;
-}
-.pc-team { font-size: 12px; font-weight: 600; color: var(--ink-muted); }
-.pc-sub {
-  font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
-  color: var(--ink-faint); margin-bottom: 8px;
-}
-.pc-pts {
-  display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px;
-  max-height: 244px; overflow-y: auto;
-}
-.pc-pt {
-  display: flex; align-items: baseline; gap: 8px;
-  background: var(--surface-2); border-radius: 8px; padding: 6px 10px;
-}
-.pc-rd { flex: 0 0 auto; font-size: 11px; font-weight: 700; color: var(--ink-faint); }
-.pc-opp {
-  flex: 1 1 auto; min-width: 0; font-size: 11px; font-weight: 600; color: var(--ink-muted);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.pc-pt b { flex: 0 0 auto; font-family: var(--font-display); font-size: 15px; color: var(--forest); }
-.pc-none { font-size: 13px; color: var(--ink-muted); margin-bottom: 16px; }
-.pc-actions { display: flex; gap: 8px; }
-.pc-actions .ofds-btn { flex: 1; }
-
 /* Advisory helper chips — what the ideal XV still wants (never blocks a save) */
 .needs-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 14px 4px 2px;
   font-size: 11px; font-weight: 700; color: var(--ink-muted); }

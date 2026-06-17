@@ -189,6 +189,35 @@ a { color: inherit; text-decoration: none; }
   align-items: center;
   gap: 10px;
 }
+/* Trade-offer notification — appears when another team offers you a trade. */
+.ofds-trade-notif {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-full);
+  color: var(--cream);
+  transition: background var(--motion-fast);
+}
+.ofds-trade-notif:hover { background: rgba(245,241,232,.12); }
+.ofds-trade-count {
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: var(--r-full);
+  background: var(--amber);
+  color: var(--forest-deep);
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 16px;
+  text-align: center;
+}
 .ofds-user-chip {
   display: flex;
   align-items: center;
@@ -291,12 +320,12 @@ a { color: inherit; text-decoration: none; }
 .ofds-btn:active:not(:disabled) { transform: scale(.98); }
 .ofds-btn:disabled { opacity: .4; cursor: not-allowed; }
 .ofds-btn--primary {
-  background: var(--amber);
-  color: var(--forest-deep);
+  background: var(--forest);
+  color: var(--cream-warm);
   box-shadow: var(--shadow-1);
 }
 .ofds-btn--primary:hover:not(:disabled) {
-  background: var(--amber-deep);
+  background: var(--forest-soft);
   box-shadow: var(--shadow-2);
 }
 .ofds-btn--secondary {
@@ -305,8 +334,8 @@ a { color: inherit; text-decoration: none; }
 }
 .ofds-btn--secondary:hover:not(:disabled) { background: var(--forest-soft); }
 .ofds-btn--ghost {
-  background: transparent;
-  color: var(--forest);
+  /* background: transparent; */
+  color: var(--amber);
   border-color: var(--border-strong);
 }
 .ofds-btn--ghost:hover:not(:disabled) { background: var(--surface-2); }
@@ -706,3 +735,50 @@ a { color: inherit; text-decoration: none; }
   .ofds-user-chip .avatar { width: 22px; height: 22px; font-size: 12px; }
   .ofds-header-end .ofds-logout { display: none; }
 }
+
+/* ============================================================
+   PLAYER CARD — shared modal (recent points + opponents).
+   Used by the Squad pitch (with captain/bench actions) and the
+   read-only card on the Player Hub & Match Up pages.
+   ============================================================ */
+.pc-overlay {
+  position: fixed; inset: 0; z-index: 200; background: rgba(11,33,26,.55);
+  display: grid; place-items: center; padding: 20px;
+}
+.pc-card {
+  position: relative; width: 100%; max-width: 340px; padding: 16px;
+  background: var(--surface); border-radius: var(--r-lg, 14px);
+  box-shadow: 0 14px 40px rgba(0,0,0,.35);
+}
+.pc-x {
+  position: absolute; top: 6px; right: 10px; border: none; background: none;
+  font-size: 24px; line-height: 1; color: var(--ink-faint); cursor: pointer;
+}
+.pc-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding-right: 22px; }
+.pc-name { font-family: var(--font-display); font-weight: 800; font-size: 18px; color: var(--forest); }
+.pc-cap {
+  font-size: 11px; font-weight: 800; background: var(--amber); color: var(--forest-deep);
+  border-radius: var(--r-full); padding: 1px 7px; vertical-align: middle;
+}
+.pc-team { font-size: 12px; font-weight: 600; color: var(--ink-muted); }
+.pc-sub {
+  font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--ink-faint); margin-bottom: 8px;
+}
+.pc-pts {
+  display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px;
+  max-height: 244px; overflow-y: auto;
+}
+.pc-pt {
+  display: flex; align-items: baseline; gap: 8px;
+  background: var(--surface-2); border-radius: 8px; padding: 6px 10px;
+}
+.pc-rd { flex: 0 0 auto; font-size: 11px; font-weight: 700; color: var(--ink-faint); }
+.pc-opp {
+  flex: 1 1 auto; min-width: 0; font-size: 11px; font-weight: 600; color: var(--ink-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pc-pt b { flex: 0 0 auto; font-family: var(--font-display); font-size: 15px; color: var(--forest); }
+.pc-none { font-size: 13px; color: var(--ink-muted); margin-bottom: 16px; }
+.pc-actions { display: flex; gap: 8px; }
+.pc-actions .ofds-btn { flex: 1; }

@@ -43,6 +43,20 @@ table.ph tbody tr:last-child td { border-bottom: none; }
 .ph-empty, .ph-loading { padding: 40px; text-align: center; color: var(--ink-muted); font-size: 13px; }
 .yours-tag { font-size: 10px; font-weight: 700; color: var(--amber-deep); text-transform: uppercase; }
 
+/* Next fixture + Line Up columns (not sortable). */
+table.ph th.c-next, table.ph th.c-lineup { cursor: default; }
+table.ph .c-next, table.ph .c-lineup { text-align: center; }
+.ph-next { font-family: var(--font-body); font-size: 12px; font-weight: 700; color: var(--ink-muted); }
+.ph-na { color: var(--ink-faint); }
+.lu { font-family: var(--font-body); font-size: 10px; font-weight: 800; letter-spacing: .04em;
+  text-transform: uppercase; padding: 2px 8px; border-radius: var(--r-full); white-space: nowrap; }
+.lu--s { color: var(--success);    background: rgba(46,125,79,.14); }
+.lu--b { color: var(--amber-deep); background: rgba(232,155,44,.16); }
+.lu--o { color: var(--danger);     background: rgba(179,58,46,.12); }
+
+table.ph tbody tr.ph-clickable { cursor: pointer; }
+table.ph tbody tr.ph-clickable:hover { background: var(--surface-2); }
+
 .trade-sheet .ofds-sheet-panel { max-width: 520px; margin: 0 auto; }
 .ts-head { padding: 16px 20px 12px; border-bottom: 1px solid var(--border); }
 .ts-title { font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--ink); }

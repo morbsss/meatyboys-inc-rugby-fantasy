@@ -854,6 +854,9 @@ def api_players():
     owner = {(r['player_id'] if isinstance(r, dict) else r[0]):
              (r['team_name'] if isinstance(r, dict) else r[1]) for r in cursor.fetchall()}
 
+    # Upcoming-round real fixture + matchday lineup status (Player Hub columns).
+    nxt_fx, nxt_lineup, teams_named = _next_round_context(conn, league_id, next_round)
+
     def metric_value(pid):
         total = total_at(pid, target)
         if metric == 'form':
@@ -875,10 +878,15 @@ def api_players():
     for r in cursor.fetchall():
         d = dict(r) if not isinstance(r, dict) else r
         pid = d['player_id']
+        team = d['team']
+        status = nxt_lineup.get(((d['name'] or '').replace("'", ''), team))
+        if status is None and team in teams_named:
+            status = 'O'   # team named a squad but this player isn't in it
         players.append({
             'player_id': pid, 'name': d['name'], 'position': d['position'],
-            'real_team': d['team'], 'value': metric_value(pid), 'total_points': round(total_at(pid, target), 1),
+            'real_team': team, 'value': metric_value(pid), 'total_points': round(total_at(pid, target), 1),
             'fantasy_team': owner.get(pid), 'is_fr': False,
+            'next': nxt_fx.get(team), 'lineup': status,
         })
 
     fr_owner: dict[str, str] = {}
@@ -903,6 +911,7 @@ def api_players():
                 'player_id': None, 'name': f'{club} FR', 'position': 'FR',
                 'real_team': club, 'value': val, 'total_points': val,
                 'fantasy_team': fr_owner.get(club), 'is_fr': True,
+                'next': nxt_fx.get(club), 'lineup': None,
             })
 
     cursor.close()
@@ -912,6 +921,58 @@ def api_players():
     conn.close()
     return jsonify({'league': league, 'players': players, 'rounds': rounds,
                     'round': target, 'metric': metric, 'teams': teams})
+
+
+def _next_round_context(conn, league_id, next_round):
+    """Upcoming-round real fixtures + matchday lineup status. Returns
+    (fixtures, lineup, teams_named):
+      fixtures    {real_team: {'opp': str, 'home': bool}}
+      lineup      {(player_name_no_apostrophe, real_team): 'S'|'B'}
+      teams_named set of teams with a published lineup (their other players → 'O').
+    Apostrophes are stripped from names to match the lineup feed's spelling."""
+    cursor = _get_cursor(conn)
+    cursor.execute('SELECT home_team, away_team FROM real_fixtures WHERE league_id = ? AND round = ?',
+                   (league_id, next_round))
+    fixtures: dict[str, dict] = {}
+    for r in cursor.fetchall():
+        d = dict(r) if not isinstance(r, dict) else r
+        fixtures[d['home_team']] = {'opp': d['away_team'], 'home': True}
+        fixtures[d['away_team']] = {'opp': d['home_team'], 'home': False}
+    cursor.execute('SELECT player_name, real_team, is_bench FROM match_lineups '
+                   'WHERE league_id = ? AND round = ?', (league_id, next_round))
+    lineup: dict[tuple, str] = {}
+    teams_named: set = set()
+    for r in cursor.fetchall():
+        d = dict(r) if not isinstance(r, dict) else r
+        teams_named.add(d['real_team'])
+        lineup[((d['player_name'] or '').replace("'", ''), d['real_team'])] = 'B' if d['is_bench'] else 'S'
+    cursor.close()
+    return fixtures, lineup, teams_named
+
+
+@app.route('/api/player/points')
+def api_player_points():
+    """A single player's per-round points + opponent (for the shared player
+    card used on the Player Hub and Match Up). Mirrors the squad card data."""
+    pid = request.args.get('id', type=int)
+    if not pid:
+        return jsonify({'error': 'id required'}), 400
+    conn = get_db()
+    ensure_schema(conn)
+    league_id = current_league_id(conn)
+    next_round = get_next_round(conn, league_id)
+    cursor = _get_cursor(conn)
+    cursor.execute('SELECT player_id, name, position, team AS real_team FROM players '
+                   'WHERE player_id = ? AND league_id = ?', (pid, league_id))
+    row = cursor.fetchone()
+    cursor.close()
+    if not row:
+        conn.close()
+        return jsonify({'error': 'not found'}), 404
+    player = dict(row) if not isinstance(row, dict) else dict(row)
+    _attach_recent_points(conn, league_id, [player], next_round)
+    conn.close()
+    return jsonify(player)
 
 
 @app.route('/players')
