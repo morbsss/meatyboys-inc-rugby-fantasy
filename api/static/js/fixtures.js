@@ -77,13 +77,14 @@ function makeWeekCard(week, matches) {
       }
       const tWin = m.wins, tLose = m.loses;
       return `<div class="match-row">
-        <span class="match-home ${tWin ? 'winner' : ''}">${esc(m.team)}</span>
+        <span class="match-home ${tWin ? 'winner' : ''}">
+          <span class="tn">${esc(m.team)}</span>
+          ${m.team_bp ? `<span class="bp-tag">BP</span>` : ``}
+        </span>
         <div class="match-score-wrap">
-          ${m.team_bp ? `<span class="bp-tag">BP</span>` : `<span class="bp-spacer"></span>`}
           <span class="match-score ${tWin ? 'winner' : ''}">${m.team_score.toFixed(1)}</span>
           <span class="match-vsep"> v </span>
           <span class="match-score bye-avg-score">${m.bye_score.toFixed(1)}</span>
-          <span class="bp-spacer"></span>
         </div>
         <span class="match-away bye-label">Bye avg</span>
       </div>`;
@@ -97,15 +98,19 @@ function makeWeekCard(week, matches) {
     }
     const hWin = m.home_wins, aWin = m.away_wins;
     return `<div class="match-row">
-      <span class="match-home ${hWin ? 'winner' : ''}">${esc(m.home)}</span>
+      <span class="match-home ${hWin ? 'winner' : ''}">
+        <span class="tn">${esc(m.home)}</span>
+        ${m.home_bp ? `<span class="bp-tag">BP</span>` : ``}
+      </span>
       <div class="match-score-wrap">
-        ${m.home_bp ? `<span class="bp-tag">BP</span>` : `<span class="bp-spacer"></span>`}
         <span class="match-score ${hWin ? 'winner' : ''}">${m.home_score.toFixed(1)}</span>
         <span class="match-vsep"> v </span>
         <span class="match-score ${aWin ? 'winner' : ''}">${m.away_score.toFixed(1)}</span>
-        ${m.away_bp ? `<span class="bp-tag">BP</span>` : `<span class="bp-spacer"></span>`}
       </div>
-      <span class="match-away ${aWin ? 'winner' : ''}">${esc(m.away)}</span>
+      <span class="match-away ${aWin ? 'winner' : ''}">
+        ${m.away_bp ? `<span class="bp-tag">BP</span>` : ``}
+        <span class="tn">${esc(m.away)}</span>
+      </span>
     </div>`;
   }).join('');
 
