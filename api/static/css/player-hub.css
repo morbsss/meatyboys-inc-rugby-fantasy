@@ -15,26 +15,33 @@
 .offer .you-get { color: var(--success); font-weight: 700; }
 .offer .you-give { color: var(--danger); font-weight: 700; }
 
+/* Filters share the row width evenly. */
 .filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
 .filters select, .ph-search { padding: 9px 11px; border: 1px solid var(--border); border-radius: var(--r-md);
-  font-size: 14px; min-height: 40px; background: var(--surface); color: var(--ink); }
-.ph-search { flex: 1; min-width: 150px; }
+  font-size: 14px; min-height: 40px; background: var(--surface); color: var(--ink);
+  flex: 1 1 140px; min-width: 0; }
 .ph-search:focus, .filters select:focus { outline: none; border-color: var(--forest); box-shadow: 0 0 0 3px rgba(11,59,46,.12); }
-.metric-toggle { display: inline-flex; border: 1px solid var(--border); border-radius: var(--r-full); overflow: hidden; }
+.metric-toggle { display: inline-flex; border: 1px solid var(--border); border-radius: var(--r-full); overflow: hidden; flex-shrink: 0; }
 .metric-toggle button { padding: 8px 14px; font-size: 12px; font-weight: 700; color: var(--ink-muted); background: var(--surface); min-height: 40px; }
 .metric-toggle button.on { background: var(--forest); color: var(--cream); }
-.ph-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+/* Position chips on the left; metric toggle pushed to the right (above Actions). */
+.ph-chips-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.ph-chips { display: flex; flex-wrap: wrap; gap: 6px; flex: 1 1 auto; }
 
 .tbl-card { overflow: hidden; }
 .tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 table.ph { width: 100%; border-collapse: collapse; min-width: 540px; }
-table.ph th, table.ph td { padding: 10px 10px; text-align: right; white-space: nowrap; }
+table.ph th, table.ph td { padding: 10px 10px; text-align: center; white-space: nowrap; }
 table.ph thead th { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
   color: var(--ink-muted); background: var(--surface-2); border-bottom: 1px solid var(--border-strong); cursor: pointer; }
 table.ph thead th.sorted { color: var(--forest); }
-table.ph .c-name, table.ph .c-act { text-align: left; }
+/* Player, Owner, Next + the action column stay left-aligned; everything else centred. */
+table.ph .c-name, table.ph .c-owner, table.ph .c-next, table.ph .c-act { text-align: left; }
 table.ph tbody td { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--ink);
-  border-bottom: 1px solid var(--border); }
+  border-bottom: 1px solid var(--border);
+  /* Uniform row height: matches a row with an action button (36px btn + 2x10px
+     cell padding) so "Yours"/empty action cells don't render shorter. */
+  height: 56px; }
 table.ph tbody tr:last-child td { border-bottom: none; }
 .ph-name { font-family: var(--font-display); font-size: 15px; font-weight: 800; color: var(--forest); }
 .ph-team { font-family: var(--font-body); font-size: 11px; font-weight: 600; color: var(--ink-faint); }
@@ -45,7 +52,6 @@ table.ph tbody tr:last-child td { border-bottom: none; }
 
 /* Next fixture + Line Up columns (not sortable). */
 table.ph th.c-next, table.ph th.c-lineup { cursor: default; }
-table.ph .c-next, table.ph .c-lineup { text-align: center; }
 .ph-next { font-family: var(--font-body); font-size: 12px; font-weight: 700; color: var(--ink-muted); }
 .ph-na { color: var(--ink-faint); }
 .lu { font-family: var(--font-body); font-size: 10px; font-weight: 800; letter-spacing: .04em;

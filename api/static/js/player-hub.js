@@ -9,7 +9,7 @@ const positionChips = () => Leagues.positionFilters(rosterModel);
 let ALL = [], myRoster = [], myTeam = null, isLocked = false, teamsList = [], roundsList = [], maxRound = 0;
 let rosterModel = null;
 let likeForLike = false;   // positioned squads (OFDS) trade same-position only
-let pos = 'ALL', q = '', teamFilter = 'ALL', roundSel = '', metric = 'total';
+let pos = 'ALL', q = '', teamFilter = 'ALL', lineupFilter = 'ALL', roundSel = '', metric = 'total';
 let sortKey = 'value', sortDir = -1;
 
 async function init() {
@@ -49,7 +49,7 @@ function renderFilters() {
   }
   tf.value = teamFilter;
   const rf = document.getElementById('round-filter');
-  rf.innerHTML = `<option value="">Latest (R${maxRound})</option>`
+  rf.innerHTML = `<option value="">Total</option>`
     + roundsList.map(r => `<option value="${r}">Round ${r}</option>`).join('');
   rf.value = roundSel;
   document.getElementById('m-total').classList.toggle('on', metric === 'total');
@@ -109,6 +109,8 @@ function render() {
   if (pos !== 'ALL') rows = rows.filter(r => r.position === pos);
   if (teamFilter === 'FREE') rows = rows.filter(r => !r.fantasy_team);
   else if (teamFilter !== 'ALL') rows = rows.filter(r => r.fantasy_team === teamFilter);
+  if (lineupFilter !== 'ALL') rows = rows.filter(r =>
+    lineupFilter === 'UNK' ? !r.lineup : r.lineup === lineupFilter);
   if (q) { const s = q.toLowerCase(); rows = rows.filter(r =>
     (r.name||'').toLowerCase().includes(s) || (r.real_team||'').toLowerCase().includes(s)); }
   rows.sort((a, b) => {
@@ -120,12 +122,12 @@ function render() {
   const el = document.getElementById('table');
   if (!rows.length) { el.className = 'ph-empty'; el.textContent = 'No players match.'; return; }
   el.className = '';
-  const valLabel = metric === 'form' ? 'Form' : 'Pts';
+  const valLabel = metric === 'form' ? 'Form' : (roundSel ? 'Rd Pts' : 'Pts');
   const th = (key, label, cls='') =>
     `<th class="${cls} ${sortKey === key ? 'sorted' : ''}" data-key="${key}">${label}${sortKey === key ? (sortDir < 0 ? ' ▾' : ' ▴') : ''}</th>`;
   el.innerHTML = `<table class="ph"><thead><tr>
-      ${th('name','Player','c-name')} ${th('position','Pos')} ${th('value', valLabel)}
-      ${th('fantasy_team','Owner')} <th class="c-next">Next</th> <th class="c-lineup">Line Up</th> <th class="c-act"></th>
+      ${th('name','Player','c-name')} ${th('position','Position')} <th class="c-next">Next</th> ${th('fantasy_team','Owner','c-owner')}
+      ${th('value', valLabel)} <th class="c-lineup">Line Up</th> <th class="c-act"></th>
     </tr></thead><tbody>${rows.slice(0,80).map(rowHTML).join('')}</tbody></table>`;
   el.querySelectorAll('th[data-key]').forEach(h => h.addEventListener('click', () => {
     const k = h.dataset.key;
@@ -150,7 +152,8 @@ function actionCell(r) {
   return `<button class="ofds-btn ofds-btn--secondary ofds-btn--sm" data-trade="${r.player_id}">Trade</button>`;
 }
 
-function fmtVal(v) { return metric === 'form' ? (v ?? 0).toFixed(1) : (v ?? 0).toFixed(0); }
+// Season total shows whole points; per-round and form values keep one decimal.
+function fmtVal(v) { return (metric === 'form' || roundSel) ? (v ?? 0).toFixed(1) : (v ?? 0).toFixed(0); }
 
 // Who the player's real team faces next (v = home, @ = away).
 function nextHTML(r) {
@@ -173,9 +176,10 @@ function rowHTML(r) {
   return `<tr${r.player_id ? ` data-player="${r.player_id}" class="ph-clickable"` : ''}>
     <td class="c-name"><span class="ph-name">${esc(r.name)}</span> <span class="ph-team">${esc(r.real_team||'')}</span></td>
     <td><span class="ofds-pos">${r.position}</span></td>
-    <td class="ph-val">${fmtVal(r.value)}</td>
-    <td>${owner}</td>
     <td class="c-next">${nextHTML(r)}</td>
+    <td class="c-owner">${owner}</td>
+    <td class="ph-val">${fmtVal(r.value)}</td>
+    
     <td class="c-lineup">${lineupHTML(r)}</td>
     <td class="c-act">${actionCell(r)}</td>
   </tr>`;
@@ -244,6 +248,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTradeSh
 
 document.getElementById('search').addEventListener('input', e => { q = e.target.value; render(); });
 document.getElementById('team-filter').addEventListener('change', e => { teamFilter = e.target.value; render(); });
+document.getElementById('lineup-filter').addEventListener('change', e => { lineupFilter = e.target.value; render(); });
 document.getElementById('round-filter').addEventListener('change', e => { roundSel = e.target.value; init(); });
 document.querySelectorAll('.metric-toggle button').forEach(b =>
   b.addEventListener('click', () => { metric = b.dataset.metric; init(); }));

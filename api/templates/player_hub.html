@@ -17,13 +17,23 @@
   <div class="filters">
     <input class="ph-search" id="search" type="search" placeholder="Search players or clubs…" autocomplete="off">
     <select id="team-filter" title="Team"></select>
+    <select id="lineup-filter" title="Line Up">
+      <option value="ALL">All</option>
+      <option value="S">Starting</option>
+      <option value="B">Bench</option>
+      <option value="O">Out</option>
+      <option value="UNK">Unknown</option>
+    </select>
     <select id="round-filter" title="Round"></select>
+
+  </div>
+  <div class="ph-chips-row">
+    <div class="ph-chips" id="pos-chips"></div>
     <span class="metric-toggle">
       <button id="m-total" class="on" data-metric="total">Total</button>
       <button id="m-form" data-metric="form">Form</button>
     </span>
   </div>
-  <div class="ph-chips" id="pos-chips"></div>
 
   <div class="ofds-card tbl-card">
     <div class="tbl-wrap"><div id="table" class="ph-loading">Loading players…</div></div>

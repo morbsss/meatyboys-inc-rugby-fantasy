@@ -863,6 +863,10 @@ def api_players():
             base = total_at(pid, target - 3)
             n = min(3, target) or 1
             return round((total - base) / n, 1)
+        # 'total' metric: a chosen round shows THAT round's own points (the
+        # cumulative delta); "Total" (no round) shows the season total.
+        if round_param:
+            return round(total - total_at(pid, target - 1), 1)
         return round(total, 1)
 
     # Draftable individual players for this league's model (meatyboys excludes
