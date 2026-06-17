@@ -29,3 +29,54 @@ async function apiFetch(path, body) {
   try { data = await res.json(); } catch (_) { /* response had no JSON body */ }
   return { ok: res.ok, status: res.status, data };
 }
+
+/* ---------------------------------------------------------------------------
+ * Shared player card — a read-only popup with the player's per-round points
+ * and who they played, fetched from /api/player/points. Used by the Player Hub
+ * and Match Up (the Squad pitch has its own card with captain/bench actions).
+ * ------------------------------------------------------------------------- */
+function ofdsClosePlayerCard() {
+  document.removeEventListener('keydown', _ofdsCardKey);
+  const ex = document.querySelector('.pc-overlay');
+  if (ex) ex.remove();
+}
+function _ofdsCardKey(e) { if (e.key === 'Escape') ofdsClosePlayerCard(); }
+
+async function ofdsPlayerCard(playerId) {
+  if (!playerId) return;
+  ofdsClosePlayerCard();
+  let p = null;
+  try { p = await (await fetch('/api/player/points?id=' + encodeURIComponent(playerId))).json(); }
+  catch (_) { return; }
+  if (!p || p.error) return;
+
+  const pts = p.recent_points || [];
+  const rows = pts.length
+    ? pts.map((r) => {
+        const opp = r.opponent ? `${r.home ? 'v' : '@'} ${esc(r.opponent)}` : '';
+        return `<div class="pc-pt"><span class="pc-rd">R${r.round}</span>`
+          + `<span class="pc-opp">${opp}</span><b>${r.points}</b></div>`;
+      }).join('')
+    : `<div class="pc-none">No points from previous rounds yet.</div>`;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'pc-overlay';
+  overlay.innerHTML = `
+    <div class="pc-card" role="dialog" aria-modal="true" aria-label="${esc(p.name)}">
+      <button class="pc-x" data-pc="close" aria-label="Close">&times;</button>
+      <div class="pc-head">
+        <span class="ofds-pos">${esc(p.position || '')}</span>
+        <div class="pc-id">
+          <div class="pc-name">${esc(p.name)}</div>
+          <div class="pc-team">${esc(p.real_team || '')}</div>
+        </div>
+      </div>
+      <div class="pc-sub">Previous rounds</div>
+      <div class="pc-pts">${rows}</div>
+    </div>`;
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay || e.target.closest('[data-pc="close"]')) ofdsClosePlayerCard();
+  });
+  document.addEventListener('keydown', _ofdsCardKey);
+  document.body.appendChild(overlay);
+}

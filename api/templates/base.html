@@ -26,6 +26,10 @@
       {% block header_controls %}{% endblock %}
     </div>
     <div class="ofds-header-end">
+      <a class="ofds-trade-notif" id="trade-notif" href="/transfers" style="display:none;" title="Trade offers" aria-label="Trade offers — tap to review">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4 3 8l4 4"/><path d="M3 8h14"/><path d="m17 20 4-4-4-4"/><path d="M21 16H7"/></svg>
+        <span class="ofds-trade-count" id="trade-count">0</span>
+      </a>
       <div class="ofds-user-chip" id="user-chip" style="display:none; cursor:pointer;" role="button" tabindex="0" title="Your profile"
            onclick="document.getElementById('profile-sheet').classList.add('is-open');"
            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('profile-sheet').classList.add('is-open');}">
