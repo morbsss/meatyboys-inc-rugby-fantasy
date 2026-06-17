@@ -44,11 +44,14 @@ async function renderMatch() {
   if (!m) return;
   const card = document.getElementById('mu-card');
   card.innerHTML = '<div class="mu-loading">Loading line-ups…</div>';
-  const [home, away] = await Promise.all([teamPicks(m.home), teamPicks(m.away)]);
+  const [home, away] = await Promise.all([teamPicks(m.home, weekSel), teamPicks(m.away, weekSel)]);
 
   const played = m.played;
   const hs = played ? (m.home_score ?? 0) : null;
   const as = played ? (m.away_score ?? 0) : null;
+  // Higher score = win (green), lower score = lose (red).
+  const homeCls = played ? (hs > as ? 'win' : (hs < as ? 'lose' : '')) : '';
+  const awayCls = played ? (as > hs ? 'win' : (as < hs ? 'lose' : '')) : '';
 
   card.innerHTML = `
     <div class="mu-head">
@@ -61,30 +64,53 @@ async function renderMatch() {
       <div class="mu-col away">${colHTML(away)}</div>
     </div>
     <div class="mu-total">
-      <span class="v ${played && hs > as ? 'win' : ''}">${played ? hs.toFixed(1) : '—'}</span>
+      <span class="v ${homeCls}">${played ? hs.toFixed(1) : '—'}</span>
       <span class="lbl">Total</span>
-      <span class="v away ${played && as > hs ? 'win' : ''}">${played ? as.toFixed(1) : '—'}</span>
+      <span class="v away ${awayCls}">${played ? as.toFixed(1) : '—'}</span>
     </div>`;
 }
 
-async function teamPicks(name) {
+async function teamPicks(name, round) {
   try {
-    return await (await fetch('/api/team-view?name=' + encodeURIComponent(name))).json();
+    return await (await fetch(`/api/team-view?name=${encodeURIComponent(name)}&round=${round}`)).json();
   } catch { return {picks: [], fr_club: null}; }
 }
 
+// A player's round points, shown toward the centre divider (right-aligned in the
+// home column, left-aligned in the away column via the row's reversed flow).
+// The captain's points count double (C = captain ×2).
+const ptsHTML = p => {
+  if (p.points === null || p.points === undefined) return '';
+  const v = p.is_captain ? p.points * 2 : p.points;
+  return `<span class="pts">${v.toFixed(1)}</span>`;
+};
+
+// Put the front row in real jersey order — loosehead prop, hooker, tighthead
+// prop (PR, HK, PR) — then the rest of the XV in their existing grouped order.
+function orderStarters(starters) {
+  const props = starters.filter(p => p.position === 'PR');
+  const hooks = starters.filter(p => p.position === 'HK');
+  const front = [props[0], hooks[0], props[1]].filter(Boolean);
+  const seen = new Set(front);
+  const rest = starters.filter(p => !seen.has(p) && p.position !== 'PR' && p.position !== 'HK');
+  const spareFront = [...props, ...hooks].filter(p => !seen.has(p));   // defensive: odd counts
+  return [...front, ...spareFront, ...rest];
+}
+
 function colHTML(team) {
-  const starters = (team.picks || []).filter(p => !p.is_bench);
-  const line = p => `<div class="mu-p">
-      <span class="ofds-pos">${p.position}</span>
-      <span class="nm"><b>${esc(p.name)}</b></span>
-      ${p.is_captain ? '<span class="ck">C</span>' : ''}
-    </div>`;
-  let html = `<div class="mu-sub">Starting</div>`;
-  html += team.fr_club
-    ? `<div class="mu-p"><span class="ofds-pos">FR</span><span class="nm"><b>${esc(team.fr_club)} FR</b></span></div>`
-    : '';
-  html += starters.map(line).join('') || '<div class="mu-p">-</div>';
+  const starters = orderStarters((team.picks || []).filter(p => !p.is_bench));
+  const rows = [];
+  if (team.fr_club) {
+    rows.push(`<span class="ofds-pos">FR</span><span class="nm"><b>${esc(team.fr_club)} FR</b></span>`);
+  }
+  starters.forEach(p => rows.push(
+    `<span class="ofds-pos">${p.position}</span>`
+    + `<span class="nm"><b>${esc(p.name)}</b>${p.is_captain ? '<span class="ck">C</span>' : ''}</span>`
+    + ptsHTML(p)));
+
+  let html = ``;
+  html += rows.map((inner, i) => `<div class="mu-p${i % 2 ? ' alt' : ''}">${inner}</div>`).join('')
+    || '<div class="mu-p">-</div>';
   return html;
 }
 
