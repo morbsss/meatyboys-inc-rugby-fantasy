@@ -48,14 +48,6 @@
   color: var(--forest);
   line-height: 1;
 }
-.page-sub {
-  margin-top: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-  color: var(--ink-muted);
-}
 @media (max-width: 768px) {
   .page-title { font-size: 24px; }
 }
@@ -105,8 +97,8 @@
   display: inline-block;
   vertical-align: middle;
   font-family: var(--font-display);
-  font-size: 16px;
-  font-weight: 800;
+  font-size: 15px;
+  font-weight: 700;
   letter-spacing: .01em;
   color: var(--forest);
   white-space: nowrap;
@@ -116,6 +108,9 @@
 }
 .lt-muted { color: var(--ink-muted); font-weight: 700; }
 .lt-pts { color: var(--forest); font-weight: 800; font-size: 17px; }
+.lt .c-champs { text-align: center; white-space: nowrap; }
+.lt-champs { font-size: 13px; letter-spacing: -1px; line-height: 1.15; }
+.lt-trophies, .lt-sackos { display: block; }   /* aubergines stacked under the trophies */
 
 /* Movement vs last week (spec §7) */
 .lt .c-move { width: 26px; text-align: center; padding-left: 0; padding-right: 4px; }
@@ -152,7 +147,7 @@
   font-weight: 800;
   letter-spacing: .14em;
   text-transform: uppercase;
-  padding: 6px 0;
+  padding: 3px 3px;
 }
 .lt-side--champ { background: rgba(46,125,79,.12); color: var(--success); box-shadow: inset 4px 0 0 var(--success); }
 .lt-side--sacko { background: rgba(179,58,46,.10); color: var(--danger);  box-shadow: inset 4px 0 0 var(--danger); }
@@ -178,16 +173,16 @@
 .lt-legend {
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-end;   /* shift to the right, by the Champs column */
+  align-items: center;
   gap: 14px;
-  margin-top: 14px;
+  margin-top: 8px;
   font-size: 11px;
   font-weight: 600;
   color: var(--ink-muted);
 }
-.lt-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.lt-legend span { display: inline-flex; gap: 6px; }
 .lt-legend .swatch { width: 12px; height: 12px; border-radius: 3px; }
-.lt-legend .swatch--champ { background: var(--success); }
-.lt-legend .swatch--sacko { background: var(--danger); }
 
 /* Compact table on mobile: hide secondary columns (BP, PF, PA, PD) and
    switch to fixed layout so the essentials (#, team, P/W/D/L, Pts) always fit. */
@@ -314,7 +309,7 @@
 .ts-grid    { stroke: var(--border); stroke-width: 1; stroke-dasharray: 2 3; }
 .ts-area    { fill: rgba(11,59,46,.08); }
 .ts-line    { fill: none; stroke: var(--forest); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
-.ts-dot     { fill: var(--forest); }
+.ts-dot     { fill: var(--forest); cursor: help; }
 .ts-dot--hi { fill: var(--amber); }
 .ts-avg     { stroke: var(--amber); stroke-width: 2; stroke-dasharray: 5 4; }
 .ts-xlabel  { fill: var(--ink-muted); font-size: 9px; font-family: var(--font-body); }
