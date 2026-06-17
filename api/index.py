@@ -1111,6 +1111,10 @@ def get_team_view():
     cursor.close()
     league_id = current_league_id(conn)
     next_round = get_next_round(conn, league_id)
+    # Optional ?round=N → attach each pick's points for that round (Match Up).
+    round_param = request.args.get('round', type=int)
+    if round_param:
+        _attach_round_points(conn, league_id, picks, round_param)
     fr = _team_front_row_view(conn, league_id, team_name, next_round)
     conn.close()
 
@@ -1120,6 +1124,35 @@ def get_team_view():
         'picks':     picks,
         'fr_club':   fr['club'],
     })
+
+
+def _attach_round_points(conn, league_id, picks, round_num):
+    """Attach `points` (that round's own score) to each pick. weekly_stats is
+    cumulative, so the round's points are its total minus the previous round's;
+    `None` when the player has no stat that round (e.g. didn't feature)."""
+    pids = [p['player_id'] for p in picks if isinstance(p.get('player_id'), int)]
+    if not pids:
+        for p in picks:
+            p['points'] = None
+        return
+    cursor = _get_cursor(conn)
+    ph = ','.join(['?'] * len(pids))
+    cursor.execute(
+        f'SELECT player_id, round, total_points FROM weekly_stats '
+        f'WHERE league_id = ? AND player_id IN ({ph}) AND round IN (?, ?)',
+        (league_id, *pids, round_num, round_num - 1))
+    totals: dict[tuple[int, int], float] = {}
+    for r in cursor.fetchall():
+        d = dict(r) if not isinstance(r, dict) else r
+        totals[(d['player_id'], d['round'])] = d['total_points'] or 0.0
+    cursor.close()
+    for p in picks:
+        cur_total = totals.get((p['player_id'], round_num))
+        if cur_total is None:
+            p['points'] = None
+        else:
+            prev_total = totals.get((p['player_id'], round_num - 1), 0.0)
+            p['points'] = round(cur_total - prev_total, 1)
 
 
 @app.route('/api/team/<team_name>')
