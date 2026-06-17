@@ -13,6 +13,7 @@ let MOVE = {};           // team → {dir:'up'|'down'|'same', delta}
 let TEAM_COLORS = {};
 let champEnd = 0;        // championship = indices [0, champEnd)
 let sackoStart = 0;      // sacko        = indices [sackoStart, n)
+let BONUS = true;        // mtyby = false → hide BP & Pts; rank purely on wins
 
 // Previous championships per team → one 🏆 each (hard-coded for now).
 const CHAMPS = {
@@ -48,6 +49,7 @@ async function init() {
   TABLE    = data.table    || [];
   RESULTS  = data.results  || [];
   HISTORY  = data.position_history || [];
+  BONUS    = data.bonus !== false;   // mtyby sends bonus:false
   computeMovement();
   renderTable(TABLE);
   renderPositionChart();
@@ -108,6 +110,8 @@ function renderTable(table) {
     const mv = MOVE[t.name] || { dir: 'same', delta: 0 };
     const mvIcon = mv.dir === 'up' ? '▲' : (mv.dir === 'down' ? '▼' : '–');
     const mvTitle = mv.dir === 'same' ? 'No change' : `${mv.dir === 'up' ? 'Up' : 'Down'} ${mv.delta} vs last round`;
+    const bpCell  = BONUS ? `<td class="c-hide lt-muted">${t.bonus_points}</td>` : '';
+    const ptsCell = BONUS ? `<td class="lt-pts">${t.league_points}</td>` : '';
 
     return `<tr class="${cls.join(' ')}" onclick="openTeamSheet('${escAttr(t.name)}')">
       ${side}
@@ -118,11 +122,11 @@ function renderTable(table) {
       <td>${t.won}</td>
       <td class="lt-muted">${t.drawn}</td>
       <td class="lt-muted">${t.lost}</td>
-      <td class="c-hide lt-muted">${t.bonus_points}</td>
+      ${bpCell}
       <td class="c-hide lt-muted">${t.points_for.toFixed(1)}</td>
       <td class="c-hide lt-muted">${t.points_against.toFixed(1)}</td>
       <td class="c-hide ${pdCls}">${pdStr}</td>
-      <td class="lt-pts">${t.league_points}</td>
+      ${ptsCell}
       <td class="c-champs lt-champs" title="${(CHAMPS[t.name] || 0)} championship${(CHAMPS[t.name] || 0) === 1 ? '' : 's'}, ${(SACKOS[t.name] || 0)} sacko${(SACKOS[t.name] || 0) === 1 ? '' : 's'}"><span class="lt-trophies">${'🏆'.repeat(CHAMPS[t.name] || 0)}</span><span class="lt-sackos">${'🍆'.repeat(SACKOS[t.name] || 0)}</span></td>
       <td class="c-chev"><svg class="lt-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></td>
     </tr>`;
@@ -135,8 +139,8 @@ function renderTable(table) {
           <th class="c-side"></th>
           <th class="c-rank">#</th><th class="c-move"></th><th class="c-team">Team</th>
           <th>P</th><th>W</th><th>D</th><th>L</th>
-          <th class="c-hide">BP</th><th class="c-hide">PF</th><th class="c-hide">PA</th>
-          <th class="c-hide">PD</th><th>Pts</th><th class="c-champs">Champs</th><th class="c-chev"></th>
+          ${BONUS ? '<th class="c-hide">BP</th>' : ''}<th class="c-hide">PF</th><th class="c-hide">PA</th>
+          <th class="c-hide">PD</th>${BONUS ? '<th>Pts</th>' : ''}<th class="c-champs">Champs</th><th class="c-chev"></th>
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>

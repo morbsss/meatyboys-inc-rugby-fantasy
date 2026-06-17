@@ -2273,9 +2273,10 @@ def competition_data():
 
     # Dynamic schedule: generate the regular season from the live team list,
     # then seed playoffs (Championship top-4 + Sacko bottom-4) off the standings.
+    award_bonus = bool(_roster_model(conn, league_id).get('bonus'))   # mtyby: wins-only
     teams    = get_league_teams(conn, league_id)
     regular  = generate_regular_fixtures(teams)
-    table    = calculate_table(regular, conn, min(max_round, REGULAR_ROUNDS))
+    table    = calculate_table(regular, conn, min(max_round, REGULAR_ROUNDS), award_bonus)
     playoffs = build_playoffs(conn, table, max_round)
 
     # Regular fixtures + resolved playoff pairings drive the per-week results
@@ -2351,7 +2352,7 @@ def competition_data():
 
     # Per-round standings for movement arrows + the historical-position line
     # chart (spec §7) — computed before the connection is closed.
-    position_history = standings_progression(regular, conn, min(max_round, REGULAR_ROUNDS))
+    position_history = standings_progression(regular, conn, min(max_round, REGULAR_ROUNDS), award_bonus)
 
     conn.close()
     return jsonify({
@@ -2372,6 +2373,7 @@ def competition_data():
         'playoffs': playoffs,
         'position_history': position_history,
         'regular_rounds': REGULAR_ROUNDS,
+        'bonus': award_bonus,   # false for mtyby → UI hides BP & Pts, ranks on wins
     })
 
 

@@ -186,16 +186,20 @@
     // other side, so the XV always stays a valid 15 (see "OFDS section").
     if (Leagues.isOfds(MODEL) && swapSamePosition(p)) return;
     
-    // mtyby: check if moving from bench to starters would exceed the limit
+    // mtyby: each starting position has a fixed number of slots (FR + the
+    // MODEL.starters counts). Slots may be left empty, but never over-filled —
+    // so a bench player can only start if its position has a free slot.
     if (Leagues.isMtyby(MODEL) && p.is_bench) {
-      const starterTarget = MODEL.starter_count + 1;
-      const currentStarters = picks.filter((x) => !x.is_bench).length;
-      if (currentStarters >= starterTarget) {
-        window.mtybyToast(`Cannot have a starting squad of more than ${starterTarget} players`, 'err');
+      const cap = p.is_fr ? 1 : (MODEL.starters[p.position] || 0);
+      const filled = picks.filter((x) => !x.is_bench
+        && (p.is_fr ? x.is_fr : (!x.is_fr && x.position === p.position))).length;
+      if (filled >= cap) {
+        const label = p.is_fr ? 'front row' : (MODEL.labels[p.position] || p.position);
+        window.mtybyToast(`No free ${label} slot in the starting team — bench one first`, 'err');
         return;
       }
     }
-    
+
     p.is_bench = !p.is_bench;               // mtyby (or no counterpart): plain toggle
   }
 
@@ -439,17 +443,16 @@
   // flowing down to the outside backs. Not a strict 1–15, so shirts carry the
   // position code rather than a jersey number. x/y are % of the pitch (centre).
   const MTYBY_FORMATION = [
-    { pos: 'FR',  x: 50, y: 7  },   // FR Unit
-    { pos: 'LK',  x: 50, y: 24 },   // lock
-    { pos: 'LF',  x: 33, y: 36 },   // loose forward
-    { pos: 'LF',  x: 67, y: 36 },   // loose forward
-    { pos: 'SH',  x: 40, y: 49 },   // half back
-    { pos: 'FH',  x: 58, y: 61 },   // fly half
-    { pos: 'MID', x: 38, y: 73 },   // midfielder
-    { pos: 'MID', x: 62, y: 73 },   // midfielder
-    { pos: 'OBK', x: 18, y: 87 },   // outside back
-    { pos: 'OBK', x: 50, y: 91 },   // outside back
-    { pos: 'OBK', x: 82, y: 87 },   // outside back
+    { pos: 'LK',  x: 50, y: 28 },   // lock
+    { pos: 'LF',  x: 33, y: 40 },   // loose forward
+    { pos: 'LF',  x: 67, y: 40 },   // loose forward
+    { pos: 'SH',  x: 20, y: 55 },   // scrum-half
+    { pos: 'FH',  x: 30, y: 65 },   // fly-half
+    { pos: 'MID', x: 45, y: 70 },   // Midfield
+    { pos: 'MID', x: 65, y: 75 },   // Midfield
+    { pos: 'OBK', x: 16, y: 80 },   // Outside Back
+    { pos: 'OBK', x: 84, y: 80 },   // Outside Back
+    { pos: 'OBK', x: 50, y: 86 },   // Outside Back
   ];
 
   function renderFlexiblePitch(starters, bench) {
@@ -482,14 +485,7 @@
       +     renderFlexBench(bench)
       +   `</aside>`
       + `</div>`;
-
-    // mtyby is a soft model — surplus starters are now blocked at interaction time.
-    const extra = indiv.filter((p) => !used.has(p.player_id));
-    if (extra.length) {
-      html += `<div class="mtyby-card"><div class="slot-label" style="color:var(--warning)">`
-        + `Extra starters — advisory, move some to the bench</div>`
-        + extra.map(playerRow).join('') + `</div>`;
-    }
+      
     return html;
   }
 
@@ -513,7 +509,7 @@
 
   // The club front-row UNIT — a single distinct (amber) token atop the pitch.
   function frFieldToken(p) {
-    return `<div class="fp fp--fr" style="left:50%;top:11%">
+    return `<div class="fp fp--fr" style="left:50%;top:13%">
       <button class="fp-shirt fp-shirt--fr" data-act="info" data-id="${p.player_id}"
         title="${esc(p.real_team || '')} front row — tap for options">
         FR${statusDotHtml(p)}
@@ -523,9 +519,9 @@
   }
 
   function emptyFrToken() {
-    return `<div class="fp fp--empty fp--fr" style="left:50%;top:11%">
+    return `<div class="fp fp--empty fp--fr" style="left:50%;top:13%">
       <div class="fp-shirt fp-shirt--empty fp-shirt--code"><span class="fp-code">FR</span></div>
-      <div class="fp-name">No front row</div>
+      <div class="fp-name">Empty</div>
     </div>`;
   }
 
@@ -551,13 +547,12 @@
   }
 
   // mtyby validity: composition is advisory; only the squad cap + one captain.
-  function flexibleValidity(captains) {
+  function flexibleValidity() {
     const total = picks.filter((p) => !p.is_fr).length;
     const cap = MODEL.starter_count + MODEL.bench_count;
     let msg = '';
-    if (captains !== 1 && Leagues.isOfds(MODEL)) msg = 'Pick exactly one captain.';
-    else if (total > cap) msg = `Too many players (max ${cap}).`;
-    return { valid: (captains !== 1 && Leagues.isOfds(MODEL)) && total <= cap, msg };
+    if (total > cap) msg = `Too many players (max ${cap}).`;
+    return { valid: total <= cap, msg };
   }
 
   // ---- Save bar (dispatch to the right league's validation) --------------
@@ -567,7 +562,7 @@
     const status = el('save-status');
     const { valid, msg } = Leagues.isOfds(MODEL)
       ? positionedValidity(starters, bench, captains)
-      : flexibleValidity(captains);
+      : flexibleValidity();
 
     if (isLocked) status.innerHTML = '<span class="bad">Squad locked — a game has kicked off.</span>';
     else if (msg) status.innerHTML = `<span class="bad">${esc(msg)}</span>`;
