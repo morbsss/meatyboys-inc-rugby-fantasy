@@ -71,7 +71,7 @@ async function renderMatch() {
 
   // Tap a player → shared card with their recent points and opponents.
   card.querySelectorAll('.mu-p[data-player]').forEach(el =>
-    el.addEventListener('click', () => ofdsPlayerCard(+el.dataset.player)));
+    el.addEventListener('click', () => mtybyPlayerCard(+el.dataset.player)));
 }
 
 async function teamPicks(name, round) {
@@ -105,11 +105,11 @@ function colHTML(team) {
   const starters = orderStarters((team.picks || []).filter(p => !p.is_bench));
   const rows = [];
   if (team.fr_club) {
-    rows.push({ pid: null, inner: `<span class="ofds-pos">FR</span><span class="nm"><b>${esc(team.fr_club)} FR</b></span>` });
+    rows.push({ pid: null, inner: `<span class="mtyby-pos">FR</span><span class="nm"><b>${esc(team.fr_club)} FR</b></span>` });
   }
   starters.forEach(p => rows.push({
     pid: p.player_id,
-    inner: `<span class="ofds-pos">${p.position}</span>`
+    inner: `<span class="mtyby-pos">${p.position}</span>`
       + `<span class="nm"><b>${esc(p.name)}</b>${p.is_captain ? '<span class="ck">C</span>' : ''}</span>`
       + ptsHTML(p),
   }));

@@ -1,5 +1,5 @@
 /* ============================================================
-   OFDS DESIGN SYSTEM — TOKENS
+   MTYBY DESIGN SYSTEM — TOKENS  (shared by both leagues)
    ============================================================ */
 :root {
   /* Palette */
@@ -58,7 +58,7 @@
 
 /* ============================================================
    LEAGUE THEMES (spec §7)
-   meatyboys / Super Rugby Pacific → default "forest" tokens above.
+   mtyby / Super Rugby Pacific → default "forest" tokens above.
    OFDS / English Premiership      → "union" red / blue / white.
    ============================================================ */
 :root[data-theme="union"] {
@@ -126,7 +126,7 @@ a { color: inherit; text-decoration: none; }
 /* ============================================================
    APP SHELL
    ============================================================ */
-.ofds-app {
+.mtyby-app {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -139,7 +139,7 @@ a { color: inherit; text-decoration: none; }
 /* ============================================================
    HEADER
    ============================================================ */
-.ofds-header {
+.mtyby-header {
   background: var(--forest);
   color: var(--cream);
   padding: 10px 20px;
@@ -152,13 +152,13 @@ a { color: inherit; text-decoration: none; }
   z-index: 50;
   box-shadow: var(--shadow-1);
 }
-.ofds-brand {
+.mtyby-brand {
   display: flex;
   align-items: baseline;
   gap: 10px;
   flex-shrink: 0;
 }
-.ofds-brand-mark {
+.mtyby-brand-mark {
   font-family: var(--font-display);
   font-size: 22px;
   font-weight: 800;
@@ -167,8 +167,8 @@ a { color: inherit; text-decoration: none; }
   color: var(--cream);
   line-height: 1;
 }
-.ofds-brand-mark .accent { color: var(--amber); }
-.ofds-brand-sub {
+.mtyby-brand-mark .accent { color: var(--amber); }
+.mtyby-brand-sub {
   font-size: 11px;
   font-weight: 500;
   color: var(--cream);
@@ -176,7 +176,7 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: .04em;
   text-transform: uppercase;
 }
-.ofds-header-center {
+.mtyby-header-center {
   flex: 1;
   display: flex;
   justify-content: center;
@@ -184,13 +184,13 @@ a { color: inherit; text-decoration: none; }
   align-items: center;
   min-width: 0;
 }
-.ofds-header-end {
+.mtyby-header-end {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 /* Trade-offer notification — appears when another team offers you a trade. */
-.ofds-trade-notif {
+.mtyby-trade-notif {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -201,8 +201,8 @@ a { color: inherit; text-decoration: none; }
   color: var(--cream);
   transition: background var(--motion-fast);
 }
-.ofds-trade-notif:hover { background: rgba(245,241,232,.12); }
-.ofds-trade-count {
+.mtyby-trade-notif:hover { background: rgba(245,241,232,.12); }
+.mtyby-trade-count {
   position: absolute;
   top: -1px;
   right: -1px;
@@ -218,7 +218,7 @@ a { color: inherit; text-decoration: none; }
   line-height: 16px;
   text-align: center;
 }
-.ofds-user-chip {
+.mtyby-user-chip {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -228,7 +228,7 @@ a { color: inherit; text-decoration: none; }
   font-size: 12px;
   color: var(--cream);
 }
-.ofds-user-chip .avatar {
+.mtyby-user-chip .avatar {
   width: 24px;
   height: 24px;
   border-radius: 50%;
@@ -240,7 +240,7 @@ a { color: inherit; text-decoration: none; }
   font-weight: 800;
   font-size: 13px;
 }
-.ofds-logout {
+.mtyby-logout {
   color: var(--cream);
   opacity: .6;
   font-size: 11px;
@@ -252,19 +252,19 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: .04em;
   text-transform: uppercase;
 }
-.ofds-logout:hover { opacity: 1; background: rgba(245,241,232,.08); }
+.mtyby-logout:hover { opacity: 1; background: rgba(245,241,232,.08); }
 
 /* ============================================================
    DESKTOP TABS (under header)
    ============================================================ */
-.ofds-tabs {
+.mtyby-tabs {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   padding: 0 20px;
   display: flex;
   gap: 4px;
 }
-.ofds-tab {
+.mtyby-tab {
   padding: 12px 18px 10px;
   font-size: 13px;
   font-weight: 600;
@@ -276,12 +276,12 @@ a { color: inherit; text-decoration: none; }
   display: inline-flex;
   align-items: center;
 }
-.ofds-tab:hover { color: var(--ink); }
-.ofds-tab.is-active {
+.mtyby-tab:hover { color: var(--ink); }
+.mtyby-tab.is-active {
   color: var(--forest);
   border-bottom-color: var(--amber);
 }
-.ofds-tab.is-disabled {
+.mtyby-tab.is-disabled {
   color: var(--ink-faint);
   opacity: .55;
   cursor: not-allowed;
@@ -290,7 +290,7 @@ a { color: inherit; text-decoration: none; }
 /* ============================================================
    MAIN
    ============================================================ */
-.ofds-main {
+.mtyby-main {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -300,7 +300,7 @@ a { color: inherit; text-decoration: none; }
 /* ============================================================
    BUTTONS
    ============================================================ */
-.ofds-btn {
+.mtyby-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -317,35 +317,35 @@ a { color: inherit; text-decoration: none; }
   user-select: none;
   border: 1px solid transparent;
 }
-.ofds-btn:active:not(:disabled) { transform: scale(.98); }
-.ofds-btn:disabled { opacity: .4; cursor: not-allowed; }
-.ofds-btn--primary {
+.mtyby-btn:active:not(:disabled) { transform: scale(.98); }
+.mtyby-btn:disabled { opacity: .4; cursor: not-allowed; }
+.mtyby-btn--primary {
   background: var(--forest);
   color: var(--cream-warm);
   box-shadow: var(--shadow-1);
 }
-.ofds-btn--primary:hover:not(:disabled) {
+.mtyby-btn--primary:hover:not(:disabled) {
   background: var(--forest-soft);
   box-shadow: var(--shadow-2);
 }
-.ofds-btn--secondary {
+.mtyby-btn--secondary {
   background: var(--forest);
   color: var(--cream);
 }
-.ofds-btn--secondary:hover:not(:disabled) { background: var(--forest-soft); }
-.ofds-btn--ghost {
+.mtyby-btn--secondary:hover:not(:disabled) { background: var(--forest-soft); }
+.mtyby-btn--ghost {
   /* background: transparent; */
   color: var(--amber);
   border-color: var(--border-strong);
 }
-.ofds-btn--ghost:hover:not(:disabled) { background: var(--surface-2); }
-.ofds-btn--sm { min-height: 36px; padding: 6px 12px; font-size: 12px; }
-.ofds-btn--block { width: 100%; }
+.mtyby-btn--ghost:hover:not(:disabled) { background: var(--surface-2); }
+.mtyby-btn--sm { min-height: 36px; padding: 6px 12px; font-size: 12px; }
+.mtyby-btn--block { width: 100%; }
 
 /* ============================================================
    CHIPS
    ============================================================ */
-.ofds-chip {
+.mtyby-chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -362,20 +362,20 @@ a { color: inherit; text-decoration: none; }
   transition: color var(--motion-fast), background var(--motion-fast), border-color var(--motion-fast);
   white-space: nowrap;
 }
-.ofds-chip:hover { color: var(--ink); border-color: var(--border-strong); }
-.ofds-chip.is-active {
+.mtyby-chip:hover { color: var(--ink); border-color: var(--border-strong); }
+.mtyby-chip.is-active {
   background: var(--forest);
   border-color: var(--forest);
   color: var(--cream);
 }
-.ofds-chip.is-active:hover { background: var(--forest-soft); }
-.ofds-chip--amber.is-active {
+.mtyby-chip.is-active:hover { background: var(--forest-soft); }
+.mtyby-chip--amber.is-active {
   background: var(--amber);
   border-color: var(--amber);
   color: var(--forest-deep);
 }
-.ofds-chip--amber.is-active:hover { background: var(--amber-deep); }
-.ofds-chip--pos {
+.mtyby-chip--amber.is-active:hover { background: var(--amber-deep); }
+.mtyby-chip--pos {
   font-family: var(--font-display);
   font-size: 13px;
   font-weight: 800;
@@ -387,18 +387,18 @@ a { color: inherit; text-decoration: none; }
 /* ============================================================
    CARDS
    ============================================================ */
-.ofds-card {
+.mtyby-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
   box-shadow: var(--shadow-1);
 }
-.ofds-card--flat { box-shadow: none; }
+.mtyby-card--flat { box-shadow: none; }
 
 /* ============================================================
    JERSEY BADGES
    ============================================================ */
-.ofds-jersey {
+.mtyby-jersey {
   width: 28px;
   height: 28px;
   border-radius: 6px;
@@ -412,12 +412,12 @@ a { color: inherit; text-decoration: none; }
   color: var(--ink);
   flex-shrink: 0;
 }
-.ofds-jersey--starter {
+.mtyby-jersey--starter {
   background: var(--forest);
   border-color: var(--forest);
   color: var(--cream);
 }
-.ofds-jersey--bench {
+.mtyby-jersey--bench {
   background: var(--surface-2);
   border-color: var(--border-strong);
   color: var(--ink-muted);
@@ -426,7 +426,7 @@ a { color: inherit; text-decoration: none; }
 /* ============================================================
    POSITION TAG
    ============================================================ */
-.ofds-pos {
+.mtyby-pos {
   display: inline-grid;
   place-items: center;
   min-width: 38px;
@@ -444,7 +444,7 @@ a { color: inherit; text-decoration: none; }
 /* ============================================================
    STATUS BADGES
    ============================================================ */
-.ofds-status {
+.mtyby-status {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -456,9 +456,9 @@ a { color: inherit; text-decoration: none; }
   text-transform: uppercase;
   white-space: nowrap;
 }
-.ofds-status--available { background: rgba(46,125,79,.14);  color: var(--success); }
-.ofds-status--mine      { background: rgba(232,155,44,.20); color: #8C5400; }
-.ofds-status--taken {
+.mtyby-status--available { background: rgba(46,125,79,.14);  color: var(--success); }
+.mtyby-status--mine      { background: rgba(232,155,44,.20); color: #8C5400; }
+.mtyby-status--taken {
   background: rgba(179,58,46,.10);
   color: var(--danger);
   text-transform: none;
@@ -470,12 +470,12 @@ a { color: inherit; text-decoration: none; }
   display: inline-block;
   line-height: 16px;
 }
-.ofds-status--full      { background: rgba(201,122,31,.16); color: var(--warning); }
+.mtyby-status--full      { background: rgba(201,122,31,.16); color: var(--warning); }
 
 /* ============================================================
    FIXTURE-STATUS DOT (3-second scannability)
    ============================================================ */
-.ofds-fix-dot {
+.mtyby-fix-dot {
   width: 15px;
   height: 15px;
   border-radius: 50%;
@@ -489,14 +489,14 @@ a { color: inherit; text-decoration: none; }
   line-height: 1;
   flex-shrink: 0;
 }
-.ofds-fix-dot--starting { background: var(--success); color: var(--cream); }
-.ofds-fix-dot--bench    { background: var(--amber);   color: var(--forest-deep); }
-.ofds-fix-dot--none     { background: transparent; border: 1px dashed var(--border-strong); color: var(--ink-faint); }
+.mtyby-fix-dot--starting { background: var(--success); color: var(--cream); }
+.mtyby-fix-dot--bench    { background: var(--amber);   color: var(--forest-deep); }
+.mtyby-fix-dot--none     { background: transparent; border: 1px dashed var(--border-strong); color: var(--ink-faint); }
 
 /* ============================================================
    HEADER STAT PILLS
    ============================================================ */
-.ofds-stat {
+.mtyby-stat {
   display: inline-flex;
   flex-direction: column;
   align-items: flex-start;
@@ -507,7 +507,7 @@ a { color: inherit; text-decoration: none; }
   min-height: 40px;
   justify-content: center;
 }
-.ofds-stat-label {
+.mtyby-stat-label {
   font-size: 9px;
   font-weight: 600;
   text-transform: uppercase;
@@ -515,19 +515,19 @@ a { color: inherit; text-decoration: none; }
   color: var(--cream);
   opacity: .6;
 }
-.ofds-stat-value {
+.mtyby-stat-value {
   font-family: var(--font-display);
   font-size: 18px;
   font-weight: 700;
   color: var(--cream);
   line-height: 1.05;
 }
-.ofds-stat-value .accent { color: var(--amber); }
+.mtyby-stat-value .accent { color: var(--amber); }
 
 /* ============================================================
    BOTTOM NAV (mobile only)
    ============================================================ */
-.ofds-bottom-nav {
+.mtyby-bottom-nav {
   display: none;
   position: sticky;
   bottom: 0;
@@ -537,7 +537,7 @@ a { color: inherit; text-decoration: none; }
   z-index: 60;
   box-shadow: 0 -2px 8px rgba(11,59,46,.06);
 }
-.ofds-bottom-nav-item {
+.mtyby-bottom-nav-item {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -552,14 +552,14 @@ a { color: inherit; text-decoration: none; }
   text-transform: uppercase;
   transition: color var(--motion-fast);
 }
-.ofds-bottom-nav-item.is-active { color: var(--forest); }
-.ofds-bottom-nav-icon {
+.mtyby-bottom-nav-item.is-active { color: var(--forest); }
+.mtyby-bottom-nav-icon {
   width: 22px;
   height: 22px;
   display: grid;
   place-items: center;
 }
-.ofds-bottom-nav-item .dot {
+.mtyby-bottom-nav-item .dot {
   width: 4px;
   height: 4px;
   border-radius: 50%;
@@ -567,25 +567,25 @@ a { color: inherit; text-decoration: none; }
   margin-top: 1px;
   opacity: 0;
 }
-.ofds-bottom-nav-item.is-active .dot { opacity: 1; }
+.mtyby-bottom-nav-item.is-active .dot { opacity: 1; }
 
 /* ============================================================
    BOTTOM SHEET
    ============================================================ */
-.ofds-sheet {
+.mtyby-sheet {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 100;
 }
-.ofds-sheet-backdrop {
+.mtyby-sheet-backdrop {
   position: absolute;
   inset: 0;
   background: rgba(6,32,24,.4);
   opacity: 0;
   transition: opacity var(--motion-med);
 }
-.ofds-sheet-panel {
+.mtyby-sheet-panel {
   position: absolute;
   left: 0; right: 0; bottom: 0;
   background: var(--surface);
@@ -600,10 +600,10 @@ a { color: inherit; text-decoration: none; }
   display: flex;
   flex-direction: column;
 }
-.ofds-sheet.is-open { pointer-events: auto; }
-.ofds-sheet.is-open .ofds-sheet-backdrop { opacity: 1; }
-.ofds-sheet.is-open .ofds-sheet-panel { transform: translateY(0); }
-.ofds-sheet-handle {
+.mtyby-sheet.is-open { pointer-events: auto; }
+.mtyby-sheet.is-open .mtyby-sheet-backdrop { opacity: 1; }
+.mtyby-sheet.is-open .mtyby-sheet-panel { transform: translateY(0); }
+.mtyby-sheet-handle {
   width: 36px; height: 4px;
   background: var(--border-strong);
   border-radius: 999px;
@@ -611,46 +611,46 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* Toggle switch (profile: commissioner) */
-.ofds-toggle {
+.mtyby-toggle {
   display: inline-flex; align-items: center; gap: 10px;
   background: transparent; border: none; padding: 0; cursor: pointer;
 }
-.ofds-toggle:disabled { cursor: not-allowed; opacity: .5; }
-.ofds-toggle-track {
+.mtyby-toggle:disabled { cursor: not-allowed; opacity: .5; }
+.mtyby-toggle-track {
   width: 44px; height: 24px; flex: 0 0 auto; border-radius: 999px;
   background: var(--border-strong); position: relative;
   transition: background var(--motion-fast);
 }
-.ofds-toggle[aria-checked="true"] .ofds-toggle-track { background: var(--forest); }
-.ofds-toggle-thumb {
+.mtyby-toggle[aria-checked="true"] .mtyby-toggle-track { background: var(--forest); }
+.mtyby-toggle-thumb {
   position: absolute; top: 2px; left: 2px; width: 20px; height: 20px;
   border-radius: 50%; background: #fff; box-shadow: var(--shadow-1);
   transition: transform var(--motion-fast);
 }
-.ofds-toggle[aria-checked="true"] .ofds-toggle-thumb { transform: translateX(20px); }
-.ofds-toggle-label { font-size: 13px; font-weight: 600; color: var(--ink); }
+.mtyby-toggle[aria-checked="true"] .mtyby-toggle-thumb { transform: translateX(20px); }
+.mtyby-toggle-label { font-size: 13px; font-weight: 600; color: var(--ink); }
 
 /* ============================================================
    SKELETON
    ============================================================ */
-.ofds-skeleton {
+.mtyby-skeleton {
   background: linear-gradient(90deg, var(--surface-2) 0%, var(--cream) 50%, var(--surface-2) 100%);
   background-size: 200% 100%;
-  animation: ofds-shimmer 1.2s linear infinite;
+  animation: mtyby-shimmer 1.2s linear infinite;
   border-radius: var(--r-sm);
 }
-@keyframes ofds-shimmer {
+@keyframes mtyby-shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .ofds-skeleton { animation: none; background: var(--surface-2); }
+  .mtyby-skeleton { animation: none; background: var(--surface-2); }
 }
 
 /* ============================================================
    TOAST
    ============================================================ */
-.ofds-toast {
+.mtyby-toast {
   position: fixed;
   left: 50%;
   bottom: calc(env(safe-area-inset-bottom) + var(--bottom-nav-h) + 16px);
@@ -669,17 +669,17 @@ a { color: inherit; text-decoration: none; }
   max-width: 90vw;
   white-space: nowrap;
 }
-.ofds-toast.is-visible { opacity: 1; transform: translateX(-50%) translateY(0); }
-.ofds-toast--err { background: var(--danger); }
-.ofds-toast--ok  { background: var(--success); }
+.mtyby-toast.is-visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+.mtyby-toast--err { background: var(--danger); }
+.mtyby-toast--ok  { background: var(--success); }
 @media (min-width: 769px) {
-  .ofds-toast { bottom: 24px; }
+  .mtyby-toast { bottom: 24px; }
 }
 
 /* ============================================================
    UTILITY
    ============================================================ */
-.ofds-sr-only {
+.mtyby-sr-only {
   position: absolute;
   width: 1px; height: 1px;
   padding: 0; margin: -1px;
@@ -688,7 +688,7 @@ a { color: inherit; text-decoration: none; }
   white-space: nowrap;
   border: 0;
 }
-.ofds-no-scroll { overflow: hidden !important; }
+.mtyby-no-scroll { overflow: hidden !important; }
 
 /* ============================================================
    RESPONSIVE
@@ -706,34 +706,34 @@ a { color: inherit; text-decoration: none; }
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
-  .ofds-app {
+  .mtyby-app {
     display: block;
     height: auto;
     min-height: 100dvh;
     overflow: visible;
     max-width: 100vw;
   }
-  .ofds-header {
+  .mtyby-header {
     padding: 6px 12px; gap: 8px; height: 50px;
     position: sticky; top: 0; z-index: 50;
   }
-  .ofds-brand-mark { font-size: 17px; }
-  .ofds-brand-sub { display: none; }
-  .ofds-tabs { display: none; }
-  .ofds-main { display: block; overflow: visible; }
-  .ofds-bottom-nav {
+  .mtyby-brand-mark { font-size: 17px; }
+  .mtyby-brand-sub { display: none; }
+  .mtyby-tabs { display: none; }
+  .mtyby-main { display: block; overflow: visible; }
+  .mtyby-bottom-nav {
     display: flex;
     position: fixed;
     left: 0; right: 0; bottom: 0;
     z-index: 95;
     padding: 4px 4px calc(4px + env(safe-area-inset-bottom));
   }
-  .ofds-bottom-nav-item { min-height: 48px; padding: 4px 4px; font-size: 9px; }
-  .ofds-bottom-nav-icon { width: 20px; height: 20px; }
-  .ofds-user-chip .name { display: none; }
-  .ofds-user-chip { padding: 3px 4px; }
-  .ofds-user-chip .avatar { width: 22px; height: 22px; font-size: 12px; }
-  .ofds-header-end .ofds-logout { display: none; }
+  .mtyby-bottom-nav-item { min-height: 48px; padding: 4px 4px; font-size: 9px; }
+  .mtyby-bottom-nav-icon { width: 20px; height: 20px; }
+  .mtyby-user-chip .name { display: none; }
+  .mtyby-user-chip { padding: 3px 4px; }
+  .mtyby-user-chip .avatar { width: 22px; height: 22px; font-size: 12px; }
+  .mtyby-header-end .mtyby-logout { display: none; }
 }
 
 /* ============================================================
@@ -781,4 +781,4 @@ a { color: inherit; text-decoration: none; }
 .pc-pt b { flex: 0 0 auto; font-family: var(--font-display); font-size: 15px; color: var(--forest); }
 .pc-none { font-size: 13px; color: var(--ink-muted); margin-bottom: 16px; }
 .pc-actions { display: flex; gap: 8px; }
-.pc-actions .ofds-btn { flex: 1; }
+.pc-actions .mtyby-btn { flex: 1; }

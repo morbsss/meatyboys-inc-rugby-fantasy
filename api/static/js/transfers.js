@@ -15,7 +15,7 @@ async function init() {
   if (!hist.length) {
     feed.innerHTML = `<div class="empty"><h3>No trades yet</h3>
       <p>Free-agent pickups and team-to-team trades will appear here.</p>
-      <a class="ofds-btn ofds-btn--primary ofds-btn--sm" href="/players">Make a move in the Player Hub</a></div>`;
+      <a class="mtyby-btn mtyby-btn--primary mtyby-btn--sm" href="/players">Make a move in the Player Hub</a></div>`;
     return;
   }
   feed.innerHTML = hist.map(rowHTML).join('');
@@ -38,8 +38,8 @@ function renderPending(data) {
         <b>${esc(t.from_team)}</b> wants to offer <span class="in">${plyr(t.out_player)}</span>
         for <span class="out">${plyr(t.in_player)}</span></span>
       <span class="offer-actions">
-        <button class="ofds-btn ofds-btn--primary ofds-btn--sm" data-act="accept" data-id="${t.id}" ${locked ? 'disabled' : ''}>Accept</button>
-        <button class="ofds-btn ofds-btn--ghost ofds-btn--sm" data-act="reject" data-id="${t.id}">Decline</button>
+        <button class="mtyby-btn mtyby-btn--primary mtyby-btn--sm" data-act="accept" data-id="${t.id}" ${locked ? 'disabled' : ''}>Accept</button>
+        <button class="mtyby-btn mtyby-btn--ghost mtyby-btn--sm" data-act="reject" data-id="${t.id}">Decline</button>
       </span>
     </div>`;
   });
@@ -49,7 +49,7 @@ function renderPending(data) {
         To <b>${esc(t.to_team)}</b>: you give <span class="out">${plyr(t.out_player)}</span>,
         get <span class="in">${plyr(t.in_player)}</span> <em>(awaiting reply)</em></span>
       <span class="offer-actions">
-        <button class="ofds-btn ofds-btn--ghost ofds-btn--sm" data-act="cancel" data-id="${t.id}">Cancel</button>
+        <button class="mtyby-btn mtyby-btn--ghost mtyby-btn--sm" data-act="cancel" data-id="${t.id}">Cancel</button>
       </span>
     </div>`;
   });
@@ -68,8 +68,8 @@ async function respond(action, id) {
   const res  = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   let data = {};
   try { data = await res.json(); } catch (_) { /* no body */ }
-  if (typeof ofdsToast === 'function') {
-    ofdsToast(res.ok ? `Trade ${data.status || 'updated'}` : (data.error || 'Failed'), res.ok ? 'ok' : 'err');
+  if (typeof mtybyToast === 'function') {
+    mtybyToast(res.ok ? `Trade ${data.status || 'updated'}` : (data.error || 'Failed'), res.ok ? 'ok' : 'err');
   }
   if (res.ok) {
     init();

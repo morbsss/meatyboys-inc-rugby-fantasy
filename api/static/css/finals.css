@@ -1,14 +1,14 @@
 /* ── Header round badge (mirrors League screen) ── */
-.ofds-round-badge {
+.mtyby-round-badge {
   display: inline-flex; align-items: baseline; gap: 6px;
   font-family: var(--font-display); font-size: 13px; font-weight: 600;
   letter-spacing: .08em; text-transform: uppercase; color: var(--cream); opacity: .85;
 }
-.ofds-round-badge strong { font-size: 18px; font-weight: 800; color: var(--amber); letter-spacing: .02em; }
+.mtyby-round-badge strong { font-size: 18px; font-weight: 800; color: var(--amber); letter-spacing: .02em; }
 @media (max-width: 768px) {
-  .ofds-round-badge { font-size: 10px; }
-  .ofds-round-badge strong { font-size: 13px; }
-  .ofds-round-badge > span:first-child { display: none; }
+  .mtyby-round-badge { font-size: 10px; }
+  .mtyby-round-badge strong { font-size: 13px; }
+  .mtyby-round-badge > span:first-child { display: none; }
 }
 
 /* ── Layout ── */

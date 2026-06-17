@@ -1,7 +1,7 @@
 /* ============================================================
    HEADER CONTROL — round badge (mirrors squad screen)
    ============================================================ */
-.ofds-round-badge {
+.mtyby-round-badge {
   display: inline-flex;
   align-items: baseline;
   gap: 6px;
@@ -13,16 +13,16 @@
   color: var(--cream);
   opacity: .85;
 }
-.ofds-round-badge strong {
+.mtyby-round-badge strong {
   font-size: 18px;
   font-weight: 800;
   color: var(--amber);
   letter-spacing: .02em;
 }
 @media (max-width: 768px) {
-  .ofds-round-badge { font-size: 10px; }
-  .ofds-round-badge strong { font-size: 13px; }
-  .ofds-round-badge > span:first-child { display: none; }
+  .mtyby-round-badge { font-size: 10px; }
+  .mtyby-round-badge strong { font-size: 13px; }
+  .mtyby-round-badge > span:first-child { display: none; }
 }
 
 /* ============================================================
@@ -203,7 +203,7 @@
 /* ============================================================
    TEAM DETAIL SHEET — weekly points chart
    ============================================================ */
-.team-sheet .ofds-sheet-panel { max-width: 540px; margin: 0 auto; }
+.team-sheet .mtyby-sheet-panel { max-width: 540px; margin: 0 auto; }
 .team-sheet-head {
   padding: 16px 20px 14px;
   border-bottom: 1px solid var(--border);
