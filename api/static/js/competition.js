@@ -14,6 +14,22 @@ let TEAM_COLORS = {};
 let champEnd = 0;        // championship = indices [0, champEnd)
 let sackoStart = 0;      // sacko        = indices [sackoStart, n)
 
+// Previous championships per team → one 🏆 each (hard-coded for now).
+const CHAMPS = {
+  'Seldom': 1,
+  'Pizza Morahana': 2,
+  'Dulwich Panthers': 1,
+  'Chessums Cheerleaders': 1,
+};
+
+// Previous Sacko (wooden-spoon) finishes per team → one 🍆 each, shown under
+// the trophies (hard-coded for now).
+const SACKOS = {
+  'Pizza Morahana': 1,
+  'Bread XV': 1,
+  'George XV': 2,
+};
+
 /* ============================================================
    BOOT
    ============================================================ */
@@ -107,6 +123,7 @@ function renderTable(table) {
       <td class="c-hide lt-muted">${t.points_against.toFixed(1)}</td>
       <td class="c-hide ${pdCls}">${pdStr}</td>
       <td class="lt-pts">${t.league_points}</td>
+      <td class="c-champs lt-champs" title="${(CHAMPS[t.name] || 0)} championship${(CHAMPS[t.name] || 0) === 1 ? '' : 's'}, ${(SACKOS[t.name] || 0)} sacko${(SACKOS[t.name] || 0) === 1 ? '' : 's'}"><span class="lt-trophies">${'🏆'.repeat(CHAMPS[t.name] || 0)}</span><span class="lt-sackos">${'🍆'.repeat(SACKOS[t.name] || 0)}</span></td>
       <td class="c-chev"><svg class="lt-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></td>
     </tr>`;
   }).join('');
@@ -119,7 +136,7 @@ function renderTable(table) {
           <th class="c-rank">#</th><th class="c-move"></th><th class="c-team">Team</th>
           <th>P</th><th>W</th><th>D</th><th>L</th>
           <th class="c-hide">BP</th><th class="c-hide">PF</th><th class="c-hide">PA</th>
-          <th class="c-hide">PD</th><th>Pts</th><th class="c-chev"></th>
+          <th class="c-hide">PD</th><th>Pts</th><th class="c-champs">Champs</th><th class="c-chev"></th>
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>
@@ -312,7 +329,8 @@ function buildChart(series, avg) {
   // Dots (highlight the best week)
   const hi = Math.max(...ys);
   const dots = series.map((s, i) =>
-    `<circle class="ts-dot${s.points === hi ? ' ts-dot--hi' : ''}" cx="${x(i).toFixed(1)}" cy="${y(s.points).toFixed(1)}" r="3.5"/>`
+    `<circle class="ts-dot${s.points === hi ? ' ts-dot--hi' : ''}" cx="${x(i).toFixed(1)}" cy="${y(s.points).toFixed(1)}" r="3.5">`
+    + `<title>Round ${s.round}: ${(+s.points).toFixed(1)} pts</title></circle>`
   ).join('');
 
   // Average line + label
