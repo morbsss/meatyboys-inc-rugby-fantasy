@@ -512,7 +512,7 @@
     return `<div class="fp fp--fr" style="left:50%;top:13%">
       <button class="fp-shirt fp-shirt--fr" data-act="info" data-id="${p.player_id}"
         title="${esc(p.real_team || '')} front row — tap for options">
-        FR${statusDotHtml(p)}
+        <span class="fp-code">FR</span>${statusDotHtml(p)}
       </button>
       <div class="fp-name">${esc(p.name)}</div>
     </div>`;
@@ -546,13 +546,16 @@
     </div>`;
   }
 
-  // mtyby validity: composition is advisory; only the squad cap + one captain.
+  // mtyby validity: no captain; the 16-player squad is FR + individuals (or, if
+  // the FR was traded away, 16 individuals). Starting per-position caps are
+  // enforced in toggleBench, so here we only guard the total squad size.
   function flexibleValidity() {
-    const total = picks.filter((p) => !p.is_fr).length;
-    const cap = MODEL.starter_count + MODEL.bench_count;
+    const hasFr = picks.some((p) => p.is_fr);
+    const individuals = picks.filter((p) => !p.is_fr).length;
+    const cap = MODEL.starter_count + MODEL.bench_count + (hasFr ? 0 : 1);   // 15 with FR, else 16
     let msg = '';
-    if (total > cap) msg = `Too many players (max ${cap}).`;
-    return { valid: total <= cap, msg };
+    if (individuals > cap) msg = `Too many players (max ${cap + (hasFr ? 1 : 0)} including the front row).`;
+    return { valid: individuals <= cap, msg };
   }
 
   // ---- Save bar (dispatch to the right league's validation) --------------

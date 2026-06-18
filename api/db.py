@@ -385,10 +385,16 @@ def _ensure_league_schema(conn, cursor) -> None:
             to_team TEXT,
             out_player_id INTEGER,
             in_player_id INTEGER,
+            out_fr_club TEXT,
+            in_fr_club TEXT,
             created_at TEXT NOT NULL,
             resolved_at TEXT
         )
     ''')
+    # Back-fill the FR-unit trade columns on DBs created before they existed.
+    for col in ('out_fr_club', 'in_fr_club'):
+        if not _column_exists(cursor, 'trades', col):
+            cursor.execute(f'ALTER TABLE trades ADD COLUMN {col} TEXT')
 
     # Real-life fixtures per round (who each real team played) — used to show a
     # player's opponent alongside their per-round points.

@@ -38,8 +38,8 @@ REAL_TEAMS = {
     ],
 }
 
-# Mock fantasy teams per league slug (8 = even / OFDS, 9 = odd / meatyboys to
-# exercise the rotating-bye logic in §5.2).
+# Mock fantasy teams per league slug (OFDS = 8, meatyboys = 10 — both even, so
+# no rotating byes).
 FANTASY_TEAMS = {
     'ofds': [
         'Dulwich Panthers', 'Bread XV', 'Chessums Cheerleaders', 'London WaspCester',
@@ -48,7 +48,7 @@ FANTASY_TEAMS = {
     'meatyboys': [
         'Auckland Anchors', 'Canterbury Crushers', 'Wellington Warriors',
         'Otago Outlaws', 'Waikato Wreckers', 'Pasifika Pythons',
-        'Brumby Bruisers', 'Reef Sharks', 'Drua Dynamos',
+        'Brumby Bruisers', 'Reef Sharks', 'Drua Dynamos', 'Highland Hunters',
     ],
 }
 

@@ -1358,8 +1358,10 @@ def save_picks(team_name):
             league_id,
         ))
 
-    # Persist the front-row unit's captain/bench state (it's a squad player too).
-    fr_club = _team_fr_club(conn, league_id, user_team)
+    # Persist the front-row unit's bench state. The owned club is the team's
+    # CURRENT front row (team_front_row is the live source of truth — trades
+    # update it), not the original draft pick.
+    fr_club = _current_fr_club(conn, league_id, user_team, next_round)
     if fr_club:
         cursor.execute('DELETE FROM team_front_row WHERE league_id = ? AND team_name = ? AND round = ?',
                        (league_id, user_team, next_round))
@@ -1452,19 +1454,110 @@ def _swap_player(conn, league_id, team, rnd, out_id, in_id):
     cursor.close()
 
 
-def _record_trade(conn, league_id, ttype, status, from_team, to_team, out_id, in_id, resolved=False):
+# --- Front-row UNIT as a tradeable asset (mtyby) ---------------------------
+# team_front_row is the live source of truth for who owns each club's FR unit.
+# An FR unit behaves like a player in trades: it can be swapped for another FR
+# or for an individual (a team holds at most one FR, total squad stays 16).
+
+def _current_fr_club(conn, league_id, team, next_round):
+    """The club whose front-row unit `team` currently owns, or None."""
+    cur = _get_cursor(conn)
+    cur.execute('SELECT club FROM team_front_row WHERE league_id = ? AND team_name = ? '
+                'AND round = (SELECT MAX(round) FROM team_front_row '
+                '             WHERE league_id = ? AND team_name = ? AND round <= ?)',
+                (league_id, team, league_id, team, next_round))
+    row = cur.fetchone()
+    cur.close()
+    if not row:
+        return None
+    return row['club'] if isinstance(row, dict) else row[0]
+
+
+def _fr_owner_now(conn, league_id, club, next_round):
+    """Which team currently owns `club`'s front-row unit, or None if it's free."""
+    cur = _get_cursor(conn)
+    cur.execute('''
+        WITH latest AS (
+            SELECT team_name, MAX(round) AS r FROM team_front_row
+            WHERE league_id = ? AND round <= ? GROUP BY team_name
+        )
+        SELECT tfr.team_name FROM team_front_row tfr JOIN latest
+          ON tfr.team_name = latest.team_name AND tfr.round = latest.r
+        WHERE tfr.league_id = ? AND tfr.club = ?
+    ''', (league_id, next_round, league_id, club))
+    row = cur.fetchone()
+    cur.close()
+    return (row['team_name'] if isinstance(row, dict) else row[0]) if row else None
+
+
+def _set_fr_club(conn, league_id, team, rnd, club):
+    """Set `team`'s current FR ownership to `club` (None clears it). Clears ALL
+    of the team's front-row rows first so a single row is the source of truth —
+    otherwise an older round's row would resurface when the current one is
+    removed."""
+    cur = _get_cursor(conn)
+    cur.execute('DELETE FROM team_front_row WHERE league_id = ? AND team_name = ?',
+                (league_id, team))
+    if club:
+        cur.execute('INSERT INTO team_front_row (league_id, team_name, round, club, is_captain, is_bench, scraped_at) '
+                    'VALUES (?, ?, ?, ?, 0, 0, ?)',
+                    (league_id, team, rnd, club, datetime.now(timezone.utc).isoformat()))
+    cur.close()
+
+
+def _drop_individual(conn, league_id, team, rnd, player_id):
+    cur = _get_cursor(conn)
+    cur.execute('DELETE FROM team_selections WHERE league_id = ? AND team_name = ? AND round = ? AND player_id = ?',
+                (league_id, team, rnd, player_id))
+    cur.close()
+
+
+def _add_individual(conn, league_id, team, rnd, player_id):
+    """Add an individual to a team's squad (onto the bench, next jersey)."""
+    cur = _get_cursor(conn)
+    cur.execute('SELECT COALESCE(MAX(jersey), 0) AS j FROM team_selections '
+                'WHERE league_id = ? AND team_name = ? AND round = ?', (league_id, team, rnd))
+    row = cur.fetchone()
+    jersey = ((row['j'] if isinstance(row, dict) else row[0]) or 0) + 1
+    cur.execute('INSERT INTO team_selections (round, team_name, player_id, is_captain, is_kicker, '
+                'is_bench, jersey, scraped_at, league_id) VALUES (?, ?, ?, 0, 0, 1, ?, ?, ?)',
+                (rnd, team, player_id, jersey, datetime.now(timezone.utc).isoformat(), league_id))
+    cur.close()
+
+
+def _apply_trade_side(conn, league_id, team, rnd, drop, add):
+    """Apply one team's side of a trade: drop one asset, add another. Each asset
+    is ('player', id) or ('fr', club). Squad size stays constant."""
+    if drop[0] == 'player' and add[0] == 'player':
+        _swap_player(conn, league_id, team, rnd, drop[1], add[1])   # in-place, keeps slot
+        return
+    if drop[0] == 'player':
+        _drop_individual(conn, league_id, team, rnd, drop[1])
+    else:
+        _set_fr_club(conn, league_id, team, rnd, None)
+    if add[0] == 'player':
+        _add_individual(conn, league_id, team, rnd, add[1])
+    else:
+        _set_fr_club(conn, league_id, team, rnd, add[1])
+
+
+def _record_trade(conn, league_id, ttype, status, from_team, to_team, out_id, in_id,
+                  resolved=False, out_fr=None, in_fr=None):
     now = datetime.now(timezone.utc).isoformat()
     cursor = _get_cursor(conn)
     cursor.execute(
         'INSERT INTO trades (league_id, type, status, from_team, to_team, out_player_id, '
-        ' in_player_id, created_at, resolved_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        (league_id, ttype, status, from_team, to_team, out_id, in_id, now, now if resolved else None))
+        ' in_player_id, out_fr_club, in_fr_club, created_at, resolved_at) '
+        'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        (league_id, ttype, status, from_team, to_team, out_id, in_id, out_fr, in_fr,
+         now, now if resolved else None))
     conn.commit()
     cursor.close()
 
 
 def _enrich_trades(conn, rows):
-    """Attach player {name,position} for out/in ids to each trade row."""
+    """Attach player {name,position} for out/in ids to each trade row. FR-unit
+    sides (out_fr_club/in_fr_club) are surfaced as a '<club> FR' pseudo-player."""
     ids = {r[k] for r in rows for k in ('out_player_id', 'in_player_id') if r.get(k)}
     names = {}
     if ids:
@@ -1476,8 +1569,10 @@ def _enrich_trades(conn, rows):
             names[d['player_id']] = {'name': d['name'], 'position': d['position']}
         cursor.close()
     for r in rows:
-        r['out_player'] = names.get(r.get('out_player_id'))
-        r['in_player'] = names.get(r.get('in_player_id'))
+        r['out_player'] = ({'name': f"{r['out_fr_club']} FR", 'position': 'FR'} if r.get('out_fr_club')
+                           else names.get(r.get('out_player_id')))
+        r['in_player'] = ({'name': f"{r['in_fr_club']} FR", 'position': 'FR'} if r.get('in_fr_club')
+                          else names.get(r.get('in_player_id')))
     return rows
 
 
@@ -1492,7 +1587,8 @@ def api_trades():
 
     cursor = _get_cursor(conn)
     cursor.execute(
-        'SELECT id, type, status, from_team, to_team, out_player_id, in_player_id, created_at, resolved_at '
+        'SELECT id, type, status, from_team, to_team, out_player_id, in_player_id, '
+        'out_fr_club, in_fr_club, created_at, resolved_at '
         'FROM trades WHERE league_id = ? ORDER BY created_at DESC', (league_id,))
     rows = [dict(r) for r in cursor.fetchall()]
     cursor.close()
@@ -1523,31 +1619,51 @@ def trade_free_agent():
 
     data = request.get_json() or {}
     drop_id, add_id = data.get('drop_id'), data.get('add_id')
+    drop_fr = bool(data.get('drop_fr'))                       # drop my own FR unit
+    add_fr = (data.get('add_fr') or '').strip() or None      # pick up this free FR club
     model = _roster_model(conn, league_id)
-    drop_pos, add_pos = _player_position(conn, drop_id), _player_position(conn, add_id)
-    # The club front-row UNIT only exists in FR-unit leagues (meatyboys); OFDS
-    # owns and trades individual front-row players like any other position.
-    if model.get('fr_unit') and add_pos in FR_POSITIONS:
-        conn.close()
-        return jsonify({'error': 'Props and hookers are owned via the club front-row unit, not individually.'}), 400
-    # Like-for-like: a positioned squad (OFDS) must keep its shape.
-    if model.get('positioned_bench') and drop_pos and add_pos and drop_pos != add_pos:
-        conn.close()
-        return jsonify({'error': 'You can only trade like-for-like — drop and add must be the same position.'}), 400
-    rnd = _roster_round(conn, league_id, team, get_next_round(conn, league_id))
-    roster = _roster_ids(conn, league_id, team, rnd)
-    if drop_id not in roster:
-        conn.close()
-        return jsonify({'error': 'The player to drop is not on your team.'}), 400
-    owner = _owner_of(conn, league_id, add_id, rnd)
-    if owner is not None:
-        conn.close()
-        return jsonify({'error': f'That player is not a free agent (owned by {owner}).'}), 409
+    nr = get_next_round(conn, league_id)
+    rnd = _roster_round(conn, league_id, team, nr)
 
-    # In-place swap — squad composition is unconstrained (rules apply to the XV).
-    _swap_player(conn, league_id, team, rnd, drop_id, add_id)
+    # Resolve the asset I'm dropping.
+    if drop_fr:
+        my_fr = _current_fr_club(conn, league_id, team, nr)
+        if not my_fr:
+            conn.close(); return jsonify({'error': 'You have no front-row unit to drop.'}), 400
+        drop = ('fr', my_fr)
+    else:
+        if drop_id not in _roster_ids(conn, league_id, team, rnd):
+            conn.close(); return jsonify({'error': 'The player to drop is not on your team.'}), 400
+        drop = ('player', drop_id)
+
+    # Resolve the free-agent asset I'm adding.
+    if add_fr:
+        if _fr_owner_now(conn, league_id, add_fr, nr) is not None:
+            conn.close(); return jsonify({'error': 'That front-row unit is not a free agent.'}), 409
+        add = ('fr', add_fr)
+    else:
+        add_pos = _player_position(conn, add_id)
+        if model.get('fr_unit') and add_pos in FR_POSITIONS:
+            conn.close(); return jsonify({'error': 'Props and hookers are owned via the club front-row unit, not individually.'}), 400
+        # Like-for-like: a positioned squad (OFDS) must keep its shape (player swaps).
+        if model.get('positioned_bench') and drop[0] == 'player':
+            if _player_position(conn, drop_id) != add_pos:
+                conn.close(); return jsonify({'error': 'You can only trade like-for-like — drop and add must be the same position.'}), 400
+        if _owner_of(conn, league_id, add_id, rnd) is not None:
+            conn.close(); return jsonify({'error': 'That player is not a free agent.'}), 409
+        add = ('player', add_id)
+
+    # A team holds at most one FR: adding an FR while keeping yours is invalid.
+    if add[0] == 'fr' and drop[0] != 'fr' and _current_fr_club(conn, league_id, team, nr):
+        conn.close(); return jsonify({'error': 'You already own a front-row unit — drop it to pick up another.'}), 400
+
+    _apply_trade_side(conn, league_id, team, rnd, drop, add)
     conn.commit()
-    _record_trade(conn, league_id, 'free_agent', 'completed', team, None, drop_id, add_id, resolved=True)
+    _record_trade(conn, league_id, 'free_agent', 'completed', team, None,
+                  drop[1] if drop[0] == 'player' else None,
+                  add[1] if add[0] == 'player' else None, resolved=True,
+                  out_fr=drop[1] if drop[0] == 'fr' else None,
+                  in_fr=add[1] if add[0] == 'fr' else None)
     conn.close()
     return jsonify({'status': 'ok'})
 
@@ -1565,6 +1681,8 @@ def trade_propose():
     data = request.get_json() or {}
     to_team = (data.get('to_team') or '').strip()
     give_id, receive_id = data.get('give_id'), data.get('receive_id')
+    give_fr = bool(data.get('give_fr'))                       # offer my FR unit
+    receive_fr = (data.get('receive_fr') or '').strip() or None   # want their FR (club)
     nr = get_next_round(conn, league_id)
     my_rnd = _roster_round(conn, league_id, team, nr)
     their_rnd = _roster_round(conn, league_id, to_team, nr)
@@ -1573,23 +1691,38 @@ def trade_propose():
         conn.close()
         return jsonify({'error': 'Choose another team to trade with.'}), 400
     model = _roster_model(conn, league_id)
-    give_pos, receive_pos = _player_position(conn, give_id), _player_position(conn, receive_id)
-    # FR-unit restriction applies only to leagues that use the club front-row unit.
-    if model.get('fr_unit') and (receive_pos in FR_POSITIONS or give_pos in FR_POSITIONS):
-        conn.close()
-        return jsonify({'error': 'Props and hookers are part of the club front-row unit, not tradeable individually.'}), 400
-    # Like-for-like: a positioned squad (OFDS) only trades same-position players.
-    if model.get('positioned_bench') and give_pos and receive_pos and give_pos != receive_pos:
-        conn.close()
-        return jsonify({'error': 'You can only trade like-for-like — both players must be the same position.'}), 400
-    if give_id not in _roster_ids(conn, league_id, team, my_rnd):
-        conn.close()
-        return jsonify({'error': 'The player you are offering is not on your team.'}), 400
-    if _owner_of(conn, league_id, receive_id, their_rnd) != to_team:
-        conn.close()
-        return jsonify({'error': 'The player you want is not on that team.'}), 400
 
-    _record_trade(conn, league_id, 'player_trade', 'pending', team, to_team, give_id, receive_id)
+    # Resolve the asset I'm offering.
+    if give_fr:
+        my_fr = _current_fr_club(conn, league_id, team, nr)
+        if not my_fr:
+            conn.close(); return jsonify({'error': 'You have no front-row unit to offer.'}), 400
+        give = ('fr', my_fr)
+    else:
+        if give_id not in _roster_ids(conn, league_id, team, my_rnd):
+            conn.close(); return jsonify({'error': 'The player you are offering is not on your team.'}), 400
+        give = ('player', give_id)
+
+    # Resolve the asset I want from the other team.
+    if receive_fr:
+        if _fr_owner_now(conn, league_id, receive_fr, nr) != to_team:
+            conn.close(); return jsonify({'error': 'That front-row unit is not on that team.'}), 400
+        receive = ('fr', receive_fr)
+    else:
+        if model.get('fr_unit') and _player_position(conn, receive_id) in FR_POSITIONS:
+            conn.close(); return jsonify({'error': 'Props and hookers are part of the club front-row unit, not tradeable individually.'}), 400
+        if model.get('positioned_bench') and give[0] == 'player' \
+           and _player_position(conn, give_id) != _player_position(conn, receive_id):
+            conn.close(); return jsonify({'error': 'You can only trade like-for-like — both players must be the same position.'}), 400
+        if _owner_of(conn, league_id, receive_id, their_rnd) != to_team:
+            conn.close(); return jsonify({'error': 'The player you want is not on that team.'}), 400
+        receive = ('player', receive_id)
+
+    _record_trade(conn, league_id, 'player_trade', 'pending', team, to_team,
+                  give[1] if give[0] == 'player' else None,
+                  receive[1] if receive[0] == 'player' else None,
+                  out_fr=give[1] if give[0] == 'fr' else None,
+                  in_fr=receive[1] if receive[0] == 'fr' else None)
     conn.close()
     return jsonify({'status': 'pending'})
 
@@ -1608,8 +1741,8 @@ def trade_respond():
     trade_id, action = data.get('trade_id'), data.get('action')
 
     cursor = _get_cursor(conn)
-    cursor.execute('SELECT type, status, from_team, to_team, out_player_id, in_player_id '
-                   'FROM trades WHERE id = ? AND league_id = ?', (trade_id, league_id))
+    cursor.execute('SELECT type, status, from_team, to_team, out_player_id, in_player_id, '
+                   'out_fr_club, in_fr_club FROM trades WHERE id = ? AND league_id = ?', (trade_id, league_id))
     row = cursor.fetchone()
     cursor.close()
     if not row:
@@ -1638,19 +1771,26 @@ def trade_respond():
 
     nr = get_next_round(conn, league_id)
     from_team, to_team = t['from_team'], t['to_team']
-    out_id, in_id = t['out_player_id'], t['in_player_id']   # from_team gives out_id, receives in_id
     from_rnd = _roster_round(conn, league_id, from_team, nr)
     to_rnd = _roster_round(conn, league_id, to_team, nr)
-    if out_id not in _roster_ids(conn, league_id, from_team, from_rnd) or \
-       in_id not in _roster_ids(conn, league_id, to_team, to_rnd):
+    # from_team gives `out` (player or FR), receives `in`.
+    out = ('fr', t['out_fr_club']) if t.get('out_fr_club') else ('player', t['out_player_id'])
+    inn = ('fr', t['in_fr_club']) if t.get('in_fr_club') else ('player', t['in_player_id'])
+
+    def _still_has(tm, rnd, asset):
+        if asset[0] == 'fr':
+            return _current_fr_club(conn, league_id, tm, nr) == asset[1]
+        return asset[1] in _roster_ids(conn, league_id, tm, rnd)
+
+    if not _still_has(from_team, from_rnd, out) or not _still_has(to_team, to_rnd, inn):
         cursor = _get_cursor(conn)
         cursor.execute('UPDATE trades SET status = ?, resolved_at = ? WHERE id = ?', ('rejected', now, trade_id))
         conn.commit(); cursor.close(); conn.close()
-        return jsonify({'error': 'Players are no longer available — trade voided.'}), 409
+        return jsonify({'error': 'Assets are no longer available — trade voided.'}), 409
 
-    # In-place swap on each team's squad (atomic — single commit below).
-    _swap_player(conn, league_id, from_team, from_rnd, out_id, in_id)
-    _swap_player(conn, league_id, to_team, to_rnd, in_id, out_id)
+    # from_team: drop `out`, add `in`; to_team: the mirror. (atomic — one commit)
+    _apply_trade_side(conn, league_id, from_team, from_rnd, out, inn)
+    _apply_trade_side(conn, league_id, to_team, to_rnd, inn, out)
     cursor = _get_cursor(conn)
     cursor.execute('UPDATE trades SET status = ?, resolved_at = ? WHERE id = ?', ('completed', now, trade_id))
     conn.commit(); cursor.close(); conn.close()
@@ -2316,8 +2456,9 @@ def competition_data():
                     margin  = abs(ts - bye_avg)
                     t_wins  = ts > bye_avg
                     t_loses = ts < bye_avg
-                    t_bp    = (t_wins  and margin >= WINNER_BP_MARGIN) or \
-                              (t_loses and margin <= LOSER_BP_MARGIN)
+                    t_bp    = award_bonus and (
+                              (t_wins  and margin >= WINNER_BP_MARGIN) or
+                              (t_loses and margin <= LOSER_BP_MARGIN))
                     all_weeks[week].append({
                         'is_bye': True, 'played': not no_data,
                         'team': team,
@@ -2335,7 +2476,7 @@ def competition_data():
                 aw      = non_bye_scores.get(away, 0.0)
                 no_data = hs == 0 and aw == 0
                 h_bp = a_bp = False
-                if not no_data and hs != aw:
+                if award_bonus and not no_data and hs != aw:
                     margin = abs(hs - aw)
                     h_wins = hs > aw
                     h_bp = (h_wins and margin >= WINNER_BP_MARGIN) or (not h_wins and margin <= LOSER_BP_MARGIN)

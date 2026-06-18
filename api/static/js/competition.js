@@ -245,10 +245,14 @@ function openTeamSheet(name) {
     recEl.textContent = '';
   }
 
-  // Stat tiles — summarise the weekly scoring shown in the chart
+  // Stat tiles — summarise the weekly scoring shown in the chart. mtyby has no
+  // league points, so the first tile shows wins instead.
+  const firstTile = BONUS
+    ? `<div class="ts-stat"><div class="ts-stat-value">${t ? t.league_points : '—'}</div><div class="ts-stat-label">Points</div></div>`
+    : `<div class="ts-stat"><div class="ts-stat-value">${t ? t.won : '—'}</div><div class="ts-stat-label">Wins</div></div>`;
   const statsEl = document.getElementById('ts-stats');
   statsEl.innerHTML = `
-    <div class="ts-stat"><div class="ts-stat-value">${t ? t.league_points : '—'}</div><div class="ts-stat-label">Points</div></div>
+    ${firstTile}
     <div class="ts-stat"><div class="ts-stat-value amber">${ys.length ? avg.toFixed(1) : '—'}</div><div class="ts-stat-label">Avg / rd</div></div>
     <div class="ts-stat"><div class="ts-stat-value">${ys.length ? hi.toFixed(0) : '—'}</div><div class="ts-stat-label">High</div></div>
     <div class="ts-stat"><div class="ts-stat-value">${ys.length ? lo.toFixed(0) : '—'}</div><div class="ts-stat-label">Low</div></div>`;

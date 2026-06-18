@@ -7,6 +7,7 @@
 // OFDS lists individual props/hookers; mtyby lists the club FR unit.
 const positionChips = () => Leagues.positionFilters(rosterModel);
 let ALL = [], myRoster = [], myTeam = null, isLocked = false, teamsList = [], roundsList = [], maxRound = 0;
+let myFrClub = null;       // the front-row club this team owns (mtyby), or null
 let rosterModel = null;
 let likeForLike = false;   // positioned squads (OFDS) trade same-position only
 let pos = 'ALL', q = '', teamFilter = 'ALL', lineupFilter = 'ALL', roundSel = '', metric = 'total';
@@ -26,6 +27,7 @@ async function init() {
   maxRound = pl.round || 0;
   teamsList = pl.teams || [];
   myRoster = mp.picks || [];
+  myFrClub = mp.fr_club || null;            // my front-row unit (a tradeable asset)
   rosterModel = mp.roster_model || null;
   likeForLike = Leagues.isOfds(rosterModel);
   myTeam = tr.my_team;
@@ -136,20 +138,23 @@ function render() {
   }));
   el.querySelectorAll('button[data-trade]').forEach(b =>
     b.addEventListener('click', () => openTrade(+b.dataset.trade)));
+  el.querySelectorAll('button[data-trade-fr]').forEach(b =>
+    b.addEventListener('click', () => openTradeFr(b.dataset.tradeFr)));
   // Tap a row (but not its action button) → player card with recent points.
   el.querySelectorAll('tr[data-player]').forEach(tr =>
     tr.addEventListener('click', (e) => {
-      if (e.target.closest('button, [data-trade]')) return;
+      if (e.target.closest('button, [data-trade], [data-trade-fr]')) return;
       mtybyPlayerCard(+tr.dataset.player);
     }));
 }
 
 function actionCell(r) {
-  if (r.is_fr) return `<span class="ph-team">club unit</span>`;   // FR units not individually tradeable (yet)
-  if (!myTeam) return '';
+  if (!myTeam) return r.is_fr ? `<span class="ph-team">club unit</span>` : '';
   if (r.fantasy_team === myTeam) return `<span class="yours-tag">Yours</span>`;
-  if (!r.fantasy_team) return `<button class="mtyby-btn mtyby-btn--primary mtyby-btn--sm" data-trade="${r.player_id}">Pick up</button>`;
-  return `<button class="mtyby-btn mtyby-btn--secondary mtyby-btn--sm" data-trade="${r.player_id}">Trade</button>`;
+  // FR units trade by club; individuals by player_id.
+  const ref = r.is_fr ? `data-trade-fr="${escAttr(r.real_team)}"` : `data-trade="${r.player_id}"`;
+  if (!r.fantasy_team) return `<button class="mtyby-btn mtyby-btn--primary mtyby-btn--sm" ${ref}>Pick up</button>`;
+  return `<button class="mtyby-btn mtyby-btn--secondary mtyby-btn--sm" ${ref}>Trade</button>`;
 }
 
 // Season total shows whole points; per-round and form values keep one decimal.
@@ -185,54 +190,65 @@ function rowHTML(r) {
   </tr>`;
 }
 
-function openTrade(playerId) {
-  const target = ALL.find(p => p.player_id === playerId);
+// An asset is either an individual (from myRoster / ALL) or the FR unit, which
+// carries is_fr + real_team (the club). Both flow through one trade sheet.
+function openTrade(playerId) { openTradeSheet(ALL.find(p => p.player_id === playerId)); }
+function openTradeFr(club)   { openTradeSheet(ALL.find(p => p.is_fr && p.real_team === club)); }
+const assetName = a => a.is_fr ? `${a.real_team} FR` : a.name;
+
+function openTradeSheet(target) {
   if (!target || !myTeam) return;
   const isFree = !target.fantasy_team;
   document.getElementById('ts-title').textContent =
-    (isFree ? 'Pick up ' : 'Trade for ') + target.name + ' (' + target.position + ')';
-  // Like-for-like squads (OFDS) can only swap same-position players, so only
-  // show those; flexible squads (mtyby) show everyone, same-position first.
+    (isFree ? 'Pick up ' : 'Trade for ') + assetName(target) + (target.is_fr ? '' : ` (${target.position})`);
+
+  // My givable assets: individuals (like-for-like only for OFDS) + my FR unit
+  // (mtyby is any-to-any, so the FR can be offered for anyone).
   let mine = myRoster.slice();
   if (likeForLike) mine = mine.filter(p => p.position === target.position);
-  else mine.sort((a,b) => (a.position===target.position?0:1) - (b.position===target.position?0:1));
+  else mine.sort((a, b) => (a.position === target.position ? 0 : 1) - (b.position === target.position ? 0 : 1));
+  if (!likeForLike && myFrClub) {
+    mine.push({ is_fr: true, real_team: myFrClub, name: `${myFrClub} FR`, position: 'FR' });
+  }
 
-  document.getElementById('ts-note').textContent = likeForLike
-    ? `Choose one of your ${target.position} players to ${isFree ? 'drop' : 'offer'}.`
-    : (isFree ? 'Choose one of your players to drop to free agents.'
-              : `Choose one of your players to offer ${target.fantasy_team}. They must accept.`);
+  document.getElementById('ts-note').textContent = isFree
+    ? 'Choose one of your players to drop.'
+    : `Choose one of your players to offer ${target.fantasy_team}. They must accept.`;
 
   const body = document.getElementById('ts-body');
   if (!mine.length) {
-    body.innerHTML = `<div class="ts-row"><span class="nm">You have no ${target.position} player to swap.</span></div>`;
+    body.innerHTML = `<div class="ts-row"><span class="nm">You have nothing to swap.</span></div>`;
   } else {
-    body.innerHTML = mine.map(p =>
-      `<div class="ts-row" data-mine="${p.player_id}">
+    body.innerHTML = mine.map((p, i) =>
+      `<div class="ts-row" data-i="${i}">
         <span class="mtyby-pos">${p.position}</span>
-        <span class="nm"><b>${esc(p.name)}</b> <span class="ph-team">${esc(p.real_team||'')}</span></span>
-        <span class="mtyby-btn mtyby-btn--ghost mtyby-btn--sm">${isFree?'Drop':'Offer'}</span>
+        <span class="nm"><b>${esc(p.name)}</b> <span class="ph-team">${esc(p.is_fr ? '' : (p.real_team || ''))}</span></span>
+        <span class="mtyby-btn mtyby-btn--ghost mtyby-btn--sm">${isFree ? 'Drop' : 'Offer'}</span>
       </div>`).join('');
     body.querySelectorAll('.ts-row').forEach(row =>
-      row.addEventListener('click', () => doTrade(target, +row.dataset.mine, isFree)));
+      row.addEventListener('click', () => doTrade(target, mine[+row.dataset.i], isFree)));
   }
   document.getElementById('trade-sheet').classList.add('is-open');
   document.body.classList.add('mtyby-no-scroll');
 }
 
-async function doTrade(target, myId, isFree) {
-  const mine = myRoster.find(p => p.player_id === myId);
+async function doTrade(target, give, isFree) {
   const msg = isFree
-    ? `Pick up ${target.name} and drop ${mine ? mine.name : 'your player'}?`
-    : `Offer ${mine ? mine.name : 'your player'} to ${target.fantasy_team} for ${target.name}?`;
+    ? `Pick up ${assetName(target)} and drop ${assetName(give)}?`
+    : `Offer ${assetName(give)} to ${target.fantasy_team} for ${assetName(target)}?`;
   if (!confirm(msg)) return;
   closeTradeSheet();
+  const body = {};
   let res;
   if (isFree) {
-    res = await fetch('/api/trades/free-agent', {method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({drop_id: myId, add_id: target.player_id})});
+    if (give.is_fr) body.drop_fr = true; else body.drop_id = give.player_id;
+    if (target.is_fr) body.add_fr = target.real_team; else body.add_id = target.player_id;
+    res = await fetch('/api/trades/free-agent', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   } else {
-    res = await fetch('/api/trades/propose', {method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({to_team: target.fantasy_team, give_id: myId, receive_id: target.player_id})});
+    body.to_team = target.fantasy_team;
+    if (give.is_fr) body.give_fr = true; else body.give_id = give.player_id;
+    if (target.is_fr) body.receive_fr = target.real_team; else body.receive_id = target.player_id;
+    res = await fetch('/api/trades/propose', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   }
   const data = await res.json();
   mtybyToast(res.ok ? (isFree ? 'Picked up' : 'Trade proposed') : (data.error || 'Failed'), res.ok ? 'ok' : 'err');
