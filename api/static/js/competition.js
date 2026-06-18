@@ -87,10 +87,6 @@ function renderTable(table) {
   const sackoCount = n - sackoStart;
 
   const rows = table.map((t, i) => {
-    const pd    = t.points_diff;
-    const pdStr = pd >= 0 ? `+${pd.toFixed(1)}` : pd.toFixed(1);
-    const pdCls = pd >= 0 ? 'lt-pd-pos' : 'lt-pd-neg';
-
     // Side-spine cell: rendered once per band via rowspan; middle rows get an
     // empty spacer; rows covered by a rowspan above emit nothing.
     let side = '';
@@ -125,7 +121,6 @@ function renderTable(table) {
       ${bpCell}
       <td class="c-hide lt-muted">${t.points_for.toFixed(1)}</td>
       <td class="c-hide lt-muted">${t.points_against.toFixed(1)}</td>
-      <td class="c-hide ${pdCls}">${pdStr}</td>
       ${ptsCell}
       <td class="c-champs lt-champs" title="${(CHAMPS[t.name] || 0)} championship${(CHAMPS[t.name] || 0) === 1 ? '' : 's'}, ${(SACKOS[t.name] || 0)} sacko${(SACKOS[t.name] || 0) === 1 ? '' : 's'}"><span class="lt-trophies">${'🏆'.repeat(CHAMPS[t.name] || 0)}</span><span class="lt-sackos">${'🍆'.repeat(SACKOS[t.name] || 0)}</span></td>
       <td class="c-chev"><svg class="lt-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></td>
@@ -140,7 +135,7 @@ function renderTable(table) {
           <th class="c-rank">#</th><th class="c-move"></th><th class="c-team">Team</th>
           <th>P</th><th>W</th><th>D</th><th>L</th>
           ${BONUS ? '<th class="c-hide">BP</th>' : ''}<th class="c-hide">PF</th><th class="c-hide">PA</th>
-          <th class="c-hide">PD</th>${BONUS ? '<th>Pts</th>' : ''}<th class="c-champs">Champs</th><th class="c-chev"></th>
+          ${BONUS ? '<th>Pts</th>' : ''}<th class="c-champs">Champs</th><th class="c-chev"></th>
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>
