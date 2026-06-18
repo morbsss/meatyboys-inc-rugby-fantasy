@@ -46,7 +46,7 @@ from .auth import (
     hash_password, verify_password,
 )
 from .competition import (
-    calculate_table, get_team_score,
+    calculate_table, get_team_score, _front_row_score,
     get_league_teams, generate_regular_fixtures,
     build_playoffs, playoff_fixtures, standings_progression, REGULAR_ROUNDS,
     WINNER_BP_MARGIN, LOSER_BP_MARGIN,
@@ -506,12 +506,14 @@ def get_user():
     can_edit_team = (league_id is not None) and (not _team_edit_locked(conn, league_id))
     # Prefer the live DB team name over the (possibly stale) session copy.
     team_name = ctx['team_name'] if ctx else session.get('team_name')
+    current_round = get_last_round(conn, league_id) if league_id is not None else None
     conn.close()
 
     return jsonify({
         'user_id': session['user_id'],
         'username': session['username'],
         'team_name': team_name,
+        'current_round': current_round,
         'is_commissioner': bool(ctx and ctx['is_commissioner']),
         'commissioner_user_id': commissioner_id,
         'commissioner_name': commissioner_name,
@@ -1181,6 +1183,10 @@ def get_team_view():
     if round_param:
         _attach_round_points(conn, league_id, picks, round_param)
     fr = _team_front_row_view(conn, league_id, team_name, next_round)
+    # FR unit's points for the viewed round — computed the same way as the team
+    # total's FR contribution, so the Match Up row matches the total exactly.
+    fr_points = (round(_front_row_score(conn, team_name, round_param), 1)
+                 if round_param and fr['club'] else None)
     conn.close()
 
     return jsonify({
@@ -1188,6 +1194,7 @@ def get_team_view():
         'round':     next_round,
         'picks':     picks,
         'fr_club':   fr['club'],
+        'fr_points': fr_points,
     })
 
 
@@ -2402,6 +2409,50 @@ def fixtures():
 @login_required
 def finals():
     return render_template('finals.html', current_page='finals')
+
+
+@app.route('/analysis')
+@login_required
+def analysis_page():
+    return render_template('analysis.html', current_page='analysis')
+
+
+@app.route('/api/analysis')
+def api_analysis():
+    """Read precomputed predictions for the current league's latest round
+    (written offline by api/predict.py). No ML libs needed here — pure reads."""
+    conn = get_db()
+    ensure_schema(conn)
+    league_id = current_league_id(conn)
+    cursor = _get_cursor(conn)
+    cursor.execute('SELECT MAX(round) AS r FROM player_predictions WHERE league_id = ?', (league_id,))
+    row = cursor.fetchone()
+    rnd = (row['r'] if isinstance(row, dict) else row[0]) if row else None
+    if rnd is None:
+        cursor.close(); conn.close()
+        return jsonify({'round': None, 'matchups': [], 'players': [], 'managers': []})
+
+    cursor.execute(
+        'SELECT home_team, away_team, home_prob, away_prob, draw_prob '
+        'FROM matchup_predictions WHERE league_id = ? AND round = ? ORDER BY home_team',
+        (league_id, rnd))
+    matchups = [dict(r) for r in cursor.fetchall()]
+
+    cursor.execute(
+        'SELECT player_id, is_fr, name, position, real_team, fantasy_team, opponent, home, '
+        '       lineup, score, proj, gbm, avg3, ssn_avg, gamma_p50, weibull_p50 '
+        'FROM player_predictions WHERE league_id = ? AND round = ? '
+        'ORDER BY COALESCE(gbm, proj) DESC', (league_id, rnd))
+    players = [dict(r) for r in cursor.fetchall()]
+    cursor.close()
+    conn.close()
+
+    managers = sorted({p['fantasy_team'] for p in players if p['fantasy_team']})
+    pos_order = ['FR', 'PR', 'HK', 'LK', 'LF', 'SH', 'FH', 'MID', 'OBK']
+    present = {p['position'] for p in players if p['position']}
+    positions = [c for c in pos_order if c in present] + sorted(present - set(pos_order))
+    return jsonify({'round': rnd, 'matchups': matchups, 'players': players,
+                    'managers': managers, 'positions': positions})
 
 
 @app.route('/api/competition')

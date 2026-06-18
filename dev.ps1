@@ -35,7 +35,7 @@ function Show-Logins {
     # List the local @test.local team accounts in the configured DB (best-effort).
     $code = @'
 import os, sqlite3
-path = os.getenv("DB_PATH", "prem_rugby_26_27.db")
+path = os.getenv("DB_PATH", "fantasy_2026_27.db")
 if not os.path.exists(path):
     print("  (no DB at " + path + ")"); raise SystemExit
 try:

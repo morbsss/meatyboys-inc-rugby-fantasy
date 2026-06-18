@@ -44,8 +44,6 @@ async function init() {
       '<div class="lt-loading">Failed to load — refresh to retry.</div>';
     return;
   }
-  const badge = document.getElementById('round-badge');
-  if (badge) badge.textContent = data.max_round ?? '—';
   TABLE    = data.table    || [];
   RESULTS  = data.results  || [];
   HISTORY  = data.position_history || [];
@@ -104,7 +102,7 @@ function renderTable(table) {
     else if (i >= sackoStart) cls.push('in-sacko');
 
     const mv = MOVE[t.name] || { dir: 'same', delta: 0 };
-    const mvIcon = mv.dir === 'up' ? '▲' : (mv.dir === 'down' ? '▼' : '–');
+    const mvIcon = mv.dir === 'up' ? '▲' : (mv.dir === 'down' ? '▼' : '-');
     const mvTitle = mv.dir === 'same' ? 'No change' : `${mv.dir === 'up' ? 'Up' : 'Down'} ${mv.delta} vs last round`;
     const bpCell  = BONUS ? `<td class="c-hide lt-muted">${t.bonus_points}</td>` : '';
     const ptsCell = BONUS ? `<td class="lt-pts">${t.league_points}</td>` : '';

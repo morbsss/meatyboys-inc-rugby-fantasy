@@ -1,0 +1,155 @@
+﻿index,datetime,round,venue,Team 1,Team 2,home/away
+1,13/02/2026 17:05,1,"Forsyth Barr Stadium, Dunedin",Highlanders,Crusaders,home
+2,13/02/2026 19:35,1,"Allianz Stadium, Sydney",Waratahs,Reds,home
+3,14/02/2026 14:35,1,"Churchill Park, Fiji",Fijian Drua,Moana Pasifika,home
+4,14/02/2026 17:05,1,TBD,Blues,Chiefs,home
+5,14/02/2026 19:35,1,"HBF Park, Perth",Force,Brumbies,home
+6,20/02/2026 17:05,2,"Sky Stadium, Wellington",Hurricanes,Moana Pasifika,home
+7,20/02/2026 19:35,2,"Allianz Stadium, Sydney",Waratahs,Fijian Drua,home
+8,21/02/2026 17:05,2,"Forsyth Barr Stadium, Dunedin",Highlanders,Chiefs,home
+9,21/02/2026 19:35,2,"HIF Health Insurance Oval, Joondalup",Force,Blues,home
+10,22/02/2026 13:35,2,"Apollo Projects Stadium, Christchurch",Crusaders,Brumbies,home
+11,27/02/2026 17:05,3,TBD,Moana Pasifika,Force,home
+12,27/02/2026 19:35,3,"Suncorp Stadium, Brisbane",Reds,Highlanders,home
+13,28/02/2026 14:35,3,"Churchill Park, Fiji",Fijian Drua,Hurricanes,home
+14,28/02/2026 17:05,3,"FMG Stadium Waikato, Hamilton",Chiefs,Crusaders,home
+15,28/02/2026 19:35,3,"GIO Stadium, Canberra",Brumbies,Blues,home
+16,6/03/2026 17:05,4,"FMG Stadium Waikato, Hamilton",Chiefs,Moana Pasifika,home
+17,6/03/2026 19:35,4,"Allianz Stadium, Sydney",Waratahs,Hurricanes,home
+18,7/03/2026 14:35,4,"Forsyth Barr Stadium, Dunedin",Highlanders,Force,home
+19,7/03/2026 17:05,4,TBD,Blues,Crusaders,home
+20,7/03/2026 19:35,4,"GIO Stadium, Canberra",Brumbies,Reds,home
+21,13/03/2026 17:05,5,TBD,Hurricanes,Force,home
+22,14/03/2026 14:35,5,"4R Electrical Govind Park, Fiji",Fijian Drua,Brumbies,home
+23,14/03/2026 17:05,5,"Apollo Projects Stadium, Christchurch",Crusaders,Highlanders,home
+24,14/03/2026 19:35,5,"Suncorp Stadium, Brisbane",Reds,Waratahs,home
+25,15/03/2026 13:35,5,TBD,Blues,Moana Pasifika,home
+26,20/03/2026 17:05,6,"Forsyth Barr Stadium, Dunedin",Highlanders,Hurricanes,home
+27,20/03/2026 19:35,6,"GIO Stadium, Canberra",Brumbies,Chiefs,home
+28,21/03/2026 14:35,6,"Churchill Park, Fiji",Fijian Drua,Reds,home
+29,21/03/2026 17:05,6,"North Harbour Stadium, Auckland",Moana Pasifika,Crusaders,home
+30,21/03/2026 19:35,6,"Allianz Stadium, Sydney",Waratahs,Blues,home
+31,27/03/2026 17:05,7,"North Harbour Stadium, Auckland",Moana Pasifika,Highlanders,home
+32,27/03/2026 19:35,7,"GIO Stadium, Canberra",Brumbies,Waratahs,home
+33,28/03/2026 14:35,7,"Sky Stadium, Wellington",Hurricanes,Reds,home
+34,28/03/2026 17:05,7,TBD,Blues,Fijian Drua,home
+35,28/03/2026 19:35,7,"HBF Park, Perth",Force,Chiefs,home
+36,3/04/2026 17:05,8,"Apollo Projects Stadium, Christchurch",Crusaders,Fijian Drua,home
+37,4/04/2026 17:05,8,"FMG Stadium Waikato, Hamilton",Chiefs,Waratahs,home
+38,4/04/2026 19:35,8,"Suncorp Stadium, Brisbane",Reds,Force,home
+39,10/04/2026 17:05,9,"Forsyth Barr Stadium, Dunedin",Highlanders,Brumbies,home
+40,11/04/2026 12:05,9,"Teufaiva Stadium, Tonga",Moana Pasifika,Chiefs,home
+41,11/04/2026 14:35,9,TBD,Fijian Drua,Force,home
+42,11/04/2026 17:05,9,"Sky Stadium, Wellington",Hurricanes,Blues,home
+43,11/04/2026 19:35,9,"Suncorp Stadium, Brisbane",Reds,Crusaders,home
+44,17/04/2026 17:05,10,TBD,Blues,Highlanders,home
+45,17/04/2026 19:35,10,"Allianz Stadium, Sydney",Waratahs,Moana Pasifika,home
+46,18/04/2026 17:05,10,"FMG Stadium Waikato, Hamilton",Chiefs,Hurricanes,home
+47,18/04/2026 19:35,10,"GIO Stadium, Canberra",Brumbies,Fijian Drua,home
+48,18/04/2026 21:55,10,"HBF Park, Perth",Force,Crusaders,home
+49,24/04/2026 17:35,11,"One NZ Stadium, Christchurch",Crusaders,Waratahs,home
+50,25/04/2026 15:05,11,"One NZ Stadium, Christchurch",Hurricanes,Brumbies,home
+51,25/04/2026 17:35,11,"One NZ Stadium, Christchurch",Blues,Reds,home
+52,26/04/2026 12:00,11,"One NZ Stadium, Christchurch",Highlanders,Moana Pasifika,home
+53,26/04/2026 14:30,11,"One NZ Stadium, Christchurch",Chiefs,Fijian Drua,home
+54,1/05/2026 17:05,12,"Sky Stadium, Wellington",Hurricanes,Crusaders,home
+55,1/05/2026 19:35,12,"Allianz Stadium, Sydney",Waratahs,Force,home
+56,2/05/2026 14:35,12,TBD,Fijian Drua,Highlanders,home
+57,2/05/2026 17:05,12,"North Harbour Stadium, Auckland",Moana Pasifika,Blues,home
+58,2/05/2026 19:35,12,"Suncorp Stadium, Brisbane",Reds,Brumbies,home
+59,8/05/2026 17:05,13,"One NZ Stadium, Christchurch",Crusaders,Blues,home
+60,8/05/2026 19:35,13,"Suncorp Stadium, Brisbane",Reds,Chiefs,home
+61,9/05/2026 14:35,13,"Forsyth Barr Stadium, Dunedin",Highlanders,Waratahs,home
+62,9/05/2026 17:05,13,"North Harbour Stadium, Auckland",Moana Pasifika,Hurricanes,home
+63,9/05/2026 19:35,13,"GIO Stadium, Canberra",Brumbies,Force,home
+64,15/05/2026 17:05,14,"FMG Stadium Waikato, Hamilton",Chiefs,Highlanders,home
+65,16/05/2026 14:35,14,TBD,Fijian Drua,Waratahs,home
+66,16/05/2026 17:05,14,TBD,Blues,Hurricanes,home
+67,16/05/2026 19:35,14,"HBF Park, Perth",Force,Reds,home
+68,22/05/2026 17:05,15,"One NZ Stadium, Christchurch",Crusaders,Chiefs,home
+69,22/05/2026 19:35,15,"Allianz Stadium, Sydney",Waratahs,Brumbies,home
+70,23/05/2026 14:35,15,"North Harbour Stadium, Auckland",Moana Pasifika,Reds,home
+71,23/05/2026 17:05,15,"Sky Stadium, Wellington",Hurricanes,Highlanders,home
+72,23/05/2026 19:35,15,"HBF Park, Perth",Force,Fijian Drua,home
+73,29/05/2026 17:05,16,"One NZ Stadium, Christchurch",Crusaders,Hurricanes,home
+74,29/05/2026 19:35,16,"Suncorp Stadium, Brisbane",Reds,Fijian Drua,home
+75,30/05/2026 14:35,16,"GIO Stadium, Canberra",Brumbies,Moana Pasifika,home
+76,30/05/2026 17:05,16,"FMG Stadium Waikato, Hamilton",Chiefs,Blues,home
+77,30/05/2026 19:35,16,"HBF Park, Perth",Force,Waratahs,home
+78,13/02/2026 17:05,1,"Forsyth Barr Stadium, Dunedin",Crusaders,Highlanders,away
+79,13/02/2026 19:35,1,"Allianz Stadium, Sydney",Reds,Waratahs,away
+80,14/02/2026 14:35,1,"Churchill Park, Fiji",Moana Pasifika,Fijian Drua,away
+81,14/02/2026 17:05,1,TBD,Chiefs,Blues,away
+82,14/02/2026 19:35,1,"HBF Park, Perth",Brumbies,Force,away
+83,20/02/2026 17:05,2,"Sky Stadium, Wellington",Moana Pasifika,Hurricanes,away
+84,20/02/2026 19:35,2,"Allianz Stadium, Sydney",Fijian Drua,Waratahs,away
+85,21/02/2026 17:05,2,"Forsyth Barr Stadium, Dunedin",Chiefs,Highlanders,away
+86,21/02/2026 19:35,2,"HIF Health Insurance Oval, Joondalup",Blues,Force,away
+87,22/02/2026 13:35,2,"Apollo Projects Stadium, Christchurch",Brumbies,Crusaders,away
+88,27/02/2026 17:05,3,TBD,Force,Moana Pasifika,away
+89,27/02/2026 19:35,3,"Suncorp Stadium, Brisbane",Highlanders,Reds,away
+90,28/02/2026 14:35,3,"Churchill Park, Fiji",Hurricanes,Fijian Drua,away
+91,28/02/2026 17:05,3,"FMG Stadium Waikato, Hamilton",Crusaders,Chiefs,away
+92,28/02/2026 19:35,3,"GIO Stadium, Canberra",Blues,Brumbies,away
+93,6/03/2026 17:05,4,"FMG Stadium Waikato, Hamilton",Moana Pasifika,Chiefs,away
+94,6/03/2026 19:35,4,"Allianz Stadium, Sydney",Hurricanes,Waratahs,away
+95,7/03/2026 14:35,4,"Forsyth Barr Stadium, Dunedin",Force,Highlanders,away
+96,7/03/2026 17:05,4,TBD,Crusaders,Blues,away
+97,7/03/2026 19:35,4,"GIO Stadium, Canberra",Reds,Brumbies,away
+98,13/03/2026 17:05,5,TBD,Force,Hurricanes,away
+99,14/03/2026 14:35,5,"4R Electrical Govind Park, Fiji",Brumbies,Fijian Drua,away
+100,14/03/2026 17:05,5,"Apollo Projects Stadium, Christchurch",Highlanders,Crusaders,away
+101,14/03/2026 19:35,5,"Suncorp Stadium, Brisbane",Waratahs,Reds,away
+102,15/03/2026 13:35,5,TBD,Moana Pasifika,Blues,away
+103,20/03/2026 17:05,6,"Forsyth Barr Stadium, Dunedin",Hurricanes,Highlanders,away
+104,20/03/2026 19:35,6,"GIO Stadium, Canberra",Chiefs,Brumbies,away
+105,21/03/2026 14:35,6,"Churchill Park, Fiji",Reds,Fijian Drua,away
+106,21/03/2026 17:05,6,"North Harbour Stadium, Auckland",Crusaders,Moana Pasifika,away
+107,21/03/2026 19:35,6,"Allianz Stadium, Sydney",Blues,Waratahs,away
+108,27/03/2026 17:05,7,"North Harbour Stadium, Auckland",Highlanders,Moana Pasifika,away
+109,27/03/2026 19:35,7,"GIO Stadium, Canberra",Waratahs,Brumbies,away
+110,28/03/2026 14:35,7,"Sky Stadium, Wellington",Reds,Hurricanes,away
+111,28/03/2026 17:05,7,TBD,Fijian Drua,Blues,away
+112,28/03/2026 19:35,7,"HBF Park, Perth",Chiefs,Force,away
+113,3/04/2026 17:05,8,"Apollo Projects Stadium, Christchurch",Fijian Drua,Crusaders,away
+114,4/04/2026 17:05,8,"FMG Stadium Waikato, Hamilton",Waratahs,Chiefs,away
+115,4/04/2026 19:35,8,"Suncorp Stadium, Brisbane",Force,Reds,away
+116,10/04/2026 17:05,9,"Forsyth Barr Stadium, Dunedin",Brumbies,Highlanders,away
+117,11/04/2026 12:05,9,"Teufaiva Stadium, Tonga",Chiefs,Moana Pasifika,away
+118,11/04/2026 14:35,9,TBD,Force,Fijian Drua,away
+119,11/04/2026 17:05,9,"Sky Stadium, Wellington",Blues,Hurricanes,away
+120,11/04/2026 19:35,9,"Suncorp Stadium, Brisbane",Crusaders,Reds,away
+121,17/04/2026 17:05,10,TBD,Highlanders,Blues,away
+122,17/04/2026 19:35,10,"Allianz Stadium, Sydney",Moana Pasifika,Waratahs,away
+123,18/04/2026 17:05,10,"FMG Stadium Waikato, Hamilton",Hurricanes,Chiefs,away
+124,18/04/2026 19:35,10,"GIO Stadium, Canberra",Fijian Drua,Brumbies,away
+125,18/04/2026 21:55,10,"HBF Park, Perth",Crusaders,Force,away
+126,24/04/2026 17:35,11,"One NZ Stadium, Christchurch",Waratahs,Crusaders,away
+127,25/04/2026 15:05,11,"One NZ Stadium, Christchurch",Brumbies,Hurricanes,away
+128,25/04/2026 17:35,11,"One NZ Stadium, Christchurch",Reds,Blues,away
+129,26/04/2026 12:00,11,"One NZ Stadium, Christchurch",Moana Pasifika,Highlanders,away
+130,26/04/2026 14:30,11,"One NZ Stadium, Christchurch",Fijian Drua,Chiefs,away
+131,1/05/2026 17:05,12,"Sky Stadium, Wellington",Crusaders,Hurricanes,away
+132,1/05/2026 19:35,12,"Allianz Stadium, Sydney",Force,Waratahs,away
+133,2/05/2026 14:35,12,TBD,Highlanders,Fijian Drua,away
+134,2/05/2026 17:05,12,"North Harbour Stadium, Auckland",Blues,Moana Pasifika,away
+135,2/05/2026 19:35,12,"Suncorp Stadium, Brisbane",Brumbies,Reds,away
+136,8/05/2026 17:05,13,"One NZ Stadium, Christchurch",Blues,Crusaders,away
+137,8/05/2026 19:35,13,"Suncorp Stadium, Brisbane",Chiefs,Reds,away
+138,9/05/2026 14:35,13,"Forsyth Barr Stadium, Dunedin",Waratahs,Highlanders,away
+139,9/05/2026 17:05,13,"North Harbour Stadium, Auckland",Hurricanes,Moana Pasifika,away
+140,9/05/2026 19:35,13,"GIO Stadium, Canberra",Force,Brumbies,away
+141,15/05/2026 17:05,14,"FMG Stadium Waikato, Hamilton",Highlanders,Chiefs,away
+142,16/05/2026 14:35,14,TBD,Waratahs,Fijian Drua,away
+143,16/05/2026 17:05,14,TBD,Hurricanes,Blues,away
+144,16/05/2026 19:35,14,"HBF Park, Perth",Reds,Force,away
+145,22/05/2026 17:05,15,"One NZ Stadium, Christchurch",Chiefs,Crusaders,away
+146,22/05/2026 19:35,15,"Allianz Stadium, Sydney",Brumbies,Waratahs,away
+147,23/05/2026 14:35,15,"North Harbour Stadium, Auckland",Reds,Moana Pasifika,away
+148,23/05/2026 17:05,15,"Sky Stadium, Wellington",Highlanders,Hurricanes,away
+149,23/05/2026 19:35,15,"HBF Park, Perth",Fijian Drua,Force,away
+150,29/05/2026 17:05,16,"One NZ Stadium, Christchurch",Hurricanes,Crusaders,away
+151,29/05/2026 19:35,16,"Suncorp Stadium, Brisbane",Fijian Drua,Reds,away
+152,30/05/2026 14:35,16,"GIO Stadium, Canberra",Moana Pasifika,Brumbies,away
+153,30/05/2026 17:05,16,"FMG Stadium Waikato, Hamilton",Blues,Chiefs,away
+154,30/05/2026 19:35,16,"HBF Park, Perth",Waratahs,Force,away

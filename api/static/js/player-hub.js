@@ -34,7 +34,7 @@ async function init() {
   isLocked = !!tr.is_locked;
   document.getElementById('comp-sub').textContent =
     (pl.league ? pl.league.name + ' · ' : '') + ALL.length + ' players'
-    + (metric === 'form' ? ' · form (last 3)' : '') + ' · round ' + maxRound
+    + (metric === 'form' ? ' · form (last 3)' : '')
     + (isLocked ? ' · trades locked' : '');
   renderFilters();
   renderPending(tr);

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block page_title %}Analysis — {{ brand }} Fantasy{% endblock %}
+
+{% block extra_styles %}<link rel="stylesheet" href="/static/css/analysis.css">{% endblock %}
+
+{% block content %}
+<div class="content">
+  <div class="page-title">Analysis <span class="an-round" id="an-round"></span></div>
+  <div class="page-sub">Model projections &amp; head-to-head win probabilities</div>
+
+  <div class="mtyby-card an-section">
+    <div class="an-section-head">This round's matchups</div>
+    <div class="an-matchups" id="an-matchups"></div>
+    <div class="an-hint" id="an-hint">Tap a matchup to filter the players below ↓</div>
+  </div>
+
+  <div class="mtyby-card an-section">
+    <div class="an-section-head">
+      <span>Player predictions</span><span class="an-count" id="an-count"></span>
+    </div>
+    <div class="an-filters">
+      <select id="f-mgr" title="Manager"></select>
+      <select id="f-lineup" title="Line up">
+        <option value="ALL">All line-ups</option>
+        <option value="S">Starting</option>
+        <option value="B">Bench</option>
+        <option value="O">Out</option>
+      </select>
+    </div>
+    <div class="an-pos-chips" id="f-pos" role="group" aria-label="Filter by position"></div>
+    <div class="an-table-wrap"><div id="an-table" class="an-loading">Loading predictions…</div></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/analysis.js"></script>
+{% endblock %}

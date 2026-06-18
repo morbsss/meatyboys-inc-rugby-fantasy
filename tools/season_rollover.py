@@ -1,7 +1,7 @@
 """Season rollover: archive last season's player totals and reset for a clean draft.
 
 Usage:
-    python tools/season_rollover.py prem_rugby_26_27.db [--season 2025-26]
+    python tools/season_rollover.py fantasy_2026_27.db [--season 2025-26]
 
 What it does (idempotent, transactional):
   1. Creates the `previous_season` table if missing.

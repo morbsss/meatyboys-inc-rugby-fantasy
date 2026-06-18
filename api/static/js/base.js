@@ -43,6 +43,14 @@ async function checkUserSession() {
     document.getElementById('user-info').textContent = user.team_name || user.username;
     document.getElementById('logout-btn').style.display = '';
 
+    const roundEl = document.getElementById('header-round');
+    if (roundEl && user.current_round != null) {
+      document.getElementById('header-round-num').textContent = user.current_round;
+      roundEl.style.display = '';
+    } else if (roundEl) {
+      roundEl.style.display = 'none';
+    }
+
     const avatarSheet = document.getElementById('user-avatar-sheet');
     const infoSheet = document.getElementById('user-info-sheet');
     if (avatarSheet) avatarSheet.textContent = initial;

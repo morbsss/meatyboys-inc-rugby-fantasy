@@ -131,12 +131,12 @@ def main():
     parser.add_argument('--year', type=int, default=2026,
                         help='Season end year (default: 2026)')
     parser.add_argument('--db', default=None,
-                        help='DB path (default: DB_PATH env var or prem_rugby_25_26.db)')
+                        help='DB path (default: DB_PATH env var or fantasy_2025_26.db)')
     parser.add_argument('--dry-run', action='store_true',
                         help='Print rounds without writing to DB')
     args = parser.parse_args()
 
-    db_path = args.db or os.getenv('DB_PATH', 'prem_rugby_25_26.db')
+    db_path = args.db or os.getenv('DB_PATH', 'fantasy_2025_26.db')
 
     print(f'Fetching {LEAGUE_ABBR} {args.year - 1}/{args.year} schedule...\n')
     try:

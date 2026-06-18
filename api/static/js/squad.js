@@ -34,7 +34,6 @@
     ]);
 
     isLocked = !!st.is_locked;
-    el('round-badge').textContent = st.round ?? '—';
     el('team-name').textContent = (mp && mp.team_name) || '';
     (st.players || []).forEach((p) => { statusByPid[p.player_id] = p.lineup_status; });
 

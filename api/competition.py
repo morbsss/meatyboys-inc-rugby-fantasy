@@ -2,7 +2,7 @@
 Fantasy Rugby Competition Table.
 
 Reads fixtures from fixtures.csv and calculates weekly team scores
-from team_selections + weekly_stats in prem_rugby_25_26.db.
+from team_selections + weekly_stats in fantasy_2025_26.db.
 
 Scoring:
   Win  = 4 league pts
@@ -21,7 +21,7 @@ from dataclasses import dataclass, field
 
 from .leagues import roster_model, DEFAULT_MODEL
 
-DB_PATH      = 'prem_rugby_25_26.db'
+DB_PATH      = 'fantasy_2025_26.db'
 FIXTURES_CSV = 'fixtures.csv'
 DB_TYPE      = os.getenv('DB_TYPE', 'sqlite').lower()
 
