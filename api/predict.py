@@ -28,7 +28,11 @@ import pandas as pd
 from scipy.stats import gamma as scipy_gamma, weibull_min
 from sklearn.ensemble import HistGradientBoostingRegressor
 
-from api.competition import generate_regular_fixtures, REGULAR_ROUNDS
+from api.competition import (
+    generate_regular_fixtures, REGULAR_ROUNDS,
+    get_league_teams, calculate_table, build_playoffs, playoff_fixtures,
+)
+from api.leagues import roster_model
 
 DB_PATH = os.getenv('DB_PATH', 'mock_fantasy.db')
 
@@ -228,12 +232,32 @@ def _train_gbm(feat, target_round):
 
 # ── Per-league computation ───────────────────────────────────────────────────
 
+def _league_model(con, league_id):
+    """The roster model for a league (keyed off its slug)."""
+    row = con.execute('SELECT slug FROM leagues WHERE league_id = ?', (league_id,)).fetchone()
+    slug = (row['slug'] if isinstance(row, dict) else row[0]) if row else None
+    return roster_model(slug) if slug else {}
+
+
+def _award_bonus(con, league_id):
+    """True when standings award bonus points (OFDS) — mirrors the app so the
+    playoff bracket we seed matches the live competition table."""
+    return bool(_league_model(con, league_id).get('bonus', True))
+
+
+def _has_fr_unit(con, league_id):
+    """True only for leagues that field a club front-row UNIT (meatyboys).
+    OFDS uses individual players, so it gets no FR pseudo-players."""
+    return bool(_league_model(con, league_id).get('fr_unit'))
+
+
 def compute_league(con, league_id):
     scores = _load_scores(con, league_id)
     if scores.empty:
-        return [], []
+        return None, [], []
     max_round = int(scores['round_num'].max())
-    target = min(max_round, REGULAR_ROUNDS)          # a played round: proj vs actual
+    target = max_round                               # the live round (incl. playoffs)
+    award_bonus = _award_bonus(con, league_id)
 
     hist = scores[scores['round_num'] < target]      # clean pre-round history
     actual = scores[scores['round_num'] == target].set_index('playerid')['total'].to_dict()
@@ -287,10 +311,11 @@ def compute_league(con, league_id):
             'gamma_p50': round(gp50, 1), 'weibull_p50': round(wp50, 1),
         })
 
-    # Front-row UNITs (meatyboys) as pseudo-players. The FR unit is treated as
-    # an individual, so it gets its own GBM trained across all clubs' FR series.
+    # Front-row UNITs (meatyboys only) as pseudo-players. The FR unit is treated
+    # as an individual, so it gets its own GBM trained across all clubs' FR series.
+    # OFDS uses individual players, so it has no FR unit in the analysis.
     fr_pct = {}
-    fr_series = _fr_scores(con, league_id)
+    fr_series = _fr_scores(con, league_id) if _has_fr_unit(con, league_id) else pd.DataFrame()
     if not fr_series.empty:
         fr_owner = _fr_owner_map(con, league_id, target)
         fr_full = _fr_score_frame(con, league_id, fr_series)
@@ -324,8 +349,8 @@ def compute_league(con, league_id):
                 'gamma_p50': round(gp50, 1), 'weibull_p50': round(gp50, 1),
             })
 
-    matchups = _win_probabilities(con, league_id, target, pct_cache, fr_pct, hist, fr_series)
-    return rows, matchups
+    matchups = _win_probabilities(con, league_id, target, pct_cache, fr_pct, hist, fr_series, award_bonus)
+    return target, rows, matchups
 
 
 def _prediction_features(pid, team, opposition, position, hist, feat):
@@ -349,13 +374,21 @@ def _prediction_features(pid, team, opposition, position, hist, feat):
     }
 
 
-def _win_probabilities(con, league_id, target, pct_cache, fr_pct, hist, fr_series):
+def _win_probabilities(con, league_id, target, pct_cache, fr_pct, hist, fr_series, award_bonus=True):
     """Per fantasy matchup: sum each starter's Gamma percentile array, cross-join
-    100×100 → win %. Starters = team_selections (is_bench=0) at round <= target."""
-    teams = [r[0] for r in con.execute(
-        'SELECT DISTINCT team_name FROM team_selections WHERE league_id=? ORDER BY team_name',
-        (league_id,)).fetchall()]
-    fixtures = [(h, a) for wk, h, _, a, _ in generate_regular_fixtures(teams)
+    100×100 → win %. Starters = team_selections (is_bench=0) at round <= target.
+
+    Regular rounds (<= REGULAR_ROUNDS) use the generated schedule; playoff rounds
+    derive their fixtures from the bracket seeded off the standings — matching how
+    the competition endpoint builds the live fixtures list."""
+    teams = get_league_teams(con, league_id)
+    regular = generate_regular_fixtures(teams)
+    if target <= REGULAR_ROUNDS:
+        source = regular
+    else:
+        table = calculate_table(regular, con, min(target, REGULAR_ROUNDS), award_bonus)
+        source = playoff_fixtures(build_playoffs(con, table, target))
+    fixtures = [(h, a) for wk, h, _, a, _ in source
                 if wk == target and h != 'Bye' and a != 'Bye']
 
     def team_dist(team):
@@ -425,11 +458,9 @@ def main():
     ensure_schema(con)
     leagues = [r[0] for r in con.execute('SELECT league_id FROM leagues ORDER BY league_id').fetchall()]
     for lid in leagues:
-        players = _load_scores(con, lid)
-        if players.empty:
+        target, prows, mrows = compute_league(con, lid)
+        if target is None:
             print(f'league {lid}: no scores — skipped'); continue
-        target = min(int(players['round_num'].max()), REGULAR_ROUNDS)
-        prows, mrows = compute_league(con, lid)
         _write(con, lid, target, prows, mrows)
         print(f'league {lid}: round {target} - {len(prows)} player rows, {len(mrows)} matchups')
     con.close()

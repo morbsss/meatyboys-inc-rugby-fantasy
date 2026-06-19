@@ -189,7 +189,7 @@
 .bp-name b {
   font-family: var(--font-display); font-weight: 700; font-size: 13px; color: var(--forest);
   overflow-wrap: anywhere; word-break: break-word;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  display: -webkit-box; -line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
 .bp-name small { color: var(--ink-faint); font-size: 11px; }
 .bp--empty .bp-name b { color: var(--ink-faint); }
