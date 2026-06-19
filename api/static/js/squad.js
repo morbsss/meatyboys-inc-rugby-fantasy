@@ -89,7 +89,7 @@
     if (el('team-select')) el('team-select').value = viewName;
     const t = TEAMS.find((x) => x.name === viewName);
     el('team-name').textContent = isMine
-      ? 'Your team'
+      ? ''
       : (t && t.owner ? `Managed by ${t.owner} · view only` : 'View only');
 
     // mtyby has no captain (rule 1) — drop any captain flag the data carries.
@@ -496,7 +496,7 @@
   // flowing down to the outside backs. Not a strict 1–15, so shirts carry the
   // position code rather than a jersey number. x/y are % of the pitch (centre).
   const MTYBY_FORMATION = [
-    { pos: 'LK',  x: 50, y: 28 },   // lock
+    { pos: 'LK',  x: 50, y: 25 },   // lock
     { pos: 'LF',  x: 33, y: 40 },   // loose forward
     { pos: 'LF',  x: 67, y: 40 },   // loose forward
     { pos: 'SH',  x: 20, y: 55 },   // scrum-half

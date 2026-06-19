@@ -4,8 +4,11 @@
 .sq-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
 .page-title { font-family: var(--font-display); font-size: 28px; font-weight: 800;
   letter-spacing: .02em; text-transform: uppercase; color: var(--forest); line-height: 1; }
-.sq-head-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.sq-team { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--ink-muted); }
+.sq-head-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  /* Align the team picker with the pitch, which sits left of the content's right
+     edge by the bench column + its gap — same offset as the legend. */
+  margin-right: 150px; }
+.sq-team { font-family: var(--font-display); font-size: 10px; font-weight: 700; font-style: italic; color: var(--ink-muted); }
 .sq-team-select {
   appearance: none; -webkit-appearance: none;
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md);
@@ -50,8 +53,8 @@
 .legend { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; text-align: center;
   margin-top: 12px; font-size: 11px; font-weight: 600; color: var(--ink-muted);
   /* Align the legend's centre with the pitch, which is offset left of the
-     content centre by the bench column (92px) + its gap (10px). */
-  padding-right: 102px; }
+     content centre by the bench column + its gap. */
+  padding-right: 150px; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .legend i { width: 11px; height: 11px; border-radius: 50%; }
 
@@ -148,7 +151,7 @@
   line-height: 1.05; width: 100%; text-shadow: 0 1px 2px rgba(0,0,0,.55);
   /* Long surnames (e.g. "Nawaqanitawase,A") wrap inside the token instead of
      overflowing onto neighbours; capped at two lines, ellipsis past that. */
-  overflow-wrap: anywhere; word-break: break-word;
+  overflow-wrap: anywhere; word-break: anywhere;
   display: -webkit-box; -line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
 .fp--empty .fp-name { font-weight: 600; opacity: .9; }
@@ -167,12 +170,15 @@
 .fp-dot.s { background: var(--success); }
 .fp-dot.b { background: var(--amber); }
 
-/* Replacements 16–23 — a vertical bench column beside the pitch. */
+/* Replacements 16–23 — a vertical bench column beside the pitch, boxed in a
+   surface panel so it reads as its own unit next to the field. */
 .bench-col {
-  flex: 0 0 auto; width: 92px; display: flex; flex-direction: column; gap: 7px;
+  flex: 0 0 auto; width: 110px; display: flex; flex-direction: column; gap: 15px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg, 14px); padding: 8px 5px;
 }
 .bench-col-head {
-  display: flex; justify-content: space-between; align-items: baseline; gap: 4px;
+  display: flex; justify-content: space-between; align-items: left ; gap: 4px;
   font-family: var(--font-display); font-size: 11px; font-weight: 800;
   letter-spacing: .05em; text-transform: uppercase; color: var(--ink-muted);
   padding: 0 2px 2px;
@@ -181,7 +187,7 @@
    the jersey number + name below; only the name colour is darkened so it reads
    on the light bench column rather than the green pitch. */
 .bp {
-  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
 }
 .bp-shirt {
   position: relative; width: 45px; height: 45px; border-radius: 50%;
