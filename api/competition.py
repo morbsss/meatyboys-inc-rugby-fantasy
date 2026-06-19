@@ -2,7 +2,7 @@
 Fantasy Rugby Competition Table.
 
 Reads fixtures from fixtures.csv and calculates weekly team scores
-from team_selections + weekly_stats in prem_rugby_25_26.db.
+from team_selections + weekly_stats in fantasy_2025_26.db.
 
 Scoring:
   Win  = 4 league pts
@@ -21,7 +21,7 @@ from dataclasses import dataclass, field
 
 from .leagues import roster_model, DEFAULT_MODEL
 
-DB_PATH      = 'prem_rugby_25_26.db'
+DB_PATH      = 'fantasy_2025_26.db'
 FIXTURES_CSV = 'fixtures.csv'
 DB_TYPE      = os.getenv('DB_TYPE', 'sqlite').lower()
 
@@ -147,14 +147,18 @@ def get_team_score(conn, team_name: str, round_num: int) -> float:
     - OFDS-style leagues (auto_sub) only count the effective starting XV after the
       real-lineup auto-substitution; all others sum every selected player.
     """
-    if _team_model(conn, team_name).get('auto_sub'):
+    model = _team_model(conn, team_name)
+    if model.get('auto_sub'):
         return _ofds_team_score(conn, team_name, round_num)
 
+    # Captain doubling only applies in leagues that have a captain (OFDS).
+    score_expr = ('CASE WHEN is_captain = 1 THEN base_delta * 2 ELSE base_delta END'
+                  if model.get('captain') else 'base_delta')
     cursor = conn.cursor()
     placeholder = _get_placeholder(conn)
     cursor.execute(f'''
         SELECT COALESCE(SUM(
-            CASE WHEN is_captain = 1 THEN base_delta * 2 ELSE base_delta END
+            {score_expr}
         ), 0) AS total_score
         FROM (
             SELECT
@@ -197,7 +201,8 @@ def _front_row_score(conn, team_name: str, round_num: int) -> float:
         return 0.0
     club = fr['club'] if isinstance(fr, dict) else fr[0]
     league_id = fr['league_id'] if isinstance(fr, dict) else fr[1]
-    is_captain = (fr['is_captain'] if isinstance(fr, dict) else fr[2]) or 0
+    # mtyby (the only league with a front-row unit) has no captain, so the unit
+    # never doubles — score its plain points delta.
 
     # Super Rugby: the club front row is one pre-aggregated 'FR' player —
     # score its own points delta directly (no matchday PR/HK derivation).
@@ -213,8 +218,7 @@ def _front_row_score(conn, team_name: str, round_num: int) -> float:
         ''', (pid, round_num, pid, round_num - 1))
         r = cur.fetchone()
         cur.close()
-        val = float((r['d'] if isinstance(r, dict) else r[0]) or 0)
-        return val * 2 if is_captain else val
+        return float((r['d'] if isinstance(r, dict) else r[0]) or 0)
 
     # Premiership (parked): derive the front row from the club's PR/HK players.
     cur.execute(f'SELECT COUNT(*) FROM match_lineups WHERE round = {ph} AND real_team = {ph}',
@@ -244,8 +248,7 @@ def _front_row_score(conn, team_name: str, round_num: int) -> float:
     cur.close()
     if not row:
         return 0.0
-    val = float((row['s'] if isinstance(row, dict) else row[0]) or 0)
-    return val * 2 if is_captain else val
+    return float((row['s'] if isinstance(row, dict) else row[0]) or 0)
 
 
 def _ofds_team_score(conn, team_name: str, round_num: int) -> float:
@@ -324,7 +327,11 @@ def calculate_table(
     fixtures: list[tuple[int, str, bool, str, bool]],
     conn: sqlite3.Connection,
     max_round: int | None = None,
+    award_bonus: bool = True,
 ) -> list[Team]:
+    """Standings table. With `award_bonus` (OFDS) teams earn league points +
+    bonus points and rank by league points then points-for. Without it (mtyby)
+    there are no bonus/league points — ranking is purely wins, then points-for."""
     teams: dict[str, Team] = {}
 
     # Group fixtures by week for two-pass bye processing
@@ -372,7 +379,7 @@ def calculate_table(
             teams[away].points_for     += aw
             teams[away].points_against += hs
 
-            _apply_result(teams[home], teams[away], hs, aw)
+            _apply_result(teams[home], teams[away], hs, aw, award_bonus)
 
         # Pass 2b: process bye matches vs the week average
         for _, home, _, away, _ in week_fixtures:
@@ -391,37 +398,36 @@ def calculate_table(
             if ts > bye_score:
                 teams[team_name].won           += 1
                 teams[team_name].league_points += WIN_PTS
-                if margin >= WINNER_BP_MARGIN:
+                if award_bonus and margin >= WINNER_BP_MARGIN:
                     teams[team_name].league_points += BP_PTS
                     teams[team_name].bonus_points  += BP_PTS
             elif ts < bye_score:
                 teams[team_name].lost          += 1
-                if margin <= LOSER_BP_MARGIN:
+                if award_bonus and margin <= LOSER_BP_MARGIN:
                     teams[team_name].league_points += BP_PTS
                     teams[team_name].bonus_points  += BP_PTS
             else:
                 teams[team_name].drawn         += 1
                 teams[team_name].league_points += DRAW_PTS
 
-    # Standings order (spec §5.4): league points, then higher Points For.
-    return sorted(
-        teams.values(),
-        key=lambda t: (t.league_points, t.points_for),
-        reverse=True,
-    )
+    # Standings order: OFDS by league points then points-for; mtyby purely by
+    # wins, then points-for (no league/bonus points).
+    key = ((lambda t: (t.league_points, t.points_for)) if award_bonus
+           else (lambda t: (t.won, t.points_for)))
+    return sorted(teams.values(), key=key, reverse=True)
 
 
-def _apply_result(home: Team, away: Team, hs: float, aw: float) -> None:
-    """Apply win/draw/loss + bonus points between two teams."""
+def _apply_result(home: Team, away: Team, hs: float, aw: float, award_bonus: bool = True) -> None:
+    """Apply win/draw/loss (+ bonus points when the league awards them)."""
     if hs > aw:
         margin = hs - aw
         home.won           += 1
         away.lost          += 1
         home.league_points += WIN_PTS
-        if margin >= WINNER_BP_MARGIN:
+        if award_bonus and margin >= WINNER_BP_MARGIN:
             home.league_points += BP_PTS
             home.bonus_points  += BP_PTS
-        if margin <= LOSER_BP_MARGIN:
+        if award_bonus and margin <= LOSER_BP_MARGIN:
             away.league_points += BP_PTS
             away.bonus_points  += BP_PTS
     elif aw > hs:
@@ -429,10 +435,10 @@ def _apply_result(home: Team, away: Team, hs: float, aw: float) -> None:
         away.won           += 1
         home.lost          += 1
         away.league_points += WIN_PTS
-        if margin >= WINNER_BP_MARGIN:
+        if award_bonus and margin >= WINNER_BP_MARGIN:
             away.league_points += BP_PTS
             away.bonus_points  += BP_PTS
-        if margin <= LOSER_BP_MARGIN:
+        if award_bonus and margin <= LOSER_BP_MARGIN:
             home.league_points += BP_PTS
             home.bonus_points  += BP_PTS
     else:
@@ -593,6 +599,7 @@ def standings_progression(
     regular: list[tuple[int, str, bool, str, bool]],
     conn,
     max_round: int,
+    award_bonus: bool = True,
 ) -> list[dict]:
     """Per-round regular-season standings (spec §7 movement arrows + history graph).
 
@@ -605,7 +612,7 @@ def standings_progression(
     upto = min(max_round, REGULAR_ROUNDS)
     history = []
     for r in range(1, upto + 1):
-        order = [t.name for t in calculate_table(regular, conn, r)]
+        order = [t.name for t in calculate_table(regular, conn, r, award_bonus)]
         order += [t for t in all_teams if t not in order]   # pad teams not yet ranked
         history.append({'round': r, 'order': order})
     return history

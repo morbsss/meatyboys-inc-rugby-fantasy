@@ -210,6 +210,8 @@ ROSTER_MODELS: dict[str, dict] = {
         'draft_picks': DRAFT_PICKS_PER_TEAM,              # 16
         'auto_sub': False,
         'soft': True,                                     # composition is advisory
+        'captain': False,                                 # no captain (no x2 scoring)
+        'bonus': False,                                   # standings: wins, then points-for
     },
     'ofds': {
         # Premiership: a real rugby-union matchday 23 with strict positions.
@@ -221,6 +223,8 @@ ROSTER_MODELS: dict[str, dict] = {
         'draft_picks': 23,
         'auto_sub': True,
         'soft': False,
+        'captain': True,                                  # one captain, scores x2
+        'bonus': True,                                    # league points + bonus points
     },
 }
 

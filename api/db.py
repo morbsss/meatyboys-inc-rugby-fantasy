@@ -3,7 +3,7 @@ Database abstraction layer supporting SQLite (local) and PostgreSQL (Vercel).
 
 Environment variables:
   DB_TYPE=sqlite or postgres (default: sqlite)
-  DB_PATH=path/to/db.db (SQLite only, default: prem_rugby_25_26_test.db)
+  DB_PATH=path/to/db.db (SQLite only, default: fantasy_2025_26.db)
   DATABASE_URL=postgres://... (PostgreSQL only, required for Vercel)
 """
 
@@ -53,7 +53,7 @@ def get_connection():
 
 def _get_sqlite_connection():
     """SQLite connection for local development."""
-    db_path = os.getenv('DB_PATH', 'prem_rugby_25_26.db')
+    db_path = os.getenv('DB_PATH', 'fantasy_2025_26.db')
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn
@@ -385,10 +385,16 @@ def _ensure_league_schema(conn, cursor) -> None:
             to_team TEXT,
             out_player_id INTEGER,
             in_player_id INTEGER,
+            out_fr_club TEXT,
+            in_fr_club TEXT,
             created_at TEXT NOT NULL,
             resolved_at TEXT
         )
     ''')
+    # Back-fill the FR-unit trade columns on DBs created before they existed.
+    for col in ('out_fr_club', 'in_fr_club'):
+        if not _column_exists(cursor, 'trades', col):
+            cursor.execute(f'ALTER TABLE trades ADD COLUMN {col} TEXT')
 
     # Real-life fixtures per round (who each real team played) — used to show a
     # player's opponent alongside their per-round points.
@@ -399,6 +405,47 @@ def _ensure_league_schema(conn, cursor) -> None:
             round INTEGER NOT NULL,
             home_team TEXT NOT NULL,
             away_team TEXT NOT NULL,
+            UNIQUE(league_id, round, home_team)
+        )
+    ''')
+
+    # Analysis predictions (written by the offline model job api/predict.py;
+    # the Analysis page only reads these — no ML libs needed at request time).
+    # One row per player (or FR unit) per round; denormalised for easy reads.
+    cursor.execute(f'''
+        CREATE TABLE IF NOT EXISTS player_predictions (
+            id {serial},
+            league_id INTEGER NOT NULL,
+            round INTEGER NOT NULL,
+            player_id INTEGER,
+            is_fr INTEGER NOT NULL DEFAULT 0,
+            name TEXT,
+            position TEXT,
+            real_team TEXT,
+            fantasy_team TEXT,
+            opponent TEXT,
+            home INTEGER,
+            lineup TEXT,
+            score REAL,
+            proj REAL,
+            gbm REAL,
+            avg3 REAL,
+            ssn_avg REAL,
+            gamma_p50 REAL,
+            weibull_p50 REAL
+        )
+    ''')
+    # Head-to-head win probabilities per fantasy matchup per round.
+    cursor.execute(f'''
+        CREATE TABLE IF NOT EXISTS matchup_predictions (
+            id {serial},
+            league_id INTEGER NOT NULL,
+            round INTEGER NOT NULL,
+            home_team TEXT NOT NULL,
+            away_team TEXT NOT NULL,
+            home_prob REAL,
+            away_prob REAL,
+            draw_prob REAL,
             UNIQUE(league_id, round, home_team)
         )
     ''')

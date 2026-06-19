@@ -42,7 +42,7 @@ def reset(app_db: str, league_slug: str) -> None:
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
-    ap.add_argument('app_db', nargs='?', default='prem_rugby_26_27.db')
+    ap.add_argument('app_db', nargs='?', default='fantasy_2026_27.db')
     ap.add_argument('--league', default='ofds')
     args = ap.parse_args()
     reset(args.app_db, args.league)

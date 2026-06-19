@@ -26,6 +26,7 @@
       {% block header_controls %}{% endblock %}
     </div>
     <div class="mtyby-header-end">
+      <span class="mtyby-round-tag" id="header-round" style="display:none;" aria-label="Current round">Round <span id="header-round-num"></span></span>
       <a class="mtyby-trade-notif" id="trade-notif" href="/transfers" style="display:none;" title="Trade offers" aria-label="Trade offers — tap to review">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4 3 8l4 4"/><path d="M3 8h14"/><path d="m17 20 4-4-4-4"/><path d="M21 16H7"/></svg>
         <span class="mtyby-trade-count" id="trade-count">0</span>
@@ -49,6 +50,7 @@
     <a href="/fixtures" class="mtyby-tab {% if current_page == 'fixtures' %}is-active{% endif %}">Fixtures</a>
     <a href="/finals" class="mtyby-tab {% if current_page == 'finals' %}is-active{% endif %}">Finals</a>
     <a href="/players" class="mtyby-tab {% if current_page == 'players' %}is-active{% endif %}">Player Hub</a>
+    <a href="/analysis" class="mtyby-tab {% if current_page == 'analysis' %}is-active{% endif %}">Analysis</a>
     <a href="/transfers" class="mtyby-tab {% if current_page == 'transfers' %}is-active{% endif %}">Transfers</a>
     {# Secondary screens #}
     <a href="/draft" class="mtyby-tab {% if current_page == 'draft' %}is-active{% endif %}">Draft</a>

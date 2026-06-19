@@ -1,16 +1,3 @@
-/* ── Header round badge (mirrors League screen) ── */
-.mtyby-round-badge {
-  display: inline-flex; align-items: baseline; gap: 6px;
-  font-family: var(--font-display); font-size: 13px; font-weight: 600;
-  letter-spacing: .08em; text-transform: uppercase; color: var(--cream); opacity: .85;
-}
-.mtyby-round-badge strong { font-size: 18px; font-weight: 800; color: var(--amber); letter-spacing: .02em; }
-@media (max-width: 768px) {
-  .mtyby-round-badge { font-size: 10px; }
-  .mtyby-round-badge strong { font-size: 13px; }
-  .mtyby-round-badge > span:first-child { display: none; }
-}
-
 /* ── Layout ── */
 .content { max-width: 960px; margin: 0 auto; padding: 22px 16px 48px; width: 100%; }
 @media (max-width: 768px) { .content { padding: 14px 12px calc(var(--bottom-nav-h, 56px) + 28px); } }

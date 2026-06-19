@@ -1,7 +1,7 @@
 """Seed the meatyboys (Super Rugby) league with players + last-season totals
 from the uploaded Super Rugby database.
 
-Source : super-rugby-data/super_rugby_2026.db  (table: player_summary)
+Source : tools/db_modelling/super_rugby_2026.db  (table: player_summary)
 Target : the app DB (players + previous_season, scoped to the meatyboys league)
 
 `player_summary` gives one row per player for the past season, including the
@@ -90,8 +90,8 @@ def seed(app_db: str, source_db: str, league_slug: str) -> None:
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
-    ap.add_argument('app_db', nargs='?', default='prem_rugby_26_27.db')
-    ap.add_argument('--source', default='super-rugby-data/super_rugby_2026.db')
+    ap.add_argument('app_db', nargs='?', default='fantasy_2026_27.db')
+    ap.add_argument('--source', default='tools/db_modelling/super_rugby_2026.db')
     ap.add_argument('--league', default='meatyboys')
     args = ap.parse_args()
     seed(args.app_db, args.source, args.league)

@@ -15,8 +15,6 @@ async function init() {
       '<div class="finals-loading">Failed to load — refresh to retry.</div>';
     return;
   }
-  const badge = document.getElementById('round-badge');
-  if (badge) badge.textContent = data.max_round ?? '—';
   TABLE = data.table || [];
   renderPlayoffs(data.playoffs || null);
 }

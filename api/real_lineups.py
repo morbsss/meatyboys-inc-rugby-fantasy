@@ -7,7 +7,7 @@ Usage:
 
 Examples:
     python scripts/scrape_lineup.py https://www.espn.com/rugby/lineups/_/gameId/603052/league/267979
-    python scripts/scrape_lineup.py https://www.espn.com/rugby/lineups/_/gameId/603052/league/267979 --db prem_rugby_26_27.db
+    python scripts/scrape_lineup.py https://www.espn.com/rugby/lineups/_/gameId/603052/league/267979 --db fantasy_2026_27.db
 
 The script fetches both teams' lineups from ESPN's API and prints them.
 Pass --db to also upsert the players into the local SQLite players table (useful
@@ -362,7 +362,7 @@ def main():
             print(f'  Lineups not yet available: {e}')
 
     if all_teams:
-        db_path = os.getenv('DB_PATH', 'prem_rugby_25_26.db')
+        db_path = os.getenv('DB_PATH', 'fantasy_2025_26.db')
         insert_into_db(all_teams, db_path, round_num)
 
 

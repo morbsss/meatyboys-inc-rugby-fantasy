@@ -37,21 +37,22 @@ def conn():
     return c
 
 
-def test_team_score_always_counts_kicking_with_captain_double(conn):
-    # Kicking is always credited (total_points already includes it):
+def test_team_score_counts_kicking_no_captain_double(conn):
+    # Default (mtyby) league has no captain, so the is_captain flag never
+    # doubles. Kicking is always credited (already inside total_points):
     #   player 1: base 25 - 10 = 15
     #   player 2: base 30 - 10 = 20
-    #   captain:  (base 20 - 5 = 15) * 2 = 30
-    assert get_team_score(conn, 'T', 2) == pytest.approx(15 + 20 + 30)
+    #   player 3: base 20 - 5  = 15  (is_captain ignored — no captain in mtyby)
+    assert get_team_score(conn, 'T', 2) == pytest.approx(15 + 20 + 15)
 
 
 def test_empty_team_scores_zero(conn):
     assert get_team_score(conn, 'Nobody', 2) == 0.0
 
 
-def test_front_row_unit_doubles_when_captain():
-    """The club front-row unit scores like any player — and doubles when it's
-    the captain."""
+def test_front_row_unit_no_captain_double():
+    """The club front-row unit scores its plain points delta. mtyby has no
+    captain, so the is_captain flag never doubles it."""
     c = sqlite3.connect(':memory:')
     c.row_factory = sqlite3.Row
     c.executescript('''
@@ -69,12 +70,12 @@ def test_front_row_unit_doubles_when_captain():
     assert get_team_score(c, 'T', 2) == pytest.approx(10)        # base delta 15 - 5
     c.execute("UPDATE team_front_row SET is_captain = 1 WHERE team_name = 'T'")
     c.commit()
-    assert get_team_score(c, 'T', 2) == pytest.approx(20)        # doubled as captain
+    assert get_team_score(c, 'T', 2) == pytest.approx(10)        # unchanged — no captain in mtyby
 
 
 def test_super_rugby_front_row_scores_from_unit_player():
     """Super Rugby front row is one pre-aggregated 'FR' player per club; it scores
-    from its own points delta and doubles as captain."""
+    from its own points delta (mtyby has no captain, so it never doubles)."""
     c = sqlite3.connect(':memory:')
     c.row_factory = sqlite3.Row
     c.executescript('''
@@ -92,7 +93,7 @@ def test_super_rugby_front_row_scores_from_unit_player():
     assert get_team_score(c, 'T', 2) == pytest.approx(12)        # 20 - 8
     c.execute("UPDATE team_front_row SET is_captain = 1 WHERE team_name = 'T'")
     c.commit()
-    assert get_team_score(c, 'T', 2) == pytest.approx(24)        # doubled as captain
+    assert get_team_score(c, 'T', 2) == pytest.approx(12)        # unchanged — no captain in mtyby
 
 
 # ---------------------------------------------------------------------------

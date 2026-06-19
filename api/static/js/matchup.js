@@ -3,10 +3,12 @@
  * Extracted from templates/matchup.html. Shared helpers: common.js, leagues.js, base.js.
  * ========================================================================== */
 
-let RESULTS = [], weekSel = null, fixtureIdx = 0;
+let RESULTS = [], weekSel = null, fixtureIdx = 0, IS_MTYBY = false;
 
 async function init() {
   const data = await (await fetch('/api/competition')).json();
+  // meatyboys runs on wins (no bonus points); used to flip the line-up order.
+  IS_MTYBY = data.bonus === false;
   // Only weeks with real fantasy-vs-fantasy fixtures (skip byes-only entries here).
   RESULTS = (data.results || []).map(w => ({
     week: w.week,
@@ -85,8 +87,21 @@ async function teamPicks(name, round) {
 // The captain's points count double (C = captain ×2).
 const ptsHTML = p => {
   if (p.points === null || p.points === undefined) return '';
-  const v = p.is_captain ? p.points * 2 : p.points;
+  // meatyboys has no captain, so it never doubles (matches the backend total).
+  const v = (p.is_captain && !IS_MTYBY) ? p.points * 2 : p.points;
   return `<span class="pts">${v.toFixed(1)}</span>`;
+};
+
+// The front-row UNIT's points for the round (no captain in meatyboys).
+const frPtsHTML = v =>
+  (v === null || v === undefined) ? '' : `<span class="pts">${v.toFixed(1)}</span>`;
+
+// meatyboys line-up order, TOP → BOTTOM: backs first, front row last, with the
+// club FR unit pinned to the very bottom. (OFDS keeps real jersey order.)
+const MTYBY_ORDER = ['OBK', 'MID', 'FH', 'SH', 'LF', 'LK', 'HK', 'PR'];
+const mtybyRank = pos => {
+  const i = MTYBY_ORDER.indexOf(pos);
+  return i === -1 ? MTYBY_ORDER.length : i;
 };
 
 // Put the front row in real jersey order — loosehead prop, hooker, tighthead
@@ -102,17 +117,30 @@ function orderStarters(starters) {
 }
 
 function colHTML(team) {
-  const starters = orderStarters((team.picks || []).filter(p => !p.is_bench));
-  const rows = [];
-  if (team.fr_club) {
-    rows.push({ pid: null, inner: `<span class="mtyby-pos">FR</span><span class="nm"><b>${esc(team.fr_club)} FR</b></span>` });
-  }
-  starters.forEach(p => rows.push({
+  const all = (team.picks || []).filter(p => !p.is_bench);
+  const playerRow = p => ({
     pid: p.player_id,
     inner: `<span class="mtyby-pos">${p.position}</span>`
-      + `<span class="nm"><b>${esc(p.name)}</b>${p.is_captain ? '<span class="ck">C</span>' : ''}</span>`
+      + `<span class="nm"><b>${esc(p.name)}</b>${(p.is_captain && !IS_MTYBY) ? '<span class="ck">C</span>' : ''}</span>`
       + ptsHTML(p),
-  }));
+  });
+  const frRow = () => ({
+    pid: null,
+    inner: `<span class="mtyby-pos">FR</span><span class="nm"><b>${esc(team.fr_club)} FR</b></span>`
+      + frPtsHTML(team.fr_points),
+  });
+
+  const rows = [];
+  if (IS_MTYBY) {
+    // Backs at the top, front row at the bottom; FR unit pinned last.
+    const starters = all.slice().sort((a, b) => mtybyRank(a.position) - mtybyRank(b.position));
+    starters.forEach(p => rows.push(playerRow(p)));
+    if (team.fr_club) rows.push(frRow());
+  } else {
+    // OFDS: real jersey order with the front row at the top.
+    if (team.fr_club) rows.push(frRow());
+    orderStarters(all).forEach(p => rows.push(playerRow(p)));
+  }
 
   return rows.map((row, i) =>
     `<div class="mu-p${i % 2 ? ' alt' : ''}${row.pid ? ' mu-clickable' : ''}"`
