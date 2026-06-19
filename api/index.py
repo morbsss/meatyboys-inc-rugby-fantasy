@@ -1194,6 +1194,7 @@ def get_team_view():
         'round':     next_round,
         'picks':     picks,
         'fr_club':   fr['club'],
+        'fr_is_bench': fr['is_bench'],
         'fr_points': fr_points,
     })
 

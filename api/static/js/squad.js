@@ -23,31 +23,82 @@
   let statusByPid = {};     // player_id -> 'S' | 'B' | null  (real-match lineup status)
   let isLocked = false;
   let original = '';        // snapshot of the saved line-up, for change detection
+  let myTeam = '';          // the logged-in user's own team name
+  let viewName = '';        // the team currently being viewed
+  let readOnly = false;     // true when viewing a team that isn't yours
+  let TEAMS = [];           // [{name, owner, available}] for the team selector
 
   const el = (id) => document.getElementById(id);
 
   // ---- Load --------------------------------------------------------------
   async function init() {
-    const [mp, st] = await Promise.all([
+    const [mp, st, teams] = await Promise.all([
       fetch('/api/my-picks').then((r) => (r.ok ? r.json() : null)),
       fetch('/api/state').then((r) => r.json()),
+      fetch('/api/auth/teams').then((r) => (r.ok ? r.json() : [])),
     ]);
 
     isLocked = !!st.is_locked;
-    el('team-name').textContent = (mp && mp.team_name) || '';
     (st.players || []).forEach((p) => { statusByPid[p.player_id] = p.lineup_status; });
 
     el('lock-pill').classList.toggle('is-locked', isLocked);
     el('lock-text').textContent = isLocked ? 'Locked' : 'Open';
 
     MODEL = (mp && mp.roster_model) || MODEL;
+    myTeam = (mp && mp.team_name) || '';
+    TEAMS = teams || [];
+    buildTeamSelect();
+
+    // Default to your own squad (editable). The selector switches to others.
+    applyTeamData(mp, true);
+  }
+
+  // Populate the team picker with every team in the league; yours is marked.
+  function buildTeamSelect() {
+    const sel = el('team-select');
+    if (!sel) return;
+    sel.innerHTML = TEAMS.map((t) => {
+      const mine = t.name === myTeam;
+      return `<option value="${escAttr(t.name)}">${esc(t.name)}${mine ? ' (You)' : ''}</option>`;
+    }).join('');
+    if (myTeam) sel.value = myTeam;
+    sel.addEventListener('change', () => loadTeam(sel.value));
+  }
+
+  // Load a team into the page. Your own team is editable (fresh /api/my-picks);
+  // anyone else's is read-only (/api/team-view — view, never save).
+  async function loadTeam(name) {
+    if (name === myTeam) {
+      const mp = await fetch('/api/my-picks').then((r) => (r.ok ? r.json() : null));
+      applyTeamData(mp, true);
+      return;
+    }
+    try {
+      const tv = await fetch(`/api/team-view?name=${encodeURIComponent(name)}`)
+        .then((r) => (r.ok ? r.json() : null));
+      if (!tv) { window.mtybyToast('Could not load that squad', 'err'); return; }
+      applyTeamData(tv, false);
+    } catch { window.mtybyToast('Could not load that squad', 'err'); }
+  }
+
+  // Shared shape: /api/my-picks and /api/team-view both carry picks + fr_club +
+  // fr_is_bench, so one mapper handles both. `isMine` decides edit vs read-only.
+  function applyTeamData(data, isMine) {
+    readOnly = !isMine;
+    viewName = (data && data.team_name) || myTeam;
+    if (el('team-select')) el('team-select').value = viewName;
+    const t = TEAMS.find((x) => x.name === viewName);
+    el('team-name').textContent = isMine
+      ? 'Your team'
+      : (t && t.owner ? `Managed by ${t.owner} · view only` : 'View only');
+
     // mtyby has no captain (rule 1) — drop any captain flag the data carries.
     const hasCaptain = Leagues.isOfds(MODEL);
-    picks = ((mp && mp.picks) || []).map((p) => ({
+    picks = ((data && data.picks) || []).map((p) => ({
       ...p, is_bench: !!p.is_bench, is_captain: hasCaptain && !!p.is_captain,
     }));
-    frClub = (Leagues.isMtyby(MODEL) && mp) ? mp.fr_club : null;
-    if (frClub) addFrontRowUnitPick(mp);
+    frClub = (Leagues.isMtyby(MODEL) && data) ? data.fr_club : null;
+    if (frClub) addFrontRowUnitPick(data);
 
     original = snapshot();
     render();
@@ -61,7 +112,7 @@
     const body = el('squad-body');
     if (!picks.length) { renderEmpty(body); return; }
     el('legend').hidden = false;
-    el('save-bar').hidden = false;
+    el('save-bar').hidden = readOnly;   // no save controls for other teams
 
     const starters = picks.filter((p) => !p.is_bench);
     const bench = picks.filter((p) => p.is_bench);
@@ -89,14 +140,15 @@
     const dot = stat === 'S' ? 's' : (stat === 'B' ? 'b' : '');
     const dotTitle = stat === 'S' ? 'Starting' : (stat === 'B' ? 'On bench' : 'Not named');
     const disabled = isLocked ? 'disabled' : '';
+    const marks = readOnly ? '' : `<span class="marks">
+        <button class="ck-btn cap ${p.is_captain ? 'on' : ''}" data-act="cap" data-id="${p.player_id}" ${disabled} title="Captain">C</button>
+        <button class="mtyby-btn mtyby-btn--ghost mtyby-btn--sm bench-btn" data-act="bench" data-id="${p.player_id}" ${disabled}>${p.is_bench ? 'Start' : 'Bench'}</button>
+      </span>`;
     return `<div class="pl">
       <span class="status-dot ${dot}" title="${dotTitle}"></span>
       <span class="mtyby-pos">${p.position}</span>
       <span class="nm"><b>${esc(p.name)}</b> <small>${esc(p.real_team || '')}</small></span>
-      <span class="marks">
-        <button class="ck-btn cap ${p.is_captain ? 'on' : ''}" data-act="cap" data-id="${p.player_id}" ${disabled} title="Captain">C</button>
-        <button class="mtyby-btn mtyby-btn--ghost mtyby-btn--sm bench-btn" data-act="bench" data-id="${p.player_id}" ${disabled}>${p.is_bench ? 'Start' : 'Bench'}</button>
-      </span>
+      ${marks}
     </div>`;
   }
 
@@ -105,6 +157,7 @@
     const p = picks.find((x) => String(x.player_id) === String(id));
     if (!p) return;
     if (kind === 'info') { openPlayerCard(p); return; }   // pitch/bench tap → card
+    if (readOnly) return;                                 // viewing only — no edits
     if (kind === 'cap') setCaptain(p);
     else if (kind === 'bench') toggleBench(p);
     render();
@@ -126,12 +179,16 @@
     const disabled = isLocked ? 'disabled' : '';
     const hasCaptain = Leagues.isOfds(MODEL);   // OFDS only — mtyby has no captain
     const capBadge = (hasCaptain && p.is_captain) ? ' <span class="pc-cap">C</span>' : '';
-    const capBtn = hasCaptain
+    const capBtn = (hasCaptain && !readOnly)
       ? `<button class="mtyby-btn mtyby-btn--secondary mtyby-btn--sm" data-pc="cap" ${disabled}>`
         + `${p.is_captain ? 'Remove captain' : 'Make captain'}</button>`
       : '';
     const benchLabel = onField ? 'Move to bench'
       : (hasCaptain ? 'Move to starting XV' : 'Move to starting team');
+    const benchBtn = readOnly ? ''
+      : `<button class="mtyby-btn mtyby-btn--primary mtyby-btn--sm" data-pc="bench" ${disabled}>${benchLabel}</button>`;
+    const actions = (capBtn || benchBtn)
+      ? `<div class="pc-actions">${capBtn}${benchBtn}</div>` : '';
 
     const overlay = document.createElement('div');
     overlay.className = 'pc-overlay';
@@ -147,11 +204,7 @@
         </div>
         <div class="pc-sub">Previous rounds</div>
         <div class="pc-pts">${ptsHtml}</div>
-        <div class="pc-actions">
-          ${capBtn}
-          <button class="mtyby-btn mtyby-btn--primary mtyby-btn--sm" data-pc="bench" ${disabled}>
-            ${benchLabel}</button>
-        </div>
+        ${actions}
       </div>`;
 
     overlay.addEventListener('click', (e) => {
@@ -204,6 +257,7 @@
 
   // ---- Save --------------------------------------------------------------
   async function save() {
+    if (readOnly) return;                  // can only save your own team
     const btn = el('save-btn');
     btn.disabled = true;
 
@@ -218,7 +272,7 @@
     // Captain is an OFDS-only concept; mtyby never sends one.
     const captain = Leagues.isOfds(MODEL) ? realPicks.find((p) => p.is_captain) : null;
 
-    const teamName = el('team-name').textContent || 'me';
+    const teamName = myTeam || 'me';   // server saves to your own team regardless
     const { ok, data } = await apiFetch(`/api/team/${encodeURIComponent(teamName)}/picks`, {
       player_ids: realPicks.map((p) => p.player_id),
       bench_ids: realPicks.filter((p) => p.is_bench).map((p) => p.player_id),
@@ -559,6 +613,7 @@
 
   // ---- Save bar (dispatch to the right league's validation) --------------
   function renderSaveBar(starters, bench) {
+    if (readOnly) return;                  // save bar is hidden when viewing others
     const captains = picks.filter((p) => p.is_captain).length;
     const changed = snapshot() !== original;
     const status = el('save-status');
@@ -574,7 +629,7 @@
   }
 
   // ---- Boot --------------------------------------------------------------
-  el('reset-btn').addEventListener('click', init);
+  el('reset-btn').addEventListener('click', () => loadTeam(viewName));
   el('save-btn').addEventListener('click', save);
   init();
 })();
