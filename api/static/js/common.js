@@ -44,9 +44,20 @@ function _mtybyCardKey(e) { if (e.key === 'Escape') mtybyClosePlayerCard(); }
 
 async function mtybyPlayerCard(playerId) {
   if (!playerId) return;
+  return _mtybyShowCard('/api/player/points?id=' + encodeURIComponent(playerId));
+}
+
+// The meatyboys front-row UNIT (a club) shows its previous stats the same way an
+// individual does, fetched by club rather than player id.
+async function mtybyFrCard(club) {
+  if (!club) return;
+  return _mtybyShowCard('/api/player/points?fr=' + encodeURIComponent(club));
+}
+
+async function _mtybyShowCard(url) {
   mtybyClosePlayerCard();
   let p = null;
-  try { p = await (await fetch('/api/player/points?id=' + encodeURIComponent(playerId))).json(); }
+  try { p = await (await fetch(url)).json(); }
   catch (_) { return; }
   if (!p || p.error) return;
 
