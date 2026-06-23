@@ -32,9 +32,12 @@
 
 .pl { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-bottom: 1px solid var(--border); }
 .pl:last-child { border-bottom: none; }
-.pl .status-dot { width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0; background: var(--border-strong); }
-.pl .status-dot.s { background: var(--success); }
-.pl .status-dot.b { background: var(--amber); }
+.pl .status-dot { width: 14px; flex-shrink: 0; text-align: center;
+  font-family: var(--font-display); font-weight: 800; font-size: 12px; line-height: 1;
+  color: var(--border-strong); }
+.pl .status-dot.s { color: var(--success); }
+.pl .status-dot.b { color: var(--amber); }
+.pl .status-dot.o { color: var(--border-strong); }
 .pl .nm { flex: 1; min-width: 0; }
 .pl .nm b { font-family: var(--font-display); font-weight: 400; color: var(--forest); }
 .pl .nm small { color: var(--ink-faint); font-weight: 500; }
@@ -56,7 +59,7 @@
      content centre by the bench column + its gap. */
   padding-right: 150px; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
-.legend i { width: 11px; height: 11px; border-radius: 50%; }
+.legend .lg-stat { font-family: var(--font-display); font-weight: 800; font-size: 13px; line-height: 1; }
 
 .save-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 70; background: var(--surface);
   border-top: 1px solid var(--border); box-shadow: 0 -2px 8px rgba(11,59,46,.08);
@@ -126,25 +129,47 @@
   position: absolute; transform: translate(-50%, -50%); z-index: 2;
   display: flex; flex-direction: column; align-items: center; gap: 3px; width: 84px;
 }
-.fp-shirt {
-  position: relative; width: 45px; height: 45px; border-radius: 50%;
-  border: 2px solid #fff; background: var(--forest); color: var(--cream);
-  font-family: var(--font-display); font-weight: 800; font-size: 13px;
-  display: grid; place-items: center; cursor: pointer; padding: 0;
-  box-shadow: 0 2px 5px rgba(0,0,0,.28);
+/* Player token = a rugby jersey silhouette (shared by field + bench tokens).
+   A white "shirt" sits behind a slightly inset coloured jersey so it reads on
+   both the green pitch and the light bench panel; the number / position code is
+   the button's own text, painted above the two masked pseudo-layers. */
+.fp-shirt, .bp-shirt {
+  --jersey: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M30 14 L38 6 L46 15 L50 17 L54 15 L62 6 L70 14 L90 28 L84 44 L72 38 L72 95 Q72 99 68 99 L32 99 Q28 99 28 95 L28 38 L16 44 L10 28 Z' fill='%23fff'/%3E%3C/svg%3E");
+  position: relative; isolation: isolate;
+  width: 80px; height: 60px; border: 0; background: transparent;
+  padding: 16px 0 2px;        /* seat the number on the chest, below the collar */
+  display: grid; place-items: center; cursor: pointer;
+  color: var(--cream); font-family: var(--font-display); font-weight: 800; font-size: 15px;
 }
-.fp-shirt:disabled { cursor: default; }
-.fp.is-cap .fp-shirt { box-shadow: 0 0 0 3px var(--amber), 0 2px 5px rgba(0,0,0,.28); }
-.fp-shirt--empty {
-  background: rgba(255,255,255,.16); border-style: dashed;
-  color: rgba(255,255,255,.85); cursor: default;
+.fp-shirt::before, .fp-shirt::after,
+.bp-shirt::before, .bp-shirt::after {
+  content: ''; position: absolute;
+  -webkit-mask: var(--jersey) center / 100% 100% no-repeat;
+          mask: var(--jersey) center / 100% 100% no-repeat;
 }
+.fp-shirt::before, .bp-shirt::before {   /* white outline (back layer) */
+  inset: 0; z-index: -2; background: #fff;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.30));
+}
+.fp-shirt::after, .bp-shirt::after {     /* coloured jersey, inset to show the edge */
+  inset: 2px; z-index: -1; background: var(--forest);
+}
+.fp-shirt:disabled, .bp-shirt:disabled { cursor: default; }
+/* Captain: amber jersey outline + halo (alongside the C badge). */
+.fp.is-cap .fp-shirt::before, .bp.is-cap .bp-shirt::before {
+  background: var(--amber);
+  filter: drop-shadow(0 0 2px var(--amber)) drop-shadow(0 1px 2px rgba(0,0,0,.30));
+}
+.fp-shirt--empty { color: rgba(255,255,255,.85); cursor: default; }
+.fp-shirt--empty::before { background: rgba(255,255,255,.55); filter: none; }
+.fp-shirt--empty::after  { background: rgba(255,255,255,.14); }
 /* mtyby pitch: shirts carry a position code (not a 1-15 jersey number), and
    the club front-row UNIT gets a distinct amber token at the top. */
 .fp-shirt--code, .bp-shirt--code { font-size: 13px; }
 .fp-code { font-weight: 800; letter-spacing: .03em; }
-.fp-shirt--fr { background: var(--forest); color: var(--cream); border-color: #fff; }
-.bp-shirt--fr { background: var(--amber); color: var(--forest-deep); border-color: var(--amber); }
+.fp-shirt--fr::after { background: var(--forest); }
+.bp-shirt--fr { color: var(--forest-deep); }
+.bp-shirt--fr::after { background: var(--amber); }
 .fp--fr .fp-name { font-weight: 800; }
 .fp-name {
   font-size: 14px; font-weight: 700; color: #fff; text-align: center;
@@ -158,22 +183,29 @@
 
 /* Captain badge + lineup-status dot — shared by field tokens and bench chips. */
 .fp-c {
-  position: absolute; top: -6px; right: -6px; width: 16px; height: 16px;
+  position: absolute; top: 1px; right: 2px; width: 16px; height: 16px;
   border-radius: 50%; background: var(--amber); color: var(--forest-deep);
   font-size: 9px; font-weight: 800; display: grid; place-items: center;
-  border: 1.5px solid #fff;
+  border: 1.5px solid #fff; z-index: 1;
 }
+/* Lineup status, shown as a letter — S (starting), B (bench), O (out) — in a
+   small white chip so the coloured letter reads on the jersey. */
 .fp-dot {
-  position: absolute; bottom: -2px; left: -2px; width: 10px; height: 10px;
-  border-radius: 50%; background: var(--border-strong); border: 1.5px solid #fff;
+  position: absolute; bottom: 2px; left: 6px; z-index: 1;
+  min-width: 15px; height: 15px; padding: 0 1px;
+  display: grid; place-items: center; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.25);
+  font-family: var(--font-display); font-weight: 800; font-size: 10px; line-height: 1;
+  color: var(--border-strong);
 }
-.fp-dot.s { background: var(--success); }
-.fp-dot.b { background: var(--amber); }
+.fp-dot.s { color: var(--success); }
+.fp-dot.b { color: var(--amber); }
+.fp-dot.o { color: var(--border-strong); }
 
 /* Replacements 16–23 — a vertical bench column beside the pitch, boxed in a
    surface panel so it reads as its own unit next to the field. */
 .bench-col {
-  flex: 0 0 auto; width: 110px; display: flex; flex-direction: column; gap: 15px;
+  flex: 0 0 auto; width: 150px; display: flex; flex-direction: column; gap: 15px;
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--r-lg, 14px); padding: 8px 5px;
 }
@@ -183,25 +215,14 @@
   letter-spacing: .05em; text-transform: uppercase; color: var(--ink-muted);
   padding: 0 2px 2px;
 }
-/* Same card format as the on-field players (.fp): a round forest shirt with
-   the jersey number + name below; only the name colour is darkened so it reads
-   on the light bench column rather than the green pitch. */
+/* Bench tokens use the same jersey (see the shared .fp-shirt, .bp-shirt rule);
+   only the name colour is darkened so it reads on the light bench panel. */
 .bp {
   display: flex; flex-direction: column; align-items: center; gap: 8px;
 }
-.bp-shirt {
-  position: relative; width: 45px; height: 45px; border-radius: 50%;
-  border: 2px solid #fff; background: var(--forest); color: var(--cream);
-  font-family: var(--font-display); font-weight: 800; font-size: 13px;
-  display: grid; place-items: center; cursor: pointer; padding: 0;
-  box-shadow: 0 2px 5px rgba(0,0,0,.28);
-}
-.bp-shirt:disabled { cursor: default; }
-.bp.is-cap .bp-shirt { box-shadow: 0 0 0 3px var(--amber), 0 2px 5px rgba(0,0,0,.28); }
-.bp-shirt--empty {
-  background: var(--surface-2); border-style: dashed; border-color: var(--border-strong);
-  color: var(--ink-faint); cursor: default; box-shadow: none;
-}
+.bp-shirt--empty { color: var(--ink-faint); cursor: default; }
+.bp-shirt--empty::before { background: var(--border-strong); filter: none; }
+.bp-shirt--empty::after  { background: var(--surface-2); }
 .bp-name { text-align: center; line-height: 1.05; width: 100%; max-width: 88px; }
 .bp-name b {
   font-family: var(--font-display); font-weight: 700; font-size: 13px; color: var(--forest);
