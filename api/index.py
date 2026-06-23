@@ -86,6 +86,18 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 # Non-permanent sessions stay browser-session cookies and expire on browser close.
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
 
+# Behind Railway's TLS proxy, trust X-Forwarded-* so url_for/secure cookies see
+# https (harmless locally — only the immediate proxy hop is trusted).
+from werkzeug.middleware.proxy_fix import ProxyFix
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+
+
+@app.route('/healthz')
+def healthz():
+    """Liveness probe for the platform (Railway healthcheck). No DB touch, so it
+    stays green even before the database is reachable/seeded."""
+    return {'status': 'ok'}, 200
+
 # Get database type
 DB_TYPE_LOCAL = os.getenv('DB_TYPE', 'sqlite').lower()
 

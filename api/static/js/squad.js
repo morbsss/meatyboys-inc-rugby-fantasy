@@ -89,7 +89,7 @@
     if (el('team-select')) el('team-select').value = viewName;
     const t = TEAMS.find((x) => x.name === viewName);
     el('team-name').textContent = isMine
-      ? 'Your team'
+      ? ''
       : (t && t.owner ? `Managed by ${t.owner} · view only` : 'View only');
 
     // mtyby has no captain (rule 1) — drop any captain flag the data carries.
@@ -137,15 +137,16 @@
   // ---- Shared rendering helpers -----------------------------------------
   function playerRow(p) {
     const stat = statusByPid[p.player_id];
-    const dot = stat === 'S' ? 's' : (stat === 'B' ? 'b' : '');
-    const dotTitle = stat === 'S' ? 'Starting' : (stat === 'B' ? 'On bench' : 'Not named');
+    const dot = stat === 'S' ? 's' : (stat === 'B' ? 'b' : 'o');
+    const dotLetter = stat === 'S' ? 'S' : (stat === 'B' ? 'B' : 'O');
+    const dotTitle = stat === 'S' ? 'Starting' : (stat === 'B' ? 'On bench' : 'Out');
     const disabled = isLocked ? 'disabled' : '';
     const marks = readOnly ? '' : `<span class="marks">
         <button class="ck-btn cap ${p.is_captain ? 'on' : ''}" data-act="cap" data-id="${p.player_id}" ${disabled} title="Captain">C</button>
         <button class="mtyby-btn mtyby-btn--ghost mtyby-btn--sm bench-btn" data-act="bench" data-id="${p.player_id}" ${disabled}>${p.is_bench ? 'Start' : 'Bench'}</button>
       </span>`;
     return `<div class="pl">
-      <span class="status-dot ${dot}" title="${dotTitle}"></span>
+      <span class="status-dot ${dot}" title="${dotTitle}">${dotLetter}</span>
       <span class="mtyby-pos">${p.position}</span>
       <span class="nm"><b>${esc(p.name)}</b> <small>${esc(p.real_team || '')}</small></span>
       ${marks}
@@ -438,9 +439,10 @@
   // field tokens and bench chips); mirrors the legend on the page.
   function statusDotHtml(p) {
     const stat = statusByPid[p.player_id];
-    const cls = stat === 'S' ? 's' : (stat === 'B' ? 'b' : '');
-    const title = stat === 'S' ? 'Starting' : (stat === 'B' ? 'On bench' : 'Not named');
-    return `<span class="fp-dot ${cls}" title="${title}"></span>`;
+    const cls = stat === 'S' ? 's' : (stat === 'B' ? 'b' : 'o');
+    const letter = stat === 'S' ? 'S' : (stat === 'B' ? 'B' : 'O');
+    const title = stat === 'S' ? 'Starting' : (stat === 'B' ? 'On bench' : 'Out');
+    return `<span class="fp-dot ${cls}" title="${title}">${letter}</span>`;
   }
 
   // Swap the clicked player with the same-position player on the opposite side
@@ -496,13 +498,13 @@
   // flowing down to the outside backs. Not a strict 1–15, so shirts carry the
   // position code rather than a jersey number. x/y are % of the pitch (centre).
   const MTYBY_FORMATION = [
-    { pos: 'LK',  x: 50, y: 28 },   // lock
-    { pos: 'LF',  x: 33, y: 40 },   // loose forward
-    { pos: 'LF',  x: 67, y: 40 },   // loose forward
-    { pos: 'SH',  x: 20, y: 55 },   // scrum-half
-    { pos: 'FH',  x: 30, y: 65 },   // fly-half
-    { pos: 'MID', x: 45, y: 70 },   // Midfield
-    { pos: 'MID', x: 65, y: 75 },   // Midfield
+    { pos: 'LK',  x: 50, y: 24 },   // lock
+    { pos: 'LF',  x: 33, y: 34 },   // loose forward
+    { pos: 'LF',  x: 67, y: 34 },   // loose forward
+    { pos: 'SH',  x: 15, y: 45 },   // scrum-half
+    { pos: 'FH',  x: 23, y: 59 },   // fly-half
+    { pos: 'MID', x: 40, y: 65 },   // Midfield
+    { pos: 'MID', x: 60, y: 72 },   // Midfield
     { pos: 'OBK', x: 16, y: 80 },   // Outside Back
     { pos: 'OBK', x: 84, y: 80 },   // Outside Back
     { pos: 'OBK', x: 50, y: 86 },   // Outside Back

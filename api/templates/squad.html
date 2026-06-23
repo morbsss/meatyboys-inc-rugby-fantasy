@@ -12,18 +12,18 @@
 <div class="content">
   <div class="sq-head">
     <div class="page-title">Squad</div>
+     <div class="sq-team" id="team-name"></div>
     <div class="sq-head-right">
       <select class="sq-team-select" id="team-select" aria-label="Choose a team to view"></select>
-      <div class="sq-team" id="team-name"></div>
     </div>
   </div>
 
   <div id="squad-body"><div class="empty"><p>Loading your squad…</p></div></div>
 
   <div class="legend" id="legend" hidden>
-    <span><i style="background:var(--success)"></i> Starting (real match)</span>
-    <span><i style="background:var(--amber)"></i> Bench (real match)</span>
-    <span><i style="background:var(--border-strong)"></i> Not named / out</span>
+    <span><b class="lg-stat" style="color:var(--success)">S</b> Starting (real match)</span>
+    <span><b class="lg-stat" style="color:var(--amber)">B</b> Bench (real match)</span>
+    <span><b class="lg-stat" style="color:var(--border-strong)">O</b> Out / not named</span>
     {% if brand == 'OFDS' %}
     <span>C = captain (x2)</span>
     {% endif %}

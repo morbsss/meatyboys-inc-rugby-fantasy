@@ -1,0 +1,3 @@
+# Railway/Nixpacks builds from the repo root and detects Python via this file.
+# The actual runtime dependencies live in api/requirements.txt.
+-r api/requirements.txt
