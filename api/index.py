@@ -970,15 +970,24 @@ def _next_round_context(conn, league_id, next_round):
 
 @app.route('/api/player/points')
 def api_player_points():
-    """A single player's per-round points + opponent (for the shared player
-    card used on the Player Hub and Match Up). Mirrors the squad card data."""
+    """A player's (or a meatyboys FR unit's) per-round points + opponent, for the
+    shared player card used on the Player Hub and Match Up. Pass ?id=<player_id>
+    for an individual, or ?fr=<club> for a club front-row unit."""
+    fr_club = (request.args.get('fr') or '').strip()
     pid = request.args.get('id', type=int)
-    if not pid:
-        return jsonify({'error': 'id required'}), 400
+    if not fr_club and not pid:
+        return jsonify({'error': 'id or fr required'}), 400
     conn = get_db()
     ensure_schema(conn)
     league_id = current_league_id(conn)
     next_round = get_next_round(conn, league_id)
+
+    if fr_club:
+        pts = _fr_recent_points(conn, league_id, fr_club, next_round)
+        conn.close()
+        return jsonify({'name': f'{fr_club} FR', 'position': 'FR',
+                        'real_team': fr_club, 'recent_points': pts})
+
     cursor = _get_cursor(conn)
     cursor.execute('SELECT player_id, name, position, team AS real_team FROM players '
                    'WHERE player_id = ? AND league_id = ?', (pid, league_id))
@@ -1096,6 +1105,50 @@ def _attach_recent_points(conn, league_id, picks, next_round):
             deltas.append(entry)
             prev = tot
         p['recent_points'] = deltas
+
+
+def _fr_recent_points(conn, league_id, club, next_round):
+    """Per-round points for a club's front-row UNIT — the sum of its matchday
+    PR/HK players' point deltas each completed round (mirrors
+    competition._front_row_score), plus the club's opponent that round."""
+    cursor = _get_cursor(conn)
+    cursor.execute(
+        "SELECT ws.round AS round, "
+        "       SUM(ws.total_points - COALESCE(wp.total_points, 0)) AS pts "
+        "FROM players p "
+        "JOIN weekly_stats ws ON ws.player_id = p.player_id "
+        "LEFT JOIN weekly_stats wp ON wp.player_id = p.player_id AND wp.round = ws.round - 1 "
+        "WHERE p.league_id = ? AND p.team = ? AND p.position IN ('PR', 'HK') "
+        "  AND ws.round < ? "
+        "  AND (NOT EXISTS (SELECT 1 FROM match_lineups ml "
+        "                   WHERE ml.round = ws.round AND ml.real_team = p.team) "
+        "       OR EXISTS (SELECT 1 FROM match_lineups ml "
+        "                  WHERE ml.round = ws.round AND ml.real_team = p.team "
+        "                  AND REPLACE(p.name, '''', '') = ml.player_name)) "
+        "GROUP BY ws.round ORDER BY ws.round",
+        (league_id, club, next_round))
+    series = []
+    for r in cursor.fetchall():
+        d = dict(r) if not isinstance(r, dict) else r
+        series.append((d['round'], d['pts']))
+
+    cursor.execute('SELECT round, home_team, away_team FROM real_fixtures WHERE league_id = ?',
+                   (league_id,))
+    opp = {}
+    for r in cursor.fetchall():
+        d = dict(r) if not isinstance(r, dict) else r
+        opp[(d['round'], d['home_team'])] = (d['away_team'], True)
+        opp[(d['round'], d['away_team'])] = (d['home_team'], False)
+    cursor.close()
+
+    out = []
+    for rnd, pts in series:
+        entry = {'round': rnd, 'points': round(float(pts or 0), 1)}
+        o = opp.get((rnd, club))
+        if o:
+            entry['opponent'], entry['home'] = o
+        out.append(entry)
+    return out
 
 
 def _model_payload(model: dict) -> dict:

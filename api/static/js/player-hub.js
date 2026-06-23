@@ -141,10 +141,12 @@ function render() {
   el.querySelectorAll('button[data-trade-fr]').forEach(b =>
     b.addEventListener('click', () => openTradeFr(b.dataset.tradeFr)));
   // Tap a row (but not its action button) → player card with recent points.
-  el.querySelectorAll('tr[data-player]').forEach(tr =>
+  // FR units (no player_id) open their club's stats instead.
+  el.querySelectorAll('tr[data-player], tr[data-fr]').forEach(tr =>
     tr.addEventListener('click', (e) => {
       if (e.target.closest('button, [data-trade], [data-trade-fr]')) return;
-      mtybyPlayerCard(+tr.dataset.player);
+      if (tr.dataset.fr) mtybyFrCard(tr.dataset.fr);
+      else mtybyPlayerCard(+tr.dataset.player);
     }));
 }
 
@@ -178,7 +180,9 @@ function rowHTML(r) {
   const owner = r.fantasy_team
     ? `<span class="ph-owner" style="color:var(--danger)">${esc(r.fantasy_team)}</span>`
     : `<span class="ph-owner" style="color:var(--success)">Free</span>`;
-  return `<tr${r.player_id ? ` data-player="${r.player_id}" class="ph-clickable"` : ''}>
+  const clickAttr = r.player_id ? `data-player="${r.player_id}"`
+    : (r.is_fr ? `data-fr="${escAttr(r.real_team)}"` : '');
+  return `<tr${clickAttr ? ` ${clickAttr} class="ph-clickable"` : ''}>
     <td class="c-name"><span class="ph-name">${esc(r.name)}</span> <span class="ph-team">${esc(r.real_team||'')}</span></td>
     <td><span class="mtyby-pos">${r.position}</span></td>
     <td class="c-next">${nextHTML(r)}</td>

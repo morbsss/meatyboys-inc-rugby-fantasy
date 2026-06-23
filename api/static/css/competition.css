@@ -313,7 +313,7 @@
 .ph-grid { stroke: var(--border); stroke-width: 1; stroke-dasharray: 2 3; }
 .ph-axis { stroke: var(--border-strong); stroke-width: 1; }
 .ph-ylabel, .ph-xlabel { fill: var(--ink-faint); font-size: 9px; font-family: var(--font-body); }
-.ph-line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; opacity: .55; transition: opacity var(--motion-fast), stroke-width var(--motion-fast); }
+.ph-line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; opacity: .55; cursor: pointer; pointer-events: stroke; transition: opacity var(--motion-fast), stroke-width var(--motion-fast); }
 .ph-line.hl { opacity: 1; stroke-width: 3.5; }
 .ph-line.dim { opacity: .15; }
 .ph-legend { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }

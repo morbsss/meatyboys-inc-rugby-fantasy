@@ -39,9 +39,18 @@ database starts **empty** — you need to load data. Pick one:
   (Run from a machine that can reach the DB; Railway shows a public connection
   string under the Postgres plugin → Connect.)
 
-- **Your real data (`fantasy_2025_26.db`):** the rows currently live in SQLite and
-  need copying into Postgres. There's no migrator committed yet — ask and I'll add
-  a tested `tools/migrate_to_postgres.py`.
+- **Your real data (`fantasy_2025_26.db`):** copy the SQLite rows into Postgres with
+  the migrator (needs `pip install psycopg2-binary` locally):
+  ```
+  python tools/migrate_to_postgres.py \
+      --source fantasy_2025_26.db \
+      --database-url "<railway postgres public url>"
+  ```
+  It builds the schema (`ensure_schema`), copies every table in FK order, resets
+  SERIAL sequences, and prints a source-vs-target row-count check. The target's
+  matching tables are **replaced** (it's safe to re-run; pass `--keep` to append).
+  Tested end-to-end against Postgres 16: all 16 tables migrate with matching
+  counts, sequences advance correctly, and the app reads the result.
 
 ## 4. Verify
 - `https://<your-app>.up.railway.app/healthz` → `{"status":"ok"}`
@@ -62,3 +71,6 @@ curl -H "Authorization: Bearer $CRON_SECRET" https://<your-app>.up.railway.app/a
 - ML libs (numpy/pandas/sklearn) are intentionally **not** in `requirements.txt`; the
   analysis pipeline (`api/predict.py`) runs offline and writes prediction tables the
   app only reads.
+
+
+$env:DB_TYPE="postgres"; $env:DATABASE_URL="postgresql://postgres:hUKDRitfoebfSLWceMTwyTQSbeywtuMY@shortline.proxy.rlwy.net:50637/railway"; python -m api.seed_mock

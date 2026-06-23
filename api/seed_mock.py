@@ -107,8 +107,8 @@ def _draft(players: list[dict], teams: list[str], model: dict) -> dict[str, dict
 # ---------------------------------------------------------------------------
 
 def _wipe_league(cur, league_id: int) -> None:
-    for table in ('weekly_stats', 'team_selections', 'rounds', 'match_lineups',
-                  'real_fixtures', 'draft_picks', 'players'):
+    for table in ('weekly_stats', 'team_selections', 'team_front_row', 'rounds',
+                  'match_lineups', 'real_fixtures', 'draft_picks', 'players'):
         _exec(cur, f'DELETE FROM {table} WHERE league_id = ?', (league_id,))
     _exec(cur, 'DELETE FROM draft_state WHERE league_id = ?', (league_id,))
 
@@ -212,9 +212,25 @@ def seed_league(conn, cur, slug: str, adapter: MockAdapter) -> dict:
                       (r, team, pid, 1 if pid == captain_pid else 0,
                        1 if pid == kicker_pid else 0, is_bench, jno, NOW, league_id))
 
+    # --- front-row UNIT (meatyboys) --------------------------------------
+    # Each fantasy team owns one club's front row, seeded as a STARTER so the
+    # line-up is the full 11 (the FR unit + 10 individual starters) + 5 bench.
+    # Clubs are assigned distinctly (10 teams, 11 Super Rugby clubs).
+    fr_units = 0
+    if model.get('fr_unit'):
+        clubs = sorted({p.team for p in players})
+        for i, team in enumerate(fantasy_teams):
+            club = clubs[i % len(clubs)]
+            for r in range(1, n_rounds + 1):
+                _exec(cur, 'INSERT INTO team_front_row '
+                           '(league_id, team_name, round, club, is_captain, is_bench, scraped_at) '
+                           'VALUES (?, ?, ?, ?, ?, ?, ?)',
+                      (league_id, team, r, club, 0, 0, NOW))
+            fr_units += 1
+
     return {
         'league': slug, 'players': len(players), 'rounds': n_rounds,
-        'fantasy_teams': len(fantasy_teams),
+        'fantasy_teams': len(fantasy_teams), 'fr_units': fr_units,
     }
 
 
@@ -252,8 +268,9 @@ def main() -> None:
     conn.close()
     print(f'Seeded mock DB at {os.environ["DB_PATH"]}:')
     for s in summaries:
+        fr = f", {s['fr_units']} FR units" if s.get('fr_units') else ""
         print(f"  {s['league']:>10}: {s['players']} players, "
-              f"{s['fantasy_teams']} teams, {s['rounds']} rounds")
+              f"{s['fantasy_teams']} teams, {s['rounds']} rounds{fr}")
 
 
 if __name__ == '__main__':
