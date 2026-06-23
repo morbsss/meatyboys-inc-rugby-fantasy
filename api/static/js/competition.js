@@ -190,19 +190,29 @@ function renderPositionChart() {
   legend.innerHTML = teams.map(t =>
     `<span class="ph-key" data-team="${escAttr(t)}"><i style="background:${TEAM_COLORS[t]}"></i>${esc(t)}</span>`
   ).join('');
-  legend.querySelectorAll('.ph-key').forEach(k =>
-    k.addEventListener('click', () => highlightTeam(k.dataset.team)));
+  // Hover a legend key (or a line) to spotlight that team; move away to reset.
+  const targets = [
+    ...legend.querySelectorAll('.ph-key'),
+    ...document.querySelectorAll('.ph-line'),
+  ];
+  targets.forEach(el => {
+    el.addEventListener('mouseenter', () => setHighlight(el.dataset.team));
+    el.addEventListener('mouseleave', clearHighlight);
+  });
 }
 
-function highlightTeam(name) {
-  const lines = document.querySelectorAll('.ph-line');
-  const keys = document.querySelectorAll('.ph-key');
-  const alreadyOn = [...lines].some(l => l.dataset.team === name && l.classList.contains('hl'));
-  lines.forEach(l => l.classList.remove('hl', 'dim'));
-  keys.forEach(k => k.classList.remove('on'));
-  if (alreadyOn) return;   // toggle off → reset to all-visible
-  lines.forEach(l => l.classList.add(l.dataset.team === name ? 'hl' : 'dim'));
-  keys.forEach(k => { if (k.dataset.team === name) k.classList.add('on'); });
+function setHighlight(name) {
+  document.querySelectorAll('.ph-line').forEach(l => {
+    l.classList.toggle('hl', l.dataset.team === name);
+    l.classList.toggle('dim', l.dataset.team !== name);
+  });
+  document.querySelectorAll('.ph-key').forEach(k =>
+    k.classList.toggle('on', k.dataset.team === name));
+}
+
+function clearHighlight() {
+  document.querySelectorAll('.ph-line').forEach(l => l.classList.remove('hl', 'dim'));
+  document.querySelectorAll('.ph-key').forEach(k => k.classList.remove('on'));
 }
 
 /* ============================================================
