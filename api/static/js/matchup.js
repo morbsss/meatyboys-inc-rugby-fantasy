@@ -45,7 +45,9 @@ async function renderMatch() {
   const m = currentWeek().matches[fixtureIdx];
   if (!m) return;
   const card = document.getElementById('mu-card');
+  const benchCard = document.getElementById('mu-bench-card');
   card.innerHTML = '<div class="mu-loading">Loading line-ups…</div>';
+  benchCard.hidden = true;
   const [home, away] = await Promise.all([teamPicks(m.home, weekSel), teamPicks(m.away, weekSel)]);
 
   const played = m.played;
@@ -71,9 +73,18 @@ async function renderMatch() {
       <span class="v away ${awayCls}">${played ? as.toFixed(1) : '—'}</span>
     </div>`;
 
+  // Bench lives in its own card below, separated by a cream-page gap.
+  benchCard.innerHTML = `
+    <div class="mu-bench-head">Bench - Missed Points</div>
+    <div class="mu-grid">
+      <div class="mu-col home">${benchColHTML(home)}</div>
+      <div class="mu-col away">${benchColHTML(away)}</div>
+    </div>`;
+  benchCard.hidden = false;
+
   // Tap a player → shared card with their recent points and opponents.
-  card.querySelectorAll('.mu-p[data-player]').forEach(el =>
-    el.addEventListener('click', () => mtybyPlayerCard(+el.dataset.player)));
+  [card, benchCard].forEach(c => c.querySelectorAll('.mu-p[data-player]').forEach(el =>
+    el.addEventListener('click', () => mtybyPlayerCard(+el.dataset.player))));
 }
 
 async function teamPicks(name, round) {
@@ -130,15 +141,16 @@ function colHTML(team) {
       + frPtsHTML(team.fr_points),
   });
 
+  const startingFr = team.fr_club && !team.fr_is_bench;   // benched FR shows below
   const rows = [];
   if (IS_MTYBY) {
     // Backs at the top, front row at the bottom; FR unit pinned last.
     const starters = all.slice().sort((a, b) => mtybyRank(a.position) - mtybyRank(b.position));
     starters.forEach(p => rows.push(playerRow(p)));
-    if (team.fr_club) rows.push(frRow());
+    if (startingFr) rows.push(frRow());
   } else {
     // OFDS: real jersey order with the front row at the top.
-    if (team.fr_club) rows.push(frRow());
+    if (startingFr) rows.push(frRow());
     orderStarters(all).forEach(p => rows.push(playerRow(p)));
   }
 
@@ -146,6 +158,33 @@ function colHTML(team) {
     `<div class="mu-p${i % 2 ? ' alt' : ''}${row.pid ? ' mu-clickable' : ''}"`
     + `${row.pid ? ` data-player="${row.pid}"` : ''}>${row.inner}</div>`).join('')
     || '<div class="mu-p">-</div>';
+}
+
+// The bench: substitutes (and a benched FR unit) shown muted below the total —
+// their points don't count toward the score.
+function benchColHTML(team) {
+  const bench = (team.picks || []).filter(p => p.is_bench);
+  const benchRow = p => ({
+    pid: p.player_id,
+    inner: `<span class="mtyby-pos">${p.position}</span>`
+      + `<span class="nm"><b>${esc(p.name)}</b></span>` + ptsHTML(p),
+  });
+
+  const rows = [];
+  (IS_MTYBY
+    ? bench.slice().sort((a, b) => mtybyRank(a.position) - mtybyRank(b.position))
+    : bench
+  ).forEach(p => rows.push(benchRow(p)));
+  if (team.fr_club && team.fr_is_bench) {
+    rows.push({ pid: null,
+      inner: `<span class="mtyby-pos">FR</span><span class="nm"><b>${esc(team.fr_club)} FR</b></span>`
+        + frPtsHTML(team.fr_points) });
+  }
+
+  return rows.map((row, i) =>
+    `<div class="mu-p mu-bench-p${i % 2 ? ' alt' : ''}${row.pid ? ' mu-clickable' : ''}"`
+    + `${row.pid ? ` data-player="${row.pid}"` : ''}>${row.inner}</div>`).join('')
+    || '<div class="mu-p mu-bench-p mu-bench-empty">No bench</div>';
 }
 
 function esc(s){ return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }

@@ -172,12 +172,17 @@ def seed_league(conn, cur, slug: str, adapter: MockAdapter) -> dict:
                   (r, e.player_name, e.real_team, e.jersey, e.is_bench, NOW, league_id))
 
     # --- mock draft → rosters --------------------------------------------
+    # Only the model's draftable individual positions enter the pool. For
+    # meatyboys this excludes PR/HK (rule: no individual front-rowers — the club
+    # FR UNIT is the only way to hold a front row); those players still exist in
+    # the players table because the FR unit scores off them.
     model = roster_model(slug)
     roster_size = model_starter_count(model) + model_bench_count(model)
+    draftable = set(model.get('individual_positions') or [])
     pool = [{'id': p.name + '|' + p.team, 'name': p.name, 'team': p.team,
              'position': p.position, 'rate': adapter_rate(adapter, competition, p),
              'pid': pid_map[(p.name, p.team, p.position)]}
-            for p in players]
+            for p in players if p.position in draftable]
     fantasy_teams = adapter.fantasy_teams(competition)
     rosters = _draft(pool, fantasy_teams, model)
 
