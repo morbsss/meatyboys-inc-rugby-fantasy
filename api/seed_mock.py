@@ -107,8 +107,12 @@ def _draft(players: list[dict], teams: list[str], model: dict) -> dict[str, dict
 # ---------------------------------------------------------------------------
 
 def _wipe_league(cur, league_id: int) -> None:
+    # Delete child rows before `players` — Postgres enforces the FKs that
+    # reference players(player_id) (weekly_stats, team_selections, draft_picks,
+    # previous_season), so `players` must come last.
     for table in ('weekly_stats', 'team_selections', 'team_front_row', 'rounds',
-                  'match_lineups', 'real_fixtures', 'draft_picks', 'players'):
+                  'match_lineups', 'real_fixtures', 'draft_picks', 'previous_season',
+                  'player_predictions', 'matchup_predictions', 'players'):
         _exec(cur, f'DELETE FROM {table} WHERE league_id = ?', (league_id,))
     _exec(cur, 'DELETE FROM draft_state WHERE league_id = ?', (league_id,))
 
