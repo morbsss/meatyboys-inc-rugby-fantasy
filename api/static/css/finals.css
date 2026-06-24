@@ -82,7 +82,7 @@
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .tie-score { font-family: var(--font-display); font-weight: 800; font-size: 15px; color: var(--ink-muted); white-space: nowrap; }
-.tie-score .legs { font-size: 10px; font-weight: 600; color: var(--ink-faint); margin-right: 6px; }
+.tie-score .legs { font-size: 10px; font-weight: 600; color: var(--ink-faint); margin-right: 20px; }
 .tie-side.is-winner { background: rgba(46,125,79,.07); }
 .bracket--sacko .tie-side.is-winner { background: rgba(179,58,46,.06); }
 .tie-side.is-winner .tie-name { color: var(--forest); }

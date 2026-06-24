@@ -23,7 +23,7 @@ const CHAMPS = {
   'Chessums Cheerleaders': 1,
 };
 
-// Previous Sacko (wooden-spoon) finishes per team → one 🍆 each, shown under
+// Previous Sacko finishes per team → one 🍆 each, shown under
 // the trophies (hard-coded for now).
 const SACKOS = {
   'Pizza Morahana': 1,
@@ -179,7 +179,8 @@ function renderPositionChart() {
     return `<polyline class="ph-line" data-team="${escAttr(t)}" points="${pts}" stroke="${TEAM_COLORS[t]}"/>`;
   }).join('');
 
-  document.getElementById('ph-chart-wrap').innerHTML =
+  const phWrap = document.getElementById('ph-chart-wrap');
+  phWrap.innerHTML =
     `<svg class="ph-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Each team's league position by round">
       ${grid}
       <line class="ph-axis" x1="${padL}" y1="${padT}" x2="${padL}" y2="${(padT + plotH).toFixed(1)}"/>
@@ -190,14 +191,96 @@ function renderPositionChart() {
   legend.innerHTML = teams.map(t =>
     `<span class="ph-key" data-team="${escAttr(t)}"><i style="background:${TEAM_COLORS[t]}"></i>${esc(t)}</span>`
   ).join('');
-  // Hover a legend key (or a line) to spotlight that team; move away to reset.
-  const targets = [
-    ...legend.querySelectorAll('.ph-key'),
-    ...document.querySelectorAll('.ph-line'),
-  ];
-  targets.forEach(el => {
+  // Hover a legend key to spotlight that team's line; move away to reset.
+  legend.querySelectorAll('.ph-key').forEach(el => {
     el.addEventListener('mouseenter', () => setHighlight(el.dataset.team));
     el.addEventListener('mouseleave', clearHighlight);
+  });
+
+  // Hover the chart → tracking line + a tooltip of the standings at that round.
+  attachChartHover({
+    svg: phWrap.querySelector('.ph-chart'), wrap: phWrap, count: m, W,
+    top: padT, bottom: padT + plotH, xOf: x,
+    dots: i => teams.map(t => ({ cx: x(i), cy: y(rankAt(t, HISTORY[i])), color: TEAM_COLORS[t] })),
+    content: i => {
+      const h = HISTORY[i];
+      return `<div class="ct-head">Round ${h.round}</div><div class="ct-list">`
+        + h.order.map((name, j) =>
+            `<div class="ct-row"><span class="ct-rank">${j + 1}</span>`
+            + `<i style="background:${TEAM_COLORS[name] || '#999'}"></i>`
+            + `<span class="ct-name">${esc(name)}</span></div>`).join('')
+        + `</div>`;
+    },
+  });
+}
+
+/* ============================================================
+   SHARED CHART HOVER — tracking line + dots + tooltip (round-indexed)
+   ============================================================ */
+function attachChartHover(cfg) {
+  const NS = 'http://www.w3.org/2000/svg';
+  const { svg, wrap, count, W, top, bottom, xOf, content, dots } = cfg;
+  if (!svg || !count) return;
+
+  const line = document.createElementNS(NS, 'line');
+  line.setAttribute('class', 'chart-tip-line');
+  line.setAttribute('y1', top); line.setAttribute('y2', bottom);
+  line.style.display = 'none';
+  const dotsG = document.createElementNS(NS, 'g');
+  const overlay = document.createElementNS(NS, 'rect');
+  overlay.setAttribute('class', 'chart-hover-overlay');
+  overlay.setAttribute('x', xOf(0)); overlay.setAttribute('y', top);
+  overlay.setAttribute('width', Math.max(1, xOf(count - 1) - xOf(0)));
+  overlay.setAttribute('height', Math.max(1, bottom - top));
+  svg.append(line, dotsG, overlay);
+
+  const tip = document.createElement('div');
+  tip.className = 'chart-tip'; tip.hidden = true;
+  wrap.appendChild(tip);
+
+  const nearest = clientX => {
+    const r = svg.getBoundingClientRect();
+    const vbX = (clientX - r.left) / r.width * W;
+    let best = 0, bd = Infinity;
+    for (let i = 0; i < count; i++) {
+      const d = Math.abs(xOf(i) - vbX);
+      if (d < bd) { bd = d; best = i; }
+    }
+    return best;
+  };
+
+  overlay.addEventListener('pointermove', e => {
+    const i = nearest(e.clientX), cx = xOf(i);
+    line.setAttribute('x1', cx); line.setAttribute('x2', cx); line.style.display = '';
+    dotsG.innerHTML = (dots(i) || []).map(d =>
+      `<circle class="chart-tip-dot" cx="${d.cx}" cy="${d.cy}" r="4" style="fill:${d.color}"/>`).join('');
+    tip.innerHTML = content(i); tip.hidden = false;
+    const r = svg.getBoundingClientRect(), wr = wrap.getBoundingClientRect();
+    const px = (cx / W) * r.width + (r.left - wr.left);
+    const tw = tip.offsetWidth || 140;
+    let left = px + 14;
+    if (left + tw > wr.width - 4) left = px - tw - 14;
+    tip.style.left = Math.max(4, left) + 'px';
+  });
+  overlay.addEventListener('pointerleave', () => {
+    line.style.display = 'none'; dotsG.innerHTML = ''; tip.hidden = true;
+  });
+}
+
+// Team weekly-points chart hover — coords mirror buildChart() exactly.
+function attachTeamChartHover(svg, wrap, series, avg) {
+  const W = 500, H = 230, padL = 38, padR = 16, padT = 16, padB = 30;
+  const n = series.length;
+  if (!n) return;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const niceMax = Math.max(10, Math.ceil(Math.max(...series.map(s => s.points), avg, 1) / 10) * 10);
+  const xOf = i => padL + (n === 1 ? plotW / 2 : plotW * i / (n - 1));
+  const yOf = v => padT + plotH * (1 - v / niceMax);
+  attachChartHover({
+    svg, wrap, count: n, W, top: padT, bottom: padT + plotH, xOf,
+    dots: i => [{ cx: xOf(i), cy: yOf(series[i].points), color: 'var(--forest)' }],
+    content: i => `<div class="ct-head">Round ${series[i].round}</div>`
+      + `<div class="ct-pts">${(+series[i].points).toFixed(1)} pts</div>`,
   });
 }
 
@@ -277,6 +360,8 @@ function openTeamSheet(name) {
            <span class="key"><i></i> Weekly points</span>
            <span class="key avg"><i></i> Average (${avg.toFixed(1)})</span>
          </div>`;
+    const tsSvg = body.querySelector('.ts-chart');
+    if (tsSvg) attachTeamChartHover(tsSvg, body, series, avg);
   }
 
   openSheet();

@@ -40,3 +40,16 @@
 .mu-total .v.lose { color: var(--danger); }
 .mu-total .lbl { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); }
 .mu-empty, .mu-loading { padding: 44px 20px; text-align: center; color: var(--ink-muted); font-size: 13px; }
+
+/* Bench — its own container below the starters, same card format as the starters
+   card, separated by the page-gap, muted to show points aren't counted. */
+.mu-bench-card { margin-top: 12px; }
+.mu-bench-card[hidden] { display: none; }
+.mu-bench-head { text-align: center; font-size: 10px; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-faint); padding: 8px 5px;
+  border-bottom: 1px solid var(--border); }
+.mu-bench-p { opacity: .85; }
+.mu-bench-p .mtyby-pos { opacity: .6; }
+.mu-bench-p .nm b { color: var(--ink-faint); font-weight: 600; }
+.mu-bench-p .pts { color: var(--ink-faint); font-weight: 700; }
+.mu-bench-empty { justify-content: center; color: var(--ink-faint); font-style: italic; }

@@ -35,7 +35,7 @@ function renderPlayoffs(pl) {
 
   let html = '';
   if (pl.championship) html += bracketHtml('Championship', '🏆', 'champ', pl.championship);
-  if (pl.sacko)        html += bracketHtml('Sacko', '🥄', 'sacko', pl.sacko);
+  if (pl.sacko)        html += bracketHtml('Sacko', '🍆', 'sacko', pl.sacko);
   brackets.innerHTML = html;
 }
 
@@ -85,7 +85,7 @@ function tieSide(kind, t, side, isFinal) {
     ? `<span class="legs">${fmt(t[side + '_leg1'])}+${fmt(t[side + '_leg2'])}</span>`
     : '';
   const score = t.played ? `${legs}${fmt(agg)}` : '<span class="tie-tbd">—</span>';
-  const trophy = isWin && isFinal ? `<span class="tie-trophy">${kind === 'champ' ? '🏆' : '🥄'}</span>` : '';
+  const trophy = isWin && isFinal ? `<span class="tie-trophy">${kind === 'champ' ? '🏆' : '🍆'}</span>` : '';
   return `<div class="tie-side ${isWin ? 'is-winner' : ''}">
     <span class="tie-seed">${seedNo || ''}</span>
     <span class="tie-name">${esc(name)}${trophy}</span>

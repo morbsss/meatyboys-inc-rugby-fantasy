@@ -23,7 +23,7 @@
   letter-spacing: .02em; text-transform: uppercase; color: var(--forest); margin-bottom: 14px; }
 
 /* All-rounds view: 3 round-cards per row (responsive — fewer as it narrows). */
-.weeks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 14px; }
+.weeks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(660px, 1fr)); gap: 14px; }
 @media (max-width: 520px) { .weeks-grid { grid-template-columns: 1fr; } }
 /* Single-round filter: one card, centered. */
 .single-round { max-width: 640px; margin: 0 auto; }

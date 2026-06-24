@@ -325,5 +325,25 @@
 .ph-key i { width: 14px; height: 3px; border-radius: 2px; }
 .ph-key.on { color: var(--ink); border-color: var(--border-strong); }
 
+/* ── Chart hover: tracking line + dots + floating tooltip (both charts) ── */
+#ph-chart-wrap, #ts-body { position: relative; }
+.chart-hover-overlay { fill: transparent; pointer-events: all; cursor: crosshair; }
+.chart-tip-line { stroke: var(--ink-faint); stroke-width: 1; stroke-dasharray: 3 3; pointer-events: none; }
+.chart-tip-dot { stroke: #fff; stroke-width: 1.5; pointer-events: none; }
+.chart-tip {
+  position: absolute; top: 6px; z-index: 6; pointer-events: none;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md);
+  box-shadow: var(--shadow-1); padding: 8px 10px; font-size: 11px; min-width: 92px; max-width: 230px;
+}
+.chart-tip[hidden] { display: none; }
+.ct-head { font-family: var(--font-display); font-weight: 800; font-size: 11px; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--ink); margin-bottom: 6px; }
+.ct-pts { font-family: var(--font-display); font-weight: 800; font-size: 17px; color: var(--forest); }
+.ct-list { display: grid; gap: 3px; }
+.ct-row { display: flex; align-items: center; gap: 6px; }
+.ct-rank { width: 14px; text-align: right; color: var(--ink-faint); font-weight: 700; font-variant-numeric: tabular-nums; }
+.ct-row i { width: 9px; height: 3px; border-radius: 2px; flex: 0 0 auto; }
+.ct-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); max-width: 160px; }
+
 /* Link to the dedicated Finals page */
 .finals-link { margin-top: 16px; }
