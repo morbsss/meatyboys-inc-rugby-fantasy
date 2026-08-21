@@ -1,0 +1,4 @@
+# VM deployment installs from here (deploy.sh: pip install -r requirements.txt).
+# App runtime deps live in api/requirements.txt; gunicorn is the VM web server.
+-r api/requirements.txt
+gunicorn==23.0.0
