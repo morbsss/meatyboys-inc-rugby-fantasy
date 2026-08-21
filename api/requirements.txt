@@ -2,6 +2,7 @@ requests==2.32.3
 beautifulsoup4==4.12.3
 flask==3.1.3
 Jinja2>=3.1.2
-psycopg2-binary==2.9.9
 werkzeug>=3.0.0
 tzdata>=2024.1
+# Postgres is optional (the app imports psycopg2 lazily, only for DB_TYPE=postgres).
+# If you use Postgres, install it separately:  pip install psycopg2-binary
