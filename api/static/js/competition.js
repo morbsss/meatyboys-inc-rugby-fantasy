@@ -14,22 +14,11 @@ let TEAM_COLORS = {};
 let champEnd = 0;        // championship = indices [0, champEnd)
 let sackoStart = 0;      // sacko        = indices [sackoStart, n)
 let BONUS = true;        // mtyby = false → hide BP & Pts; rank purely on wins
+let PRESEASON = false;   // no rounds played yet → teams listed alphabetically, no bands
 
-// Previous championships per team → one 🏆 each (hard-coded for now).
-const CHAMPS = {
-  'Seldom': 1,
-  'Pizza Morahana': 2,
-  'Dulwich Panthers': 1,
-  'Chessums Cheerleaders': 1,
-};
-
-// Previous Sacko finishes per team → one 🍆 each, shown under
-// the trophies (hard-coded for now).
-const SACKOS = {
-  'Pizza Morahana': 1,
-  'Bread XV': 1,
-  'George XV': 2,
-};
+// Career honours (🏆 championships / 🍆 sackos) now come from the DB per row
+// (t.champs / t.sackos), resolved via the team's owning account — see
+// _honours_by_team in api/index.py. No hard-coded map.
 
 /* ========================================= ===================
    BOOT
@@ -48,6 +37,7 @@ async function init() {
   RESULTS  = data.results  || [];
   HISTORY  = data.position_history || [];
   BONUS    = data.bonus !== false;   // mtyby sends bonus:false
+  PRESEASON = (data.max_round || 0) < 1;   // pre-season: alphabetical, no play yet
   computeMovement();
   renderTable(TABLE);
   renderPositionChart();
@@ -78,17 +68,20 @@ function renderTable(table) {
   }
 
   // Top 4 = Championship, bottom 4 = Sacko. Any team in between (e.g. a
-  // 9th-placed team) sits ungrouped between the two bands.
+  // 9th-placed team) sits ungrouped between the two bands. Pre-season there is
+  // no ranking yet (teams are alphabetical), so the bands are suppressed.
   const n = table.length;
-  champEnd   = Math.min(4, n);
-  sackoStart = Math.max(champEnd, n - 4);
+  champEnd   = PRESEASON ? 0 : Math.min(4, n);
+  sackoStart = PRESEASON ? n : Math.max(champEnd, n - 4);
   const sackoCount = n - sackoStart;
 
   const rows = table.map((t, i) => {
     // Side-spine cell: rendered once per band via rowspan; middle rows get an
     // empty spacer; rows covered by a rowspan above emit nothing.
     let side = '';
-    if (i === 0) {
+    if (PRESEASON) {
+      side = `<td class="c-side lt-side lt-side--none"></td>`;
+    } else if (i === 0) {
       side = `<td rowspan="${champEnd}" class="c-side lt-side lt-side--champ"><span>Championship</span></td>`;
     } else if (i === sackoStart && sackoCount > 0) {
       side = `<td rowspan="${sackoCount}" class="c-side lt-side lt-side--sacko"><span>Sacko</span></td>`;
@@ -97,9 +90,11 @@ function renderTable(table) {
     }
 
     const cls = ['lt-row'];
-    if (i === 0) cls.push('is-leader');
-    if (i < champEnd) cls.push('in-champ');
-    else if (i >= sackoStart) cls.push('in-sacko');
+    if (!PRESEASON) {
+      if (i === 0) cls.push('is-leader');
+      if (i < champEnd) cls.push('in-champ');
+      else if (i >= sackoStart) cls.push('in-sacko');
+    }
 
     const mv = MOVE[t.name] || { dir: 'same', delta: 0 };
     const mvIcon = mv.dir === 'up' ? '▲' : (mv.dir === 'down' ? '▼' : '-');
@@ -120,7 +115,7 @@ function renderTable(table) {
       <td class="c-hide lt-muted">${t.points_for.toFixed(1)}</td>
       <td class="c-hide lt-muted">${t.points_against.toFixed(1)}</td>
       ${ptsCell}
-      <td class="c-champs lt-champs" title="${(CHAMPS[t.name] || 0)} championship${(CHAMPS[t.name] || 0) === 1 ? '' : 's'}, ${(SACKOS[t.name] || 0)} sacko${(SACKOS[t.name] || 0) === 1 ? '' : 's'}"><span class="lt-trophies">${'🏆'.repeat(CHAMPS[t.name] || 0)}</span><span class="lt-sackos">${'🍆'.repeat(SACKOS[t.name] || 0)}</span></td>
+      <td class="c-champs lt-champs" title="${(t.champs || 0)} championship${(t.champs || 0) === 1 ? '' : 's'}, ${(t.sackos || 0)} sacko${(t.sackos || 0) === 1 ? '' : 's'}"><span class="lt-trophies">${'🏆'.repeat(t.champs || 0)}</span><span class="lt-sackos">${'🍆'.repeat(t.sackos || 0)}</span></td>
       <td class="c-chev"><svg class="lt-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></td>
     </tr>`;
   }).join('');
@@ -249,8 +244,8 @@ function attachChartHover(cfg) {
     return best;
   };
 
-  overlay.addEventListener('pointermove', e => {
-    const i = nearest(e.clientX), cx = xOf(i);
+  const show = clientX => {
+    const i = nearest(clientX), cx = xOf(i);
     line.setAttribute('x1', cx); line.setAttribute('x2', cx); line.style.display = '';
     dotsG.innerHTML = (dots(i) || []).map(d =>
       `<circle class="chart-tip-dot" cx="${d.cx}" cy="${d.cy}" r="4" style="fill:${d.color}"/>`).join('');
@@ -259,12 +254,29 @@ function attachChartHover(cfg) {
     const px = (cx / W) * r.width + (r.left - wr.left);
     const tw = tip.offsetWidth || 140;
     let left = px + 14;
-    if (left + tw > wr.width - 4) left = px - tw - 14;
+    if (left + tw > wr.width - 4) left = px - tw - 14;   // flip to keep it on-screen
     tip.style.left = Math.max(4, left) + 'px';
+  };
+  const hide = () => { line.style.display = 'none'; dotsG.innerHTML = ''; tip.hidden = true; };
+  let scrubbing = false;
+
+  // Mouse: hover to track, leave to clear.
+  overlay.addEventListener('pointermove', e => show(e.clientX));
+  overlay.addEventListener('pointerleave', () => { if (!scrubbing) hide(); });
+  // Touch/pen: tap-and-drag to scrub. Capture the pointer so a drag keeps
+  // tracking, and hide on release. touch-action:pan-y (CSS) lets the page still
+  // scroll vertically off the chart.
+  overlay.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'mouse') return;
+    scrubbing = true;
+    try { overlay.setPointerCapture(e.pointerId); } catch (_) {}
+    show(e.clientX);
   });
-  overlay.addEventListener('pointerleave', () => {
-    line.style.display = 'none'; dotsG.innerHTML = ''; tip.hidden = true;
+  overlay.addEventListener('pointerup', e => {
+    if (e.pointerType === 'mouse') return;
+    scrubbing = false; hide();
   });
+  overlay.addEventListener('pointercancel', () => { scrubbing = false; hide(); });
 }
 
 // Team weekly-points chart hover — coords mirror buildChart() exactly.

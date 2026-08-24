@@ -109,6 +109,12 @@ body {
   overflow-x: hidden;
 }
 button, input, select, textarea { font: inherit; color: inherit; }
+/* iOS Safari auto-zooms the page whenever a focused text control renders below
+   16px. The design body size is 14px, so force 16px on form controls on phones
+   (overriding any component's smaller size) to kill the zoom-on-focus jump. */
+@media (max-width: 768px) {
+  input, select, textarea { font-size: 16px !important; }
+}
 button { background: none; border: none; cursor: pointer; }
 a { color: inherit; text-decoration: none; }
 :focus-visible {
@@ -749,6 +755,9 @@ a { color: inherit; text-decoration: none; }
   .mtyby-user-chip { padding: 3px 4px; }
   .mtyby-user-chip .avatar { width: 22px; height: 22px; font-size: 12px; }
   .mtyby-header-end .mtyby-logout { display: none; }
+  /* Enlarge dense tap targets toward the 44px touch guideline (font unchanged). */
+  .mtyby-btn--sm { min-height: 44px; padding: 8px 14px; }
+  .mtyby-chip { min-height: 40px; padding: 8px 14px; }
 }
 
 /* ============================================================

@@ -9,7 +9,8 @@
 
 .mu-head { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px;
   padding: 5px 5px; border-bottom: 1px solid var(--border-strong); }
-.mu-team-name { font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--amber-deep); text-align: center; }
+.mu-team-name { font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--amber-deep);
+  text-align: center; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mu-vs { font-family: var(--font-display); font-weight: 800; color: var(--ink-faint); font-size: 13px; }
 
 .mu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
@@ -53,3 +54,13 @@
 .mu-bench-p .nm b { color: var(--ink-faint); font-weight: 600; }
 .mu-bench-p .pts { color: var(--ink-faint); font-weight: 700; }
 .mu-bench-empty { justify-content: center; color: var(--ink-faint); font-style: italic; }
+
+/* Very narrow phones (~360px): the head-to-head stays two columns by design, so
+   tighten padding/gaps and the points column to keep player names legible. */
+@media (max-width: 480px) {
+  .mu-p { padding: 6px 7px; gap: 5px; font-size: 12px; }
+  .mu-p .pts { min-width: 24px; font-size: 12px; }
+  .mu-p .nm { gap: 4px; }
+  .mu-team-name { font-size: 15px; }
+  .mu-head, .mu-total { gap: 4px; }
+}

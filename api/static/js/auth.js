@@ -63,7 +63,7 @@ function selectLeague(lg, card) {
 // Login
 document.getElementById('login-form').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const email = document.getElementById('login-email').value.trim();
+  const username = document.getElementById('login-username').value.trim();
   const password = document.getElementById('login-password').value;
   const remember = document.getElementById('login-remember').checked;
   const btn = document.getElementById('login-btn');
@@ -72,7 +72,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
   try {
     const res = await fetch('/api/auth/login', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, remember })
+      body: JSON.stringify({ username, password, remember })
     });
     const data = await res.json();
     if (res.ok) {
@@ -89,12 +89,15 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
 // Register
 document.getElementById('register-form').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const email = document.getElementById('register-email').value.trim();
+  const username = document.getElementById('register-username').value.trim();
   const password = document.getElementById('register-password').value;
   const passwordConfirm = document.getElementById('register-password-confirm').value;
-  const team = document.getElementById('register-team').value.trim();
   const alertDiv = document.getElementById('register-alert');
 
+  if (!username) {
+    alertDiv.innerHTML = `<div class="alert alert-error">Choose a username to sign in with.</div>`;
+    return;
+  }
   if (!selectedLeague) {
     alertDiv.innerHTML = `<div class="alert alert-error">Choose a league to join first.</div>`;
     return;
@@ -103,17 +106,13 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
     alertDiv.innerHTML = `<div class="alert alert-error">Passwords do not match.</div>`;
     return;
   }
-  if (!team) {
-    alertDiv.innerHTML = `<div class="alert alert-error">Give your team a name.</div>`;
-    return;
-  }
 
   const btn = document.getElementById('register-btn');
   btn.disabled = true; btn.innerHTML = '<span class="loading-spinner"></span> Creating account...';
   try {
     const res = await fetch('/api/auth/register', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, team_name: team, league: selectedLeague.slug })
+      body: JSON.stringify({ username, password, league: selectedLeague.slug })
     });
     const data = await res.json();
     if (res.ok) {
@@ -126,5 +125,14 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
     alertDiv.innerHTML = `<div class="alert alert-error">Network error: ${err.message}</div>`;
   } finally { btn.disabled = false; btn.innerHTML = 'Create account'; }
 });
+
+// "Forgot password?" -> reveal the commissioner-reset explainer.
+const forgotLink = document.getElementById('forgot-link');
+if (forgotLink) {
+  forgotLink.addEventListener('click', () => {
+    const panel = document.getElementById('forgot-panel');
+    if (panel) panel.hidden = !panel.hidden;
+  });
+}
 
 loadLeagues();

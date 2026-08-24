@@ -45,7 +45,8 @@ async function checkUserSession() {
 
     const roundEl = document.getElementById('header-round');
     if (roundEl && user.current_round != null) {
-      document.getElementById('header-round-num').textContent = user.current_round;
+      // Round 0 = pre-season (draft not finished / no rounds scored yet).
+      roundEl.textContent = user.current_round > 0 ? `Round ${user.current_round}` : 'Pre-season';
       roundEl.style.display = '';
     } else if (roundEl) {
       roundEl.style.display = 'none';
@@ -54,7 +55,11 @@ async function checkUserSession() {
     const avatarSheet = document.getElementById('user-avatar-sheet');
     const infoSheet = document.getElementById('user-info-sheet');
     if (avatarSheet) avatarSheet.textContent = initial;
-    if (infoSheet) infoSheet.textContent = user.team_name ? `${user.username} · ${user.team_name}` : user.username;
+    // Show "username · team" once the team has its own name; until then (team
+    // still defaults to the username) just show the username to avoid "a · a".
+    if (infoSheet) infoSheet.textContent =
+      (user.team_name && user.team_name !== user.username)
+        ? `${user.username} · ${user.team_name}` : user.username;
 
     renderProfile(user);
   } catch (err) {
@@ -62,18 +67,34 @@ async function checkUserSession() {
   }
 }
 
-/** Paint the profile sheet (team name, commissioner toggle) from a user. */
+/** Paint the profile sheet (username, team name, commissioner toggle) from a user. */
 function renderProfile(user) {
   window.__mtybyUser = user;
 
-  // Team name + (conditionally shown) rename control.
+  // Username (login) — always changeable.
+  const unameEl = document.getElementById('profile-username');
+  if (unameEl) unameEl.textContent = user.username || '—';
+
+  // Team name + (conditionally shown) create/rename control. Until the manager
+  // names their team it defaults to their username, so show a placeholder and a
+  // "Name your team" prompt; once named, it's a "Rename".
+  const named = !!(user.team_name && user.team_name !== user.username);
   const nameEl = document.getElementById('profile-team-name');
-  if (nameEl) nameEl.textContent = user.team_name || '—';
+  if (nameEl) {
+    nameEl.textContent = named ? user.team_name : 'Not named yet';
+    nameEl.style.color = named ? 'var(--ink)' : 'var(--ink-faint)';
+  }
   const editBtn = document.getElementById('profile-team-edit-btn');
   const lockedEl = document.getElementById('profile-team-locked');
-  if (editBtn) editBtn.style.display = user.can_edit_team ? '' : 'none';
+  const hintEl = document.getElementById('profile-team-hint');
+  if (editBtn) {
+    editBtn.textContent = named ? 'Rename' : 'Name your team';
+    editBtn.style.display = user.can_edit_team ? '' : 'none';
+  }
   if (lockedEl) lockedEl.style.display = user.can_edit_team ? 'none' : '';
+  if (hintEl) hintEl.style.display = user.can_edit_team ? '' : 'none';
   cancelTeamRename();
+  cancelUsernameChange();
   cancelPwChange();
 
   // Commissioner toggle: ON = you hold the role; disabled when someone else does.
@@ -89,6 +110,45 @@ function renderProfile(user) {
     else if (heldByOther) statusEl.textContent = `Held by ${user.commissioner_name} — they must step down first.`;
     else statusEl.textContent = 'No commissioner yet — toggle on to take the role.';
   }
+
+  // Commissioner-only: the "reset a member's password" control.
+  const resetBox = document.getElementById('profile-commish-reset');
+  if (resetBox) {
+    if (user.is_commissioner) { resetBox.style.display = ''; populateResetMembers(); }
+    else { resetBox.style.display = 'none'; }
+  }
+}
+
+// Fill the member picker with this league's claimed teams (excluding yourself).
+async function populateResetMembers() {
+  const sel = document.getElementById('reset-member-select');
+  if (!sel) return;
+  const mine = (window.__mtybyUser && window.__mtybyUser.team_name) || '';
+  try {
+    const teams = await (await fetch('/api/auth/teams')).json();
+    const members = (teams || []).filter((t) => t.owner && t.name !== mine);
+    sel.innerHTML = members.length
+      ? members.map((t) => `<option value="${escAttr(t.name)}">${esc(t.name)} (${esc(t.owner)})</option>`).join('')
+      : '<option value="">No other members yet</option>';
+  } catch (_) {
+    sel.innerHTML = '<option value="">Could not load members</option>';
+  }
+}
+
+// Reset a member's password to a random temporary one and show it to share.
+async function resetMemberPassword() {
+  const sel = document.getElementById('reset-member-select');
+  const out = document.getElementById('reset-member-result');
+  const team = sel && sel.value;
+  if (!team) { mtybyToast('Pick a member first', 'err'); return; }
+  const { ok, data } = await apiFetch('/api/league/reset-member-password', { team_name: team });
+  if (ok && data) {
+    out.innerHTML = `Temporary password for <b>${esc(data.team_name)}</b>: `
+      + `<code style="background:var(--surface-2); padding:2px 6px; border-radius:4px; font-weight:700; color:var(--ink);">${esc(data.temp_password)}</code>`
+      + `<br>Share it with them — they can change it from their own Password section.`;
+  } else {
+    mtybyToast((data && data.error) || 'Could not reset password', 'err');
+  }
 }
 
 // ---- Profile action: rename team ------------------------------------------
@@ -97,7 +157,10 @@ function startTeamRename() {
   document.getElementById('profile-team-view').style.display = 'none';
   document.getElementById('profile-team-edit').style.display = '';
   const input = document.getElementById('profile-team-input');
-  input.value = (window.__mtybyUser && window.__mtybyUser.team_name) || '';
+  const u = window.__mtybyUser || {};
+  // Start empty when the team is still unnamed (team_name defaults to username),
+  // so the manager types a fresh name rather than editing their login.
+  input.value = (u.team_name && u.team_name !== u.username) ? u.team_name : '';
   input.focus();
 }
 
@@ -114,6 +177,31 @@ async function saveTeamRename() {
   const { ok, data } = await apiFetch('/api/auth/team-name', { team_name: name });
   if (ok) { mtybyToast('Team name updated'); await checkUserSession(); }
   else mtybyToast((data && data.error) || 'Could not rename team', 'error');
+}
+
+// ---- Profile action: change username (login) ------------------------------
+
+function startUsernameChange() {
+  document.getElementById('profile-username-view').style.display = 'none';
+  document.getElementById('profile-username-edit').style.display = '';
+  const input = document.getElementById('profile-username-input');
+  input.value = (window.__mtybyUser && window.__mtybyUser.username) || '';
+  input.focus();
+}
+
+function cancelUsernameChange() {
+  const view = document.getElementById('profile-username-view');
+  const edit = document.getElementById('profile-username-edit');
+  if (view) view.style.display = 'flex';
+  if (edit) edit.style.display = 'none';
+}
+
+async function saveUsernameChange() {
+  const name = document.getElementById('profile-username-input').value.trim();
+  if (!name) { mtybyToast('Enter a username', 'error'); return; }
+  const { ok, data } = await apiFetch('/api/auth/username', { username: name });
+  if (ok) { mtybyToast('Username updated'); await checkUserSession(); }
+  else mtybyToast((data && data.error) || 'Could not change username', 'error');
 }
 
 // ---- Profile action: commissioner toggle ----------------------------------
