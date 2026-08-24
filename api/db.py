@@ -9,6 +9,7 @@ Environment variables:
 
 import os
 import sqlite3
+from datetime import datetime
 
 from .leagues import LEAGUES, DEFAULT_LEAGUE
 
@@ -278,6 +279,9 @@ def ensure_schema(conn):
     # Two-league support (spec §1, §5.1) + draft engine tables.
     _ensure_league_schema(conn, cursor)
 
+    # Evergreen identity layer: seasons, per-season opt-in entries, honours.
+    _ensure_season_schema(conn, cursor)
+
     conn.commit()
     cursor.close()
 
@@ -531,6 +535,96 @@ def _ensure_league_schema(conn, cursor) -> None:
         cursor.execute('ALTER TABLE team_front_row ADD COLUMN is_captain INTEGER NOT NULL DEFAULT 0')
     if not _column_exists(cursor, 'team_front_row', 'is_bench'):
         cursor.execute('ALTER TABLE team_front_row ADD COLUMN is_bench INTEGER NOT NULL DEFAULT 0')
+    conn.commit()
+
+
+# Season label seeded on a fresh DB. The *current* season is whichever row in
+# `seasons` has status='active'; new seasons are opened by season_rollover.py.
+INITIAL_SEASON = '2026-27'
+
+
+def _ensure_season_schema(conn, cursor) -> None:
+    """Evergreen identity layer: seasons, per-season opt-in entries, and honours.
+
+    Accounts (users) + honours persist across seasons; a manager plays a season
+    only by having a season_entries row (opt-in). team_name lives on the entry so
+    renames are per-season; users.team_name mirrors the current entry for the
+    existing team_name-keyed competition tables. Idempotent and non-destructive."""
+    serial = 'SERIAL PRIMARY KEY' if DB_TYPE == 'postgres' else 'INTEGER PRIMARY KEY AUTOINCREMENT'
+
+    cursor.execute(f'''
+        CREATE TABLE IF NOT EXISTS seasons (
+            season_id {serial},
+            label TEXT NOT NULL UNIQUE,
+            status TEXT NOT NULL DEFAULT 'active',
+            created_at TEXT
+        )
+    ''')
+
+    # Per-season opt-in participation. A manager is IN a season iff they have a
+    # row here; their team name for that season lives on the row (renamable).
+    cursor.execute(f'''
+        CREATE TABLE IF NOT EXISTS season_entries (
+            entry_id {serial},
+            user_id INTEGER NOT NULL,
+            league_id INTEGER NOT NULL,
+            season_id INTEGER NOT NULL,
+            team_name TEXT NOT NULL,
+            created_at TEXT,
+            UNIQUE(user_id, league_id, season_id),
+            UNIQUE(league_id, season_id, team_name)
+        )
+    ''')
+
+    # Permanent honours, keyed to the ACCOUNT (immune to team renames).
+    cursor.execute(f'''
+        CREATE TABLE IF NOT EXISTS honours (
+            honour_id {serial},
+            user_id INTEGER NOT NULL,
+            league_id INTEGER NOT NULL,
+            season_id INTEGER NOT NULL,
+            placement TEXT NOT NULL,
+            created_at TEXT
+        )
+    ''')
+    conn.commit()
+
+    # Seed the first season on a fresh DB.
+    cursor.execute('SELECT COUNT(*) AS n FROM seasons')
+    row = cursor.fetchone()
+    if ((row['n'] if isinstance(row, dict) else row[0]) or 0) == 0:
+        cursor.execute(
+            f"INSERT INTO seasons (label, status, created_at) VALUES ({_ph()}, 'active', {_ph()})",
+            (INITIAL_SEASON, datetime.utcnow().isoformat()),
+        )
+        conn.commit()
+
+    # Current (active) season id.
+    cursor.execute("SELECT season_id FROM seasons WHERE status = 'active' ORDER BY season_id DESC LIMIT 1")
+    row = cursor.fetchone()
+    current_season_id = (row['season_id'] if isinstance(row, dict) else row[0]) if row else None
+    if current_season_id is None:
+        return
+
+    # Backfill: existing accounts with a team_name are treated as entered in the
+    # current season, so legacy/real DBs keep their league table. No-op on a
+    # fresh clean-slate DB (0 users).
+    cursor.execute('SELECT user_id, team_name, league_id FROM users WHERE team_name IS NOT NULL')
+    for r in cursor.fetchall():
+        uid   = r['user_id']   if isinstance(r, dict) else r[0]
+        tname = r['team_name'] if isinstance(r, dict) else r[1]
+        lid   = r['league_id'] if isinstance(r, dict) else r[2]
+        if lid is None:
+            continue
+        cursor.execute(
+            f'SELECT entry_id FROM season_entries '
+            f'WHERE user_id={_ph()} AND league_id={_ph()} AND season_id={_ph()}',
+            (uid, lid, current_season_id))
+        if cursor.fetchone() is None:
+            cursor.execute(
+                f'INSERT INTO season_entries (user_id, league_id, season_id, team_name, created_at) '
+                f'VALUES ({_ph()}, {_ph()}, {_ph()}, {_ph()}, {_ph()})',
+                (uid, lid, current_season_id, tname, datetime.utcnow().isoformat()))
     conn.commit()
 
 

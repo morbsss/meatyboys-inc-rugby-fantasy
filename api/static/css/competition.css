@@ -327,7 +327,7 @@
 
 /* ── Chart hover: tracking line + dots + floating tooltip (both charts) ── */
 #ph-chart-wrap, #ts-body { position: relative; }
-.chart-hover-overlay { fill: transparent; pointer-events: all; cursor: crosshair; }
+.chart-hover-overlay { fill: transparent; pointer-events: all; cursor: crosshair; touch-action: pan-y; }
 .chart-tip-line { stroke: var(--ink-faint); stroke-width: 1; stroke-dasharray: 3 3; pointer-events: none; }
 .chart-tip-dot { stroke: #fff; stroke-width: 1.5; pointer-events: none; }
 .chart-tip {

@@ -12,7 +12,7 @@ $VM_IP       = "45.32.106.113"        # <-- your VM's public IP
 $VM_USER     = "root"                 # <-- SSH username (check your VM provider)
 $VM_SSH_PORT = 22                     # <-- SSH port (22 is default)
 $VM_APP_DIR  = "~/meatyboys"          # <-- where the app lives on the VM
-$DB_FILE     = "fantasy_2025_26.db"   # <-- SQLite DB to ship (or mock_fantasy.db)
+$DB_FILE     = "fantasy_2026_27.db"   # <-- SQLite DB to ship (new 2026-27 season)
 # -----------------------------------------------------------------------------
 
 $VM = "${VM_USER}@${VM_IP}"

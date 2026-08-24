@@ -272,7 +272,7 @@ def get_last_round(conn, league_id=None) -> int:
         result = row['max'] if row and row.get('max') else None
     else:
         result = row[0] if row else None
-    return result or 1
+    return result or 0   # 0 = pre-season (no rounds scored yet)
 
 
 ALLOW_UNRESTRICTED_EDITS = os.getenv('ALLOW_UNRESTRICTED_EDITS', 'false').lower() == 'true'
@@ -407,30 +407,37 @@ def list_leagues():
 
 @app.route('/api/auth/register', methods=['POST'])
 def register():
-    """Register a new user: email + password, joined to a chosen league (§6.1)."""
+    """Register a new user: a username (which is also the team name) + password,
+    joined to a chosen league (§6.1). No email."""
     data = request.get_json()
-    email = data.get('email', '').strip().lower()
+    # Accept `username`; fall back to legacy `team_name`/`email` keys.
+    username = (data.get('username') or data.get('team_name') or data.get('email') or '').strip()
     password = data.get('password', '')
-    team_name = data.get('team_name', '').strip()
     league_slug = data.get('league', '').strip()
 
-    if not email or '@' not in email:
-        return jsonify({'error': 'A valid email is required'}), 400
+    if not username:
+        return jsonify({'error': 'Please choose a username'}), 400
+    if len(username) > 40:
+        return jsonify({'error': 'Username must be 40 characters or fewer'}), 400
     if not password or len(password) < 6:
         return jsonify({'error': 'Password must be at least 6 characters'}), 400
     if league_slug not in joinable_leagues():
         return jsonify({'error': 'Please choose a league to join'}), 400
-    if not team_name:
-        return jsonify({'error': 'Please name your team'}), 400
 
     conn = get_db()
     ensure_schema(conn)
     league_id = _league_id_by_slug(conn, league_slug)
-    result = create_user(conn, email, password, team_name, league_id)
+    result = create_user(conn, username, password, league_id)
 
     if 'error' in result:
         conn.close()
         return jsonify(result), 400
+
+    # Enter the new account into the current season (opt-in participation lives
+    # in season_entries; the league table reads from there).
+    _enter_season(conn, result['user_id'], league_id, result['team_name'])
+    _claim_legacy_honours(conn, result['user_id'], league_id, result['team_name'])
+    conn.commit()
 
     # Commissioner is NOT auto-assigned. The role is claimed/changed later from
     # the user profile (POST /api/league/commissioner).
@@ -448,13 +455,13 @@ def register():
 
 @app.route('/api/auth/login', methods=['POST'])
 def login():
-    """Login by email (or legacy username) + password."""
+    """Login by username (or legacy email) + password."""
     data = request.get_json()
-    identifier = (data.get('email') or data.get('username') or '').strip().lower()
+    identifier = (data.get('username') or data.get('email') or '').strip()
     password = data.get('password', '')
 
     if not identifier or not password:
-        return jsonify({'error': 'Email and password required'}), 400
+        return jsonify({'error': 'Username and password required'}), 400
 
     conn = get_db()
     ensure_schema(conn)
@@ -569,15 +576,25 @@ def update_team_name():
         return jsonify({'status': 'success', 'team_name': new_name}), 200
 
     cursor = _get_cursor(conn)
-    # Team name is globally unique (users.team_name UNIQUE).
-    cursor.execute('SELECT user_id FROM users WHERE team_name = ? AND user_id != ?',
-                   (new_name, ctx['user_id']))
+    # The team name is independent of the login username; it just has to be free
+    # among team names (case-insensitive), ignoring your own row.
+    cursor.execute(
+        'SELECT user_id FROM users WHERE LOWER(team_name) = LOWER(?) AND user_id != ?',
+        (new_name, ctx['user_id']))
     if cursor.fetchone():
         cursor.close()
         conn.close()
         return jsonify({'error': 'That team name is already taken'}), 409
 
-    cursor.execute('UPDATE users SET team_name = ? WHERE user_id = ?', (new_name, ctx['user_id']))
+    # Rename ONLY the team — the username (login) is left untouched.
+    cursor.execute('UPDATE users SET team_name = ? WHERE user_id = ?',
+                   (new_name, ctx['user_id']))
+    # Rename this season's entry too (the evergreen source of truth for the table).
+    sid = _current_season_id(conn)
+    if sid is not None:
+        cursor.execute('UPDATE season_entries SET team_name = ? '
+                       'WHERE user_id = ? AND league_id = ? AND season_id = ?',
+                       (new_name, ctx['user_id'], ctx['league_id'], sid))
     # Cascade so a rename before round 1 (post-draft) keeps references aligned.
     if old_name:
         cursor.execute('UPDATE team_selections SET team_name = ? WHERE team_name = ? AND league_id = ?',
@@ -596,6 +613,82 @@ def update_team_name():
 
     session['team_name'] = new_name
     return jsonify({'status': 'success', 'team_name': new_name}), 200
+
+
+@app.route('/api/auth/username', methods=['POST'])
+def update_username():
+    """Change the login username. Independent of the team name and NOT season-
+    locked — the username is only an identity/login, referenced by user_id
+    everywhere else, so it can change any time."""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Not logged in'}), 401
+
+    new_name = (request.get_json(silent=True) or {}).get('username', '').strip()
+    if not new_name:
+        return jsonify({'error': 'Please enter a username'}), 400
+    if len(new_name) > 40:
+        return jsonify({'error': 'Username must be 40 characters or fewer'}), 400
+
+    conn = get_db()
+    ensure_schema(conn)
+    cursor = _get_cursor(conn)
+    cursor.execute('SELECT user_id FROM users WHERE LOWER(username) = LOWER(?) AND user_id != ?',
+                   (new_name, user_id))
+    if cursor.fetchone():
+        cursor.close()
+        conn.close()
+        return jsonify({'error': 'That username is already taken'}), 409
+    cursor.execute('UPDATE users SET username = ? WHERE user_id = ?', (new_name, user_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    session['username'] = new_name
+    return jsonify({'status': 'success', 'username': new_name}), 200
+
+
+@app.route('/api/season/join', methods=['POST'])
+def join_season():
+    """A returning manager opts into the current season, (re)claiming a team name.
+    New sign-ups are entered automatically at registration; this is for accounts
+    that already exist from a previous season. Honours (kept on the account) carry
+    over automatically once they're back in the table."""
+    if not session.get('user_id'):
+        return jsonify({'error': 'Not logged in'}), 401
+
+    conn = get_db()
+    ensure_schema(conn)
+    ctx = _user_context(conn)
+    if not ctx:
+        conn.close()
+        return jsonify({'error': 'Not logged in'}), 401
+
+    name = (request.get_json(silent=True) or {}).get('team_name', '').strip() or ctx['team_name']
+    if not name:
+        return jsonify({'error': 'Please choose a team name'}), 400
+    if len(name) > 40:
+        return jsonify({'error': 'Team name must be 40 characters or fewer'}), 400
+
+    cursor = _get_cursor(conn)
+    # Team name is independent of the login username; unique among team names only.
+    cursor.execute(
+        'SELECT user_id FROM users WHERE LOWER(team_name) = LOWER(?) AND user_id != ?',
+        (name, ctx['user_id']))
+    if cursor.fetchone():
+        cursor.close()
+        conn.close()
+        return jsonify({'error': 'That team name is already taken'}), 409
+    cursor.execute('UPDATE users SET team_name = ? WHERE user_id = ?', (name, ctx['user_id']))
+    cursor.close()
+
+    _enter_season(conn, ctx['user_id'], ctx['league_id'], name)
+    _claim_legacy_honours(conn, ctx['user_id'], ctx['league_id'], name)
+    conn.commit()
+    conn.close()
+
+    session['team_name'] = name
+    return jsonify({'status': 'success', 'team_name': name}), 200
 
 
 @app.route('/api/league/commissioner', methods=['POST'])
@@ -672,6 +765,51 @@ def change_password():
     cursor.close()
     conn.close()
     return jsonify({'status': 'success'}), 200
+
+
+@app.route('/api/league/reset-member-password', methods=['POST'])
+def reset_member_password():
+    """Commissioner-only: reset a league member's password to a random temporary
+    one and return it, so the commissioner can pass it on. Used by the sign-in
+    'Forgot password?' flow (no email needed). Scoped to the commissioner's league."""
+    import secrets
+    if not session.get('user_id'):
+        return jsonify({'error': 'Not logged in'}), 401
+    conn = get_db()
+    ensure_schema(conn)
+    ctx = _user_context(conn)
+    if not ctx or not ctx['is_commissioner']:
+        conn.close()
+        return jsonify({'error': 'Only the league commissioner can reset passwords'}), 403
+
+    team_name = (request.get_json(silent=True) or {}).get('team_name', '').strip()
+    if not team_name:
+        conn.close()
+        return jsonify({'error': 'Choose a member to reset'}), 400
+
+    cursor = _get_cursor(conn)
+    cursor.execute('SELECT user_id, username, team_name, league_id FROM users WHERE team_name = ?',
+                   (team_name,))
+    row = cursor.fetchone()
+    if not row:
+        cursor.close(); conn.close()
+        return jsonify({'error': 'No member with that team'}), 404
+    r = dict(row) if not isinstance(row, dict) else row
+    if r['league_id'] != ctx['league_id']:
+        cursor.close(); conn.close()
+        return jsonify({'error': 'That member is in another league'}), 403
+    if r['user_id'] == session['user_id']:
+        cursor.close(); conn.close()
+        return jsonify({'error': 'Change your own password from the Password section'}), 400
+
+    temp = secrets.token_hex(5)   # 10-char temporary password (member changes it)
+    cursor.execute('UPDATE users SET password_hash = ? WHERE user_id = ?',
+                   (hash_password(temp), r['user_id']))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return jsonify({'status': 'success', 'team_name': r['team_name'],
+                    'username': r['username'], 'temp_password': temp}), 200
 
 
 @app.route('/api/auth/teams')
@@ -818,6 +956,16 @@ def api_players():
     conn = get_db()
     ensure_schema(conn)
     league_id = current_league_id(conn)
+
+    # The Player Hub opens only once the draft is complete. Until then all player
+    # research happens on the draft board (which shows last-season stats), and the
+    # hub stays closed so nobody can grab "free agents" before the draft runs.
+    if _get_draft(conn, league_id)['status'] != 'complete':
+        league = _league_meta(conn, league_id)
+        conn.close()
+        return jsonify({'league': league, 'players': [], 'rounds': [], 'round': 0,
+                        'metric': 'total', 'teams': [], 'draft_complete': False})
+
     metric = (request.args.get('metric') or 'total').lower()
     round_param = request.args.get('round', type=int)
     cursor = _get_cursor(conn)
@@ -926,7 +1074,8 @@ def api_players():
     teams = sorted({t for t in owner.values() if t} | {t for t in fr_owner.values() if t})
     conn.close()
     return jsonify({'league': league, 'players': players, 'rounds': rounds,
-                    'round': target, 'metric': metric, 'teams': teams})
+                    'round': target, 'metric': metric, 'teams': teams,
+                    'draft_complete': True})
 
 
 def _next_round_context(conn, league_id, next_round):
@@ -1929,15 +2078,148 @@ def _get_draft(conn, league_id):
     return d
 
 
-def _league_team_names(conn, league_id):
-    """Teams eligible to draft in a league: registered user teams, falling back
-    to any teams already present in team_selections (e.g. mock-seeded data)."""
+# ── Evergreen identity layer: seasons + per-season opt-in entries ────────────
+# Accounts (users) and honours persist across seasons; a manager plays a season
+# only via a season_entries row. team_name lives on the entry (renamable per
+# season); users.team_name mirrors the current entry for the team_name-keyed
+# competition tables. See api/db.py _ensure_season_schema.
+
+def _current_season_id(conn):
+    """The active season's id, or None if the seasons table is unseeded."""
     cursor = _get_cursor(conn)
-    cursor.execute(
-        'SELECT team_name FROM users WHERE league_id = ? AND team_name IS NOT NULL',
-        (league_id,),
-    )
-    teams = [r['team_name'] if isinstance(r, dict) else r[0] for r in cursor.fetchall()]
+    cursor.execute("SELECT season_id FROM seasons WHERE status = 'active' "
+                   "ORDER BY season_id DESC LIMIT 1")
+    row = cursor.fetchone()
+    cursor.close()
+    if not row:
+        return None
+    return row['season_id'] if isinstance(row, dict) else row[0]
+
+
+def _enter_season(conn, user_id, league_id, team_name, season_id=None):
+    """Create or rename this user's entry for the current season. Does NOT commit
+    (the caller owns the transaction)."""
+    if season_id is None:
+        season_id = _current_season_id(conn)
+    if season_id is None:
+        return
+    cursor = _get_cursor(conn)
+    cursor.execute('SELECT entry_id FROM season_entries '
+                   'WHERE user_id = ? AND league_id = ? AND season_id = ?',
+                   (user_id, league_id, season_id))
+    row = cursor.fetchone()
+    now = datetime.now(timezone.utc).isoformat()
+    if row is None:
+        cursor.execute('INSERT INTO season_entries '
+                       '(user_id, league_id, season_id, team_name, created_at) '
+                       'VALUES (?, ?, ?, ?, ?)',
+                       (user_id, league_id, season_id, team_name, now))
+    else:
+        eid = row['entry_id'] if isinstance(row, dict) else row[0]
+        cursor.execute('UPDATE season_entries SET team_name = ? WHERE entry_id = ?',
+                       (team_name, eid))
+    cursor.close()
+
+
+def _has_current_entry(conn, user_id, league_id):
+    """True if the user has opted into the current season for this league."""
+    sid = _current_season_id(conn)
+    if sid is None:
+        return False
+    cursor = _get_cursor(conn)
+    cursor.execute('SELECT 1 FROM season_entries '
+                   'WHERE user_id = ? AND league_id = ? AND season_id = ?',
+                   (user_id, league_id, sid))
+    row = cursor.fetchone()
+    cursor.close()
+    return row is not None
+
+
+# ── Honours: permanent, keyed to the ACCOUNT (immune to team renames) ────────
+# Placements recorded at each season's end (season_rollover.py). The champs
+# column resolves a team → its owning account → career honours count.
+
+# One-time bootstrap of pre-evergreen honours, keyed by the team name used in
+# earlier seasons. When a manager (re)joins with a matching name in a clean DB
+# (no carried-over accounts), these are written into `honours` against their new
+# account. Going forward, rollover records honours by user_id automatically, so
+# this is consulted once per returning name and never again.
+#   { league_slug: { 'Team Name': {'champion': n, 'sacko': m}, ... } }
+# Empty for now — populate to grant real pre-evergreen honours to returning team
+# names on sign-up. Going forward, rollover records honours by user_id.
+LEGACY_HONOURS: dict = {}
+LEGACY_SEASON_LABEL = 'Legacy'   # bucket season for pre-evergreen honours
+
+
+def _legacy_season_id(conn):
+    """Season id for the synthetic 'Legacy' bucket (created on first use)."""
+    cursor = _get_cursor(conn)
+    cursor.execute('SELECT season_id FROM seasons WHERE label = ?', (LEGACY_SEASON_LABEL,))
+    row = cursor.fetchone()
+    if not row:
+        cursor.execute("INSERT INTO seasons (label, status, created_at) VALUES (?, 'complete', ?)",
+                       (LEGACY_SEASON_LABEL, datetime.now(timezone.utc).isoformat()))
+        cursor.execute('SELECT season_id FROM seasons WHERE label = ?', (LEGACY_SEASON_LABEL,))
+        row = cursor.fetchone()
+    cursor.close()
+    return row['season_id'] if isinstance(row, dict) else row[0]
+
+
+def _claim_legacy_honours(conn, user_id, league_id, team_name):
+    """One-time: grant pre-evergreen honours to a returning name. No-op if the
+    name has no legacy history or the account already holds honours. Caller
+    commits."""
+    slug = _slug_for_league_id(conn, league_id)
+    hist = LEGACY_HONOURS.get(slug) or {}
+    match = next((v for k, v in hist.items()
+                  if k.lower() == (team_name or '').lower()), None)
+    if not match:
+        return
+    cursor = _get_cursor(conn)
+    cursor.execute('SELECT 1 FROM honours WHERE user_id = ? AND league_id = ?', (user_id, league_id))
+    if cursor.fetchone():
+        cursor.close()
+        return
+    sid = _legacy_season_id(conn)
+    now = datetime.now(timezone.utc).isoformat()
+    for placement, n in match.items():
+        for _ in range(int(n)):
+            cursor.execute('INSERT INTO honours (user_id, league_id, season_id, placement, created_at) '
+                           'VALUES (?, ?, ?, ?, ?)', (user_id, league_id, sid, placement, now))
+    cursor.close()
+
+
+def _honours_by_team(conn, league_id):
+    """{team_name: {'champs': n, 'sackos': m}} for the league, resolved via the
+    owning account so renames never lose history."""
+    cursor = _get_cursor(conn)
+    cursor.execute('''
+        SELECT u.team_name AS team,
+               SUM(CASE WHEN h.placement = 'champion' THEN 1 ELSE 0 END) AS champs,
+               SUM(CASE WHEN h.placement = 'sacko'    THEN 1 ELSE 0 END) AS sackos
+        FROM users u JOIN honours h ON h.user_id = u.user_id
+        WHERE h.league_id = ? AND u.team_name IS NOT NULL
+        GROUP BY u.team_name
+    ''', (league_id,))
+    out = {}
+    for r in cursor.fetchall():
+        d = dict(r) if not isinstance(r, dict) else r
+        out[d['team']] = {'champs': int(d['champs'] or 0), 'sackos': int(d['sackos'] or 0)}
+    cursor.close()
+    return out
+
+
+def _league_team_names(conn, league_id):
+    """Teams entered in this league for the CURRENT season, sorted for a stable
+    schedule. Falls back to any teams already in team_selections (mock-seeded
+    data) when no entries exist yet."""
+    teams = []
+    sid = _current_season_id(conn)
+    cursor = _get_cursor(conn)
+    if sid is not None:
+        cursor.execute('SELECT team_name FROM season_entries '
+                       'WHERE league_id = ? AND season_id = ?', (league_id, sid))
+        teams = [r['team_name'] if isinstance(r, dict) else r[0] for r in cursor.fetchall()]
     if not teams:
         cursor.execute(
             'SELECT DISTINCT team_name FROM team_selections WHERE league_id = ?', (league_id,))
@@ -2108,14 +2390,22 @@ def _season_start_dt(conn, league_id):
     return None
 
 
+TEAM_LOCK_DAYS = 3       # team names freeze this many days before the season starts
+TEAM_LOCK_ENABLED = False  # locking temporarily OFF — names always editable for now
+
+
 def _team_edit_locked(conn, league_id) -> bool:
-    """Team names are editable until the day of round 1. Once that day begins the
-    name is locked for the season. Pre-season (no schedule yet) → editable."""
+    """Whether team-name editing is locked. Locking is currently DISABLED
+    (TEAM_LOCK_ENABLED=False) so names are always editable. Flip the flag to
+    re-enable the rule below: names freeze TEAM_LOCK_DAYS (3) days before the
+    season starts so fixtures/matchups/draft reference stable names. Pre-season
+    with no schedule yet → editable."""
+    if not TEAM_LOCK_ENABLED:
+        return False
     start = _season_start_dt(conn, league_id)
     if start is None:
         return False
-    cutoff = start.replace(hour=0, minute=0, second=0, microsecond=0)
-    return datetime.now(timezone.utc) >= cutoff
+    return datetime.now(timezone.utc) >= start - timedelta(days=TEAM_LOCK_DAYS)
 
 
 def _record_pick_and_advance(conn, league_id, state, team, player_id, fr_club, is_auto):
@@ -2600,18 +2890,38 @@ def competition_data():
     # chart (spec §7) — computed before the connection is closed.
     position_history = standings_progression(regular, conn, min(max_round, REGULAR_ROUNDS), award_bonus)
 
+    table_rows = [{
+        'name': t.name, 'played': t.played,
+        'won': t.won, 'drawn': t.drawn, 'lost': t.lost,
+        'points_for': round(t.points_for, 1),
+        'points_against': round(t.points_against, 1),
+        'points_diff': round(t.points_diff, 1),
+        'bonus_points': t.bonus_points,
+        'league_points': t.league_points,
+    } for t in table]
+
+    # Pre-season: no squads have been drafted, so the standings are empty. Still
+    # show every team that has signed up, listed alphabetically with a blank
+    # record, so managers see the league fill up before the draft.
+    if not table_rows:
+        table_rows = [{
+            'name': n, 'played': 0, 'won': 0, 'drawn': 0, 'lost': 0,
+            'points_for': 0.0, 'points_against': 0.0, 'points_diff': 0.0,
+            'bonus_points': 0, 'league_points': 0,
+        } for n in sorted(_league_team_names(conn, league_id), key=str.lower)]
+
+    # Career honours (🏆 / 🍆) per team, resolved via the owning account so a
+    # rename never drops history. Shown even in pre-season.
+    honours = _honours_by_team(conn, league_id)
+    for row in table_rows:
+        h = honours.get(row['name'], {})
+        row['champs'] = h.get('champs', 0)
+        row['sackos'] = h.get('sackos', 0)
+
     conn.close()
     return jsonify({
         'max_round': max_round,
-        'table': [{
-            'name': t.name, 'played': t.played,
-            'won': t.won, 'drawn': t.drawn, 'lost': t.lost,
-            'points_for': round(t.points_for, 1),
-            'points_against': round(t.points_against, 1),
-            'points_diff': round(t.points_diff, 1),
-            'bonus_points': t.bonus_points,
-            'league_points': t.league_points,
-        } for t in table],
+        'table': table_rows,
         'results': [
             {'week': w, 'matches': m}
             for w, m in sorted(all_weeks.items())

@@ -22,6 +22,8 @@ async function init() {
     fetch('/api/my-picks').then(r => r.ok ? r.json() : {picks:[]}),
     fetch('/api/trades').then(r => r.json()),
   ]);
+  // The hub stays closed until this league's draft is complete (see api_players).
+  if (pl.draft_complete === false) { renderClosed(pl); return; }
   ALL = pl.players || [];
   roundsList = pl.rounds || [];
   maxRound = pl.round || 0;
@@ -40,6 +42,22 @@ async function init() {
   renderPending(tr);
   renderChips();
   render();
+}
+
+// Pre-draft state: the hub is closed, so hide the toolbar and point people at
+// the draft board (where last-season stats live for research).
+function renderClosed(pl) {
+  document.getElementById('comp-sub').textContent =
+    (pl.league ? pl.league.name + ' · ' : '') + 'opens after the draft';
+  document.querySelectorAll('.filters, .ph-chips-row').forEach(n => n.hidden = true);
+  const pending = document.getElementById('pending-card');
+  if (pending) pending.hidden = true;
+  const el = document.getElementById('table');
+  el.className = 'ph-empty';
+  el.innerHTML =
+    'The Player Hub opens once your league&rsquo;s draft is complete.<br>'
+    + 'Until then, research players and their last-season points on the '
+    + '<a href="/draft">Draft board</a>.';
 }
 
 function renderFilters() {

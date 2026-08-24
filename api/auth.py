@@ -19,50 +19,42 @@ def verify_password(password: str, hash_str: str) -> bool:
     return check_password_hash(hash_str, password)
 
 
-def create_user(conn, email: str, password: str, team_name: str, league_id) -> dict:
-    """Create a new user account (email + password, joined to one league).
-
-    `username` is set to the email for backward compatibility with the legacy
-    session/display code, which still reads session['username'].
-    """
+def create_user(conn, username: str, password: str, league_id) -> dict:
+    """Create a new user. The username IS the team name (no email); it's stored
+    in both columns so login (username) and display (team_name) stay in sync."""
     ph = '%s' if _is_postgres(conn) else '?'
     cursor = conn.cursor()
 
-    # Email already registered? (username mirrors email, so this also covers it.)
-    cursor.execute(f'SELECT user_id FROM users WHERE email = {ph} OR username = {ph}', (email, email))
+    # Username/team name already taken? (case-insensitive; the two columns mirror.)
+    cursor.execute(
+        f'SELECT user_id FROM users WHERE LOWER(username) = LOWER({ph}) OR LOWER(team_name) = LOWER({ph})',
+        (username, username))
     if cursor.fetchone():
         cursor.close()
-        return {'error': 'An account with that email already exists'}
-
-    # Team name already taken?
-    cursor.execute(f'SELECT user_id FROM users WHERE team_name = {ph}', (team_name,))
-    if cursor.fetchone():
-        cursor.close()
-        return {'error': 'That team name is already taken'}
+        return {'error': 'That username is already taken'}
 
     password_hash = hash_password(password)
     created_at = datetime.utcnow().isoformat()
 
     try:
         cursor.execute(
-            f'INSERT INTO users (username, email, password_hash, team_name, league_id, created_at) '
-            f'VALUES ({ph}, {ph}, {ph}, {ph}, {ph}, {ph})',
-            (email, email, password_hash, team_name, league_id, created_at),
+            f'INSERT INTO users (username, password_hash, team_name, league_id, created_at) '
+            f'VALUES ({ph}, {ph}, {ph}, {ph}, {ph})',
+            (username, password_hash, username, league_id, created_at),
         )
         conn.commit()
 
         cursor.execute(
-            f'SELECT user_id, username, email, team_name, league_id FROM users WHERE email = {ph}',
-            (email,),
+            f'SELECT user_id, username, team_name, league_id FROM users WHERE username = {ph}',
+            (username,),
         )
         user = cursor.fetchone()
         cursor.close()
         u = user if isinstance(user, dict) else {
-            'user_id': user[0], 'username': user[1], 'email': user[2],
-            'team_name': user[3], 'league_id': user[4],
+            'user_id': user[0], 'username': user[1], 'team_name': user[2], 'league_id': user[3],
         }
         return {
-            'user_id': u['user_id'], 'username': u['username'], 'email': u['email'],
+            'user_id': u['user_id'], 'username': u['username'],
             'team_name': u['team_name'], 'league_id': u['league_id'],
         }
     except Exception as e:
@@ -84,7 +76,7 @@ def authenticate_user(conn, identifier: str, password: str) -> dict:
     cursor.close()
 
     if not user:
-        return {'error': 'Invalid email or password'}
+        return {'error': 'Invalid username or password'}
 
     if isinstance(user, dict):
         user_id = user['user_id']
@@ -96,7 +88,7 @@ def authenticate_user(conn, identifier: str, password: str) -> dict:
         user_id, username_val, user_password_hash, team_name, league_id = user
 
     if not verify_password(password, user_password_hash):
-        return {'error': 'Invalid email or password'}
+        return {'error': 'Invalid username or password'}
 
     return {
         'user_id': user_id,
