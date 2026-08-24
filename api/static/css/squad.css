@@ -2,8 +2,9 @@
 @media (max-width: 768px) { .content { padding: 14px 10px calc(var(--bottom-nav-h,56px) + 96px); } }
 
 .sq-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
-.page-title { font-family: var(--font-display); font-size: 28px; font-weight: 800;
+.page-title { font-family: var(--font-display); font-size: 30px; font-weight: 800;
   letter-spacing: .02em; text-transform: uppercase; color: var(--forest); line-height: 1; }
+@media (max-width: 768px) { .page-title { font-size: 24px; } }
 .sq-head-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
   /* Align the team picker with the pitch, which sits left of the content's right
      edge by the bench column + its gap — same offset as the legend. */

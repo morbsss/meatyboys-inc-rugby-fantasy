@@ -19,8 +19,9 @@
 
 .content { max-width: 1100px; margin: 0 auto; padding: 18px 16px 64px; }
 @media (max-width: 768px) { .content { padding: 14px 10px calc(var(--bottom-nav-h,56px) + 28px); } }
-.page-title { font-family: var(--font-display); font-size: 26px; font-weight: 800;
-  letter-spacing: .02em; text-transform: uppercase; color: var(--forest); margin-bottom: 14px; }
+.page-title { font-family: var(--font-display); font-size: 30px; font-weight: 800;
+  letter-spacing: .02em; text-transform: uppercase; color: var(--forest); line-height: 1; margin-bottom: 14px; }
+@media (max-width: 768px) { .page-title { font-size: 24px; } }
 
 /* All-rounds view: 3 round-cards per row (responsive — fewer as it narrows). */
 .weeks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(660px, 1fr)); gap: 14px; }
