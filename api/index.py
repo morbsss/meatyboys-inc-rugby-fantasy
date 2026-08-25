@@ -77,6 +77,13 @@ from .competition import (
 
 app = Flask(__name__, template_folder='templates')
 
+# Behind nginx (which terminates TLS), trust its X-Forwarded-* headers so Flask
+# sees the real client IP and knows the request arrived over HTTPS — needed for
+# request.is_secure and Secure session cookies. gunicorn binds to localhost only,
+# so nginx is the single trusted proxy hop.
+from werkzeug.middleware.proxy_fix import ProxyFix
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
+
 # Configure session
 app.secret_key = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
 app.config['SESSION_COOKIE_HTTPONLY'] = True

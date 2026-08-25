@@ -13,11 +13,22 @@ cd "$APP_DIR"
 
 # ── env ───────────────────────────────────────────────────────────────────────
 [ -f .env ] || { echo "[error] .env not found in $APP_DIR (copy .env.example)"; exit 1; }
-# Export only KEY=VALUE lines — strip CR and ignore comments/blanks/stray text so
-# a Windows-edited .env can't break sourcing (e.g. a 'python -c ...' comment line).
-set -a
-. <(sed 's/\r$//' .env | grep -E '^[[:space:]]*[A-Za-z_][A-Za-z0-9_]*=')
-set +a
+# Parse KEY=VALUE lines WITHOUT executing them, so values with spaces or other
+# shell-special characters are safe (e.g. DOMAIN=meatyboys.com www.meatyboys.com).
+# Sourcing would try to run the space-separated remainder as a command. Strips CR,
+# skips comments/blanks/stray lines, and trims one layer of surrounding quotes.
+while IFS= read -r _line || [ -n "$_line" ]; do
+    _line="${_line%$'\r'}"
+    case "$_line" in ''|'#'*) continue ;; esac
+    case "$_line" in [A-Za-z_]*=*) ;; *) continue ;; esac
+    _key="${_line%%=*}"; _val="${_line#*=}"
+    case "$_val" in
+        \"*\") _val="${_val#\"}"; _val="${_val%\"}" ;;
+        \'*\') _val="${_val#\'}"; _val="${_val%\'}" ;;
+    esac
+    export "$_key=$_val"
+done < .env
+unset _line _key _val
 APP_HOST="${HOST:-127.0.0.1}"
 APP_PORT="${PORT:-5000}"
 
@@ -64,16 +75,50 @@ nohup .venv/bin/gunicorn \
     >> "$APP_DIR/gunicorn.log" 2>&1 &
 sleep 1
 
-# ── nginx reverse proxy on :80 ────────────────────────────────────────────────
+# ── nginx reverse proxy + optional HTTPS ──────────────────────────────────────
 echo "[setup] Configuring nginx (port 80 → gunicorn ${APP_PORT})..."
 command -v nginx >/dev/null 2>&1 || { apt-get update -qq && apt-get install -y nginx; }
-sed "s/__APP_PORT__/${APP_PORT}/g" "$APP_DIR/nginx/meatyboys.conf" \
-    > /etc/nginx/sites-available/meatyboys
-ln -sf /etc/nginx/sites-available/meatyboys /etc/nginx/sites-enabled/meatyboys
-rm -f /etc/nginx/sites-enabled/default
+NGINX_CONF=/etc/nginx/sites-available/meatyboys
+SERVER_NAME="${DOMAIN:-_}"
+
+# Once certbot has taken over the config (HTTPS), leave it untouched on redeploys
+# so the TLS server block isn't clobbered. Delete the file + redeploy to reset.
+if grep -q "managed by Certbot" "$NGINX_CONF" 2>/dev/null; then
+    echo "[setup] nginx config is certbot-managed (HTTPS) — leaving it in place."
+else
+    sed -e "s/__APP_PORT__/${APP_PORT}/g" -e "s|__SERVER_NAME__|${SERVER_NAME}|g" \
+        "$APP_DIR/nginx/meatyboys.conf" > "$NGINX_CONF"
+    ln -sf "$NGINX_CONF" /etc/nginx/sites-enabled/meatyboys
+    rm -f /etc/nginx/sites-enabled/default
+fi
 nginx -t                                            # fail fast on bad config
 systemctl enable nginx >/dev/null 2>&1 || true
 systemctl reload nginx 2>/dev/null || systemctl start nginx
+
+# Open the firewall for web traffic (no-op if ufw isn't installed).
+command -v ufw >/dev/null 2>&1 && { ufw allow 80/tcp; ufw allow 443/tcp; } >/dev/null 2>&1 || true
+
+# ── HTTPS via Let's Encrypt (first-time setup only) ───────────────────────────
+# Runs once — when a real DOMAIN is set and the config isn't yet certbot-managed.
+# CERTBOT_EMAIL is OPTIONAL: given → used for renewal-failure alerts; blank →
+# registers without an email (auto-renewal still works via the systemd timer, but
+# you won't be emailed if a renewal ever fails). certbot rewrites nginx for TLS +
+# an HTTP→HTTPS redirect. Non-fatal: a failure leaves the site up on HTTP.
+if [ -n "${DOMAIN:-}" ] && [ "${DOMAIN}" != "_" ] \
+   && ! grep -q "managed by Certbot" "$NGINX_CONF" 2>/dev/null; then
+    echo "[setup] Obtaining HTTPS certificate for: ${DOMAIN}"
+    command -v certbot >/dev/null 2>&1 || { apt-get update -qq && apt-get install -y certbot python3-certbot-nginx; }
+    CB_ARGS=""; for d in ${DOMAIN}; do CB_ARGS="${CB_ARGS} -d ${d}"; done
+    if [ -n "${CERTBOT_EMAIL:-}" ]; then
+        EMAIL_ARG="-m ${CERTBOT_EMAIL}"
+    else
+        EMAIL_ARG="--register-unsafely-without-email"
+        echo "[setup] No CERTBOT_EMAIL set — registering without an email (no renewal-failure alerts)."
+    fi
+    certbot --nginx ${CB_ARGS} --non-interactive --agree-tos ${EMAIL_ARG} --redirect \
+        || echo "[warn] certbot failed — site still on HTTP. Check DNS + ports 80/443, then re-run deploy."
+    systemctl reload nginx 2>/dev/null || true
+fi
 
 echo ""
 echo "✓ Deployed."
