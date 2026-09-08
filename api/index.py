@@ -40,7 +40,7 @@ from .leagues import (
     POSITION_LABELS, POSITION_ORDER,
 )
 from . import draft as draft_engine
-from . import scheduler, ingest
+from . import scheduler, ingest, rules
 from .auth import (
     create_user, authenticate_user, get_available_teams,
     hash_password, verify_password,
@@ -2766,6 +2766,23 @@ def finals():
 @login_required
 def analysis_page():
     return render_template('analysis.html', current_page='analysis')
+
+
+@app.route('/rules')
+@login_required
+def rules_page():
+    """The rule book for whichever league the session is playing in.
+
+    Rendered server-side from api/rules.py, which derives every figure from the
+    engine constants — so the published rules can't drift from the code that
+    enforces them. Falls back to the default league if the session has no league
+    yet (shouldn't happen behind @login_required, but the page must still open).
+    """
+    slug = session.get('league_slug') or DEFAULT_LEAGUE
+    if slug not in LEAGUES:
+        slug = DEFAULT_LEAGUE
+    return render_template('rules.html', current_page='rules',
+                           rules=rules.build(slug, PICK_SECONDS))
 
 
 @app.route('/api/analysis')

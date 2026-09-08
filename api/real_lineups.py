@@ -245,7 +245,13 @@ def insert_into_db(teams, db_path, round_num):
     updated = 0
 
     for team in teams:
-        real_team = team['name']
+        # Store the canonical club code, not ESPN's display name: match_lineups
+        # is joined to players.team ('BAT', 'LEI', ...), and ESPN's names also
+        # lag club rebrands ("Bristol Rugby", "Newcastle Falcons").
+        from .prem_fixtures import resolve_team
+        real_team = (resolve_team(team.get('abbreviation'))
+                     or resolve_team(team['name'])
+                     or team['name'])
         for p in team['players']:
             if not p['name']:
                 continue

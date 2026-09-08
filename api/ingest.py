@@ -33,6 +33,12 @@ def _scalar(row):
 # ---------------------------------------------------------------------------
 
 def ingest_rounds(conn, league_id: int, competition: str) -> int:
+    """Refresh the round calendar AND the per-round match list.
+
+    `rounds` drives pick lockout (first kickoff); `real_fixtures` records who
+    each real team plays each round, which is what shows a player's opponent
+    beside their score. Both come from the same fetch so they can't drift.
+    """
     rounds = get_fixture_source().fetch_rounds(competition)
     for rd in rounds:
         _exec(conn,
@@ -42,6 +48,15 @@ def ingest_rounds(conn, league_id: int, competition: str) -> int:
               '  first_kickoff = excluded.first_kickoff, '
               '  last_kickoff  = excluded.last_kickoff',
               (rd.round_number, rd.first_kickoff, rd.last_kickoff, league_id))
+        for m in rd.matches:
+            if not m.home or not m.away:
+                continue
+            _exec(conn,
+                  'INSERT INTO real_fixtures (league_id, round, home_team, away_team) '
+                  'VALUES (?, ?, ?, ?) '
+                  'ON CONFLICT (league_id, round, home_team) DO UPDATE SET '
+                  '  away_team = excluded.away_team',
+                  (league_id, rd.round_number, m.home, m.away))
     conn.commit()
     return len(rounds)
 

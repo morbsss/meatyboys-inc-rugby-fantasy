@@ -23,7 +23,7 @@ app = Flask(__name__)
 CRON_SECRET = os.getenv('CRON_SECRET', '')
 
 POSITION_MAP = {1: 'PR', 2: 'HK', 3: 'LK', 4: 'LF', 5: 'SH', 6: 'FH', 7: 'MID', 8: 'OBK'}
-SUPERBRU_URL = 'https://www.superbru.com/premiershiprugbyfantasy/ajax/f_write_player_stats.php?'
+SUPERBRU_URL = 'https://www.superbru.com/premrugbyfantasy/ajax/f_write_player_stats.php?'
 SCRAPE_HEADERS = {
     'User-Agent': (
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
@@ -85,23 +85,27 @@ def player_data_cron():
             )
             resp.raise_for_status()
             soup = BeautifulSoup(resp.text, 'html.parser')
-            tbl = soup.find('tbody')
-            if not tbl:
+            thead, tbody = soup.find('thead'), soup.find('tbody')
+            if not tbody:
                 continue
-            for row in tbl.find_all('tr'):
+            # Header-driven column map (see api/datasource/live.py). Stats begin at
+            # cell index 3 (after team, name, and an empty colspan filler cell).
+            labels = [th.get_text(strip=True) for th in thead.find_all('th')][2:] if thead else []
+            for row in tbody.find_all('tr'):
                 cells = [td.get_text(strip=True) for td in row.find_all('td')]
-                if len(cells) < 8:
-                    cells.insert(5, '0')
+                if len(cells) < 4 or not cells[1]:
+                    continue
+                stats = dict(zip(labels, cells[3:3 + len(labels)]))
                 players.append({
                     'team':         cells[0],
-                    'name':         cells[1][:-1] if cells[1] else '',
+                    'name':         cells[1],
                     'position':     POSITION_MAP[page],
-                    'total_points': _to_float(cells[3]),
-                    'price':        _to_price(cells[4]),
-                    'kicking':      _to_float(cells[5]),
-                    'ppg':          cells[6],
-                    'popularity':   cells[7],
-                    'form':         cells[8] if len(cells) > 8 else '',
+                    'total_points': _to_float(stats.get('Points', 0)),
+                    'price':        _to_price(stats.get('Price', 0)),
+                    'kicking':      _to_float(stats.get('Kicking', 0)),
+                    'ppg':          stats.get('Points per game', ''),
+                    'popularity':   stats.get('Popularity', ''),
+                    'form':         stats.get('Form', ''),
                 })
     except Exception as e:
         conn.close()

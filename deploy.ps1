@@ -25,7 +25,7 @@ Write-Host ""
 
 # -- STEP 1: directory structure on the VM ------------------------------------
 Write-Host "[1/4] Creating app directories on VM..."
-SSH-Run "mkdir -p ${VM_APP_DIR}/api ${VM_APP_DIR}/tools ${VM_APP_DIR}/nginx"
+SSH-Run "mkdir -p ${VM_APP_DIR}/api ${VM_APP_DIR}/tools ${VM_APP_DIR}/nginx ${VM_APP_DIR}/data"
 
 # -- STEP 2: application code -------------------------------------------------
 Write-Host ""
@@ -34,6 +34,9 @@ scp -P $VM_SSH_PORT requirements.txt deploy.sh "${VM}:${VM_APP_DIR}/"
 scp -P $VM_SSH_PORT -r api   "${VM}:${VM_APP_DIR}/"
 scp -P $VM_SSH_PORT -r tools "${VM}:${VM_APP_DIR}/"
 scp -P $VM_SSH_PORT -r nginx "${VM}:${VM_APP_DIR}/"
+# data/ holds the official fixture + club list the app reads at runtime
+# (api/prem_fixtures.py). Not optional - round sync fails without it.
+scp -P $VM_SSH_PORT -r data  "${VM}:${VM_APP_DIR}/"
 
 # -- STEP 3: production .env + database ----------------------------------------
 # .env.production holds the real SECRET_KEY/CRON_SECRET/PORT etc. It is gitignored

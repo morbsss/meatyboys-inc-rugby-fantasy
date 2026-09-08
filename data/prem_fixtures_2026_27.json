@@ -1,0 +1,3668 @@
+{
+  "meta": {
+    "competition": "Gallagher PREM",
+    "season": "2026-27",
+    "source": "https://www.premiershiprugby.com/fixtures-results?competition=gallagher-prem",
+    "feed": "https://rugby-union-feeds.incrowdsports.com/v1/matches?compId=1011&season=202601&provider=rugbyviz",
+    "scraped_at": "2026-09-08T01:48:29.229948+00:00",
+    "total_fixtures": 93,
+    "timezone": "All kickoff times are UTC.",
+    "notes": [
+      "Rounds 1-18 are the regular season; round 19 = play-offs ('PO'), round 20 = final ('F').",
+      "time_confirmed=false means the league has not fixed that kickoff yet — the feed carries a placeholder 15:00 UTC slot. Currently true for rounds 1-9 and 20 only; rounds 10-19 are unconfirmed.",
+      "Play-off team names are 'TBC' until the regular season finishes.",
+      "Score fields (score, half_time_score, eighty_min_score, match_winner, attendance) are null pre-season and fill in as matches are played — re-run this script to refresh them.",
+      "home.id / away.id are provider team ids that join to clubs[].team_id."
+    ]
+  },
+  "clubs": [
+    {
+      "team_id": 2448,
+      "name": "Bath Rugby",
+      "slug": "bath-rugby",
+      "stadium": "Recreation Ground",
+      "year_founded": "1865",
+      "website": "https://www.bathrugby.com/",
+      "colour_dark": "#08205B",
+      "colour_light": "#1E3B84",
+      "logo_dark": "https://media-cdn.incrowdsports.com/f4d9a293-9086-41bf-aa1b-c98d1c62fe3b.png",
+      "logo_light": "https://media-cdn.incrowdsports.com/f4d9a293-9086-41bf-aa1b-c98d1c62fe3b.png",
+      "socials": {
+        "facebook": "https://www.facebook.com/bathrugby/",
+        "instagram": "https://www.instagram.com/bathrugby/",
+        "twitter": "https://twitter.com/bathrugby"
+      },
+      "tickets_url": "https://www.eticketing.co.uk/bathrugby/?utm_source=PRL&utm_campaign=ClubTickets&utm_medium=PRLsite&utm_content=Club%20tickets"
+    },
+    {
+      "team_id": 4581,
+      "name": "Bristol Bears",
+      "slug": "bristol-bears",
+      "stadium": "Ashton Gate",
+      "year_founded": "1888",
+      "website": "https://www.bristolbearsrugby.com/",
+      "colour_dark": "#010123",
+      "colour_light": "#121254",
+      "logo_dark": "https://media-cdn.incrowdsports.com/714ab764-0396-4c96-80df-4013a723d172.png",
+      "logo_light": "https://media-cdn.incrowdsports.com/7952282c-a8b0-4e70-af53-906f215035c2.png",
+      "socials": {
+        "_uid": "5b88a1e2-2824-4ae9-82fc-33b3027f977e",
+        "facebook": "https://www.facebook.com/bristolbears/",
+        "instagram": "https://www.instagram.com/bristolbearsrfc/?hl=en",
+        "twitter": "https://twitter.com/BristolRFCLive"
+      },
+      "tickets_url": "https://official-tickets.bristol-sport.co.uk/bristolsport_bears/events"
+    },
+    {
+      "team_id": 1574,
+      "name": "Exeter Chiefs",
+      "slug": "exeter-chiefs",
+      "stadium": "Sandy Park",
+      "year_founded": "1871",
+      "website": "https://www.exeterchiefs.co.uk/",
+      "colour_dark": "#000000",
+      "colour_light": "#1A1A1A",
+      "logo_dark": "https://media-cdn.incrowdsports.com/794f9439-1dd5-47e1-bd74-655d63c1b505.png",
+      "logo_light": "https://media-cdn.incrowdsports.com/434b059d-21e6-49ba-8d26-9af27fb98f19.png",
+      "socials": {
+        "facebook": "https://facebook.com/ExeterChiefs",
+        "instagram": "https://instagram.com/officialexeterchiefs/",
+        "twitter": "https://twitter.com/ExeterChiefs"
+      },
+      "tickets_url": "https://tickethub.exeterchiefs.co.uk/content?lang=en?utm_source=PRL&utm_campaign=ClubTickets&utm_medium=PRLsite&utm_content=Club%20tickets"
+    },
+    {
+      "team_id": 4293,
+      "name": "Gloucester Rugby",
+      "slug": "gloucester-rugby",
+      "stadium": "Kingsholm",
+      "year_founded": "1873",
+      "website": "https://www.gloucesterrugby.co.uk/",
+      "colour_dark": "#7B0A14",
+      "colour_light": "#C8202F",
+      "logo_dark": "https://media-cdn.incrowdsports.com/57109498-ebce-4d81-949a-c0bd84420813.png",
+      "logo_light": "https://media-cdn.incrowdsports.com/57109498-ebce-4d81-949a-c0bd84420813.png",
+      "socials": {
+        "facebook": "https://facebook.com/GloucesterRugby",
+        "instagram": "https://instagram.com/officialGloucesterRugby",
+        "twitter": "https://twitter.com/GloucesterRugby"
+      },
+      "tickets_url": "https://www.eticketing.co.uk/gloucesterrugby/?utm_source=PRL&utm_campaign=ClubTickets&utm_medium=PRLsite&utm_content=Club%20tickets"
+    },
+    {
+      "team_id": 1229,
+      "name": "Harlequins",
+      "slug": "harlequins",
+      "stadium": "Twickenham Stoop",
+      "year_founded": "1866",
+      "website": "https://www.quins.co.uk/",
+      "colour_dark": "#5B031B",
+      "colour_light": "#B6234B",
+      "logo_dark": "https://media-cdn.incrowdsports.com/ff7fb9b3-4a02-4407-b075-1d125962ce21.png",
+      "logo_light": "https://media-cdn.incrowdsports.com/af0358f8-9fb4-415b-a13e-03f955d1bcc8.png",
+      "socials": {
+        "facebook": "https://en-gb.facebook.com/harlequins/",
+        "instagram": "https://www.instagram.com/harlequins",
+        "twitter": "https://twitter.com/Harlequins"
+      },
+      "tickets_url": "https://www.eticketing.co.uk/harlequins?utm_source=PRL&utm_campaign=ClubTickets&utm_medium=PRLsite&utm_content=Club%20tickets"
+    },
+    {
+      "team_id": 1711,
+      "name": "Leicester Tigers",
+      "slug": "leicester-tigers",
+      "stadium": "Mattioli Woods Welford Road Stadium",
+      "year_founded": "1880",
+      "website": "https://www.leicestertigers.com/",
+      "colour_dark": "#012820",
+      "colour_light": "#044437",
+      "logo_dark": "https://media-cdn.cortextech.io/a4776d83-dbbc-4e46-b12d-aaa2c88fac9b.png",
+      "logo_light": "https://media-cdn.cortextech.io/438e7cd5-fe7c-4002-897c-e702a579fbf1.png",
+      "socials": {
+        "facebook": "https://www.facebook.com/leicestertigers",
+        "instagram": "https://www.instagram.com/leicestertigers/",
+        "twitter": "https://twitter.com/leicestertigers"
+      },
+      "tickets_url": "https://www.leicestertigers.com/tickets?utm_source=PRL&utm_campaign=ClubTickets&utm_medium=PRLsite&utm_content=Club%20tickets"
+    },
+    {
+      "team_id": 2038,
+      "name": "Newcastle Red Bulls",
+      "slug": "newcastle-redbulls",
+      "stadium": "Kingston Park",
+      "year_founded": "1877",
+      "website": "https://www.newcastlefalcons.co.uk/",
+      "colour_dark": "#000000",
+      "colour_light": "#1A1A1A",
+      "logo_dark": "https://media-cdn.cortextech.io/7fc9ef97-88f9-4353-8dff-ec260bac23ad.png",
+      "logo_light": "https://media-cdn.cortextech.io/16fafbdc-a308-43b3-80bd-c4b1e8077290.png",
+      "socials": {
+        "facebook": "https://www.facebook.com/newcastle.falcons",
+        "instagram": "https://www.instagram.com/falconsrugby/?hl=en",
+        "twitter": "https://twitter.com/FalconsRugby"
+      },
+      "tickets_url": "https://www.eticketing.co.uk/newcastle-falcons?utm_source=PRL&utm_campaign=ClubTickets&utm_medium=PRLsite&utm_content=Club%20tickets"
+    },
+    {
+      "team_id": 3436,
+      "name": "Northampton Saints",
+      "slug": "northampton-saints",
+      "stadium": "cinch stadium at Franklin's Gardens",
+      "year_founded": "1880",
+      "website": "https://www.northamptonsaints.co.uk/",
+      "colour_dark": "#000000",
+      "colour_light": "#1A1A1A",
+      "logo_dark": "https://media-cdn.incrowdsports.com/45fedf62-349b-46af-a6c9-2504dd82ee8c.png",
+      "logo_light": "https://media-cdn.incrowdsports.com/f8cf95ed-e223-43ab-bae1-1b708d811c58.png",
+      "socials": {
+        "facebook": "https://facebook.com/northamptonsaints",
+        "instagram": "https://instagram.com/northamptonsaints",
+        "twitter": "https://twitter.com/SaintsRugby"
+      },
+      "tickets_url": "https://www.northamptonsaints.co.uk/buytickets?utm_source=PRL&utm_campaign=ClubTickets&utm_medium=PRLsite&utm_content=Club%20tickets"
+    },
+    {
+      "team_id": 3964,
+      "name": "Sale Sharks",
+      "slug": "sale-sharks",
+      "stadium": "CorpAcq Stadium",
+      "year_founded": "1861",
+      "website": "https://www.salesharks.com/",
+      "colour_dark": "#01012D",
+      "colour_light": "#000050",
+      "logo_dark": "https://media-cdn.incrowdsports.com/07a5c9e0-9974-43e8-a772-bb72097702d6.png",
+      "logo_light": "https://media-cdn.incrowdsports.com/ebb6895c-51ae-4403-9a82-470bb8eed534.png",
+      "socials": {
+        "facebook": "https://www.facebook.com/SaleSharksRugby/",
+        "instagram": "https://www.instagram.com/salesharks/",
+        "twitter": "https://twitter.com/SaleSharksRugby"
+      },
+      "tickets_url": "https://www.salesharks.com/tickets/home-tickets2/?utm_source=PRL&utm_campaign=ClubTickets&utm_medium=PRLsite&utm_content=Club%20tickets"
+    },
+    {
+      "team_id": 2581,
+      "name": "Saracens",
+      "slug": "saracens",
+      "stadium": "StoneX Stadium",
+      "year_founded": "1876",
+      "website": "https://saracens.com/",
+      "colour_dark": "#000000",
+      "colour_light": "#1A1A1A",
+      "logo_dark": "https://media-cdn.cortextech.io/17733469-fa47-4bee-bb7e-2e8c36a26e8b.png",
+      "logo_light": "https://media-cdn.cortextech.io/00ac0c8c-7562-4d0c-9d4e-dba7b72672b0.png",
+      "socials": {
+        "facebook": "https://www.facebook.com/SaracensOfficial/",
+        "instagram": "https://www.instagram.com/saracensofficial/?hl=en",
+        "twitter": "https://twitter.com/Saracens"
+      },
+      "tickets_url": "https://www.eticketing.co.uk/saracens?utm_source=premrugby&utm_medium=website&utm_campaign=prl&utm_term=prl&utm_content=prl"
+    }
+  ],
+  "rounds": [
+    {
+      "round": 1,
+      "label": "1",
+      "fixtures": [
+        {
+          "match_id": 294908,
+          "round": 1,
+          "round_label": "1",
+          "home_team": "Harlequins",
+          "away_team": "Bath Rugby",
+          "kickoff_utc": "2026-09-25T18:45:00+00:00",
+          "time_confirmed": true,
+          "venue": "Twickenham Stoop",
+          "venue_id": 4267,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 1229,
+            "name": "Harlequins",
+            "short_name": "Quins",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 2448,
+            "name": "Bath Rugby",
+            "short_name": "Bath",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294909,
+          "round": 1,
+          "round_label": "1",
+          "home_team": "Northampton Saints",
+          "away_team": "Newcastle Red Bulls",
+          "kickoff_utc": "2026-09-25T18:45:00+00:00",
+          "time_confirmed": true,
+          "venue": "Franklin's Gardens",
+          "venue_id": 2746,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 3436,
+            "name": "Northampton Saints",
+            "short_name": "Saints",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 2038,
+            "name": "Newcastle Red Bulls",
+            "short_name": "Red Bulls",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294910,
+          "round": 1,
+          "round_label": "1",
+          "home_team": "Exeter Chiefs",
+          "away_team": "Gloucester Rugby",
+          "kickoff_utc": "2026-09-26T14:05:00+00:00",
+          "time_confirmed": true,
+          "venue": "Sandy Park",
+          "venue_id": 1552,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 1574,
+            "name": "Exeter Chiefs",
+            "short_name": "Chiefs",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 4293,
+            "name": "Gloucester Rugby",
+            "short_name": "Gloucester",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294911,
+          "round": 1,
+          "round_label": "1",
+          "home_team": "Sale Sharks",
+          "away_team": "Bristol Bears",
+          "kickoff_utc": "2026-09-26T16:30:00+00:00",
+          "time_confirmed": true,
+          "venue": "CorpAcq Stadium",
+          "venue_id": 3515,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 3964,
+            "name": "Sale Sharks",
+            "short_name": "Sharks",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 4581,
+            "name": "Bristol Bears",
+            "short_name": "Bears",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294912,
+          "round": 1,
+          "round_label": "1",
+          "home_team": "Leicester Tigers",
+          "away_team": "Saracens",
+          "kickoff_utc": "2026-09-27T14:00:00+00:00",
+          "time_confirmed": true,
+          "venue": "Mattioli Woods Welford Road",
+          "venue_id": 3458,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 1711,
+            "name": "Leicester Tigers",
+            "short_name": "Tigers",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 2581,
+            "name": "Saracens",
+            "short_name": "Saracens",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "label": "2",
+      "fixtures": [
+        {
+          "match_id": 294913,
+          "round": 2,
+          "round_label": "2",
+          "home_team": "Bath Rugby",
+          "away_team": "Exeter Chiefs",
+          "kickoff_utc": "2026-10-02T18:45:00+00:00",
+          "time_confirmed": true,
+          "venue": "The Rec",
+          "venue_id": 2340,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 2448,
+            "name": "Bath Rugby",
+            "short_name": "Bath",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 1574,
+            "name": "Exeter Chiefs",
+            "short_name": "Chiefs",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294914,
+          "round": 2,
+          "round_label": "2",
+          "home_team": "Bristol Bears",
+          "away_team": "Northampton Saints",
+          "kickoff_utc": "2026-10-03T14:05:00+00:00",
+          "time_confirmed": true,
+          "venue": "Ashton Gate",
+          "venue_id": 1098,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 4581,
+            "name": "Bristol Bears",
+            "short_name": "Bears",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 3436,
+            "name": "Northampton Saints",
+            "short_name": "Saints",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294915,
+          "round": 2,
+          "round_label": "2",
+          "home_team": "Gloucester Rugby",
+          "away_team": "Harlequins",
+          "kickoff_utc": "2026-10-03T16:30:00+00:00",
+          "time_confirmed": true,
+          "venue": "Kingsholm Stadium",
+          "venue_id": 2955,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 4293,
+            "name": "Gloucester Rugby",
+            "short_name": "Gloucester",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 1229,
+            "name": "Harlequins",
+            "short_name": "Quins",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294916,
+          "round": 2,
+          "round_label": "2",
+          "home_team": "Newcastle Red Bulls",
+          "away_team": "Leicester Tigers",
+          "kickoff_utc": "2026-10-03T18:45:00+00:00",
+          "time_confirmed": true,
+          "venue": "Kingston Park",
+          "venue_id": 1193,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 2038,
+            "name": "Newcastle Red Bulls",
+            "short_name": "Red Bulls",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 1711,
+            "name": "Leicester Tigers",
+            "short_name": "Tigers",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294917,
+          "round": 2,
+          "round_label": "2",
+          "home_team": "Saracens",
+          "away_team": "Sale Sharks",
+          "kickoff_utc": "2026-10-04T14:00:00+00:00",
+          "time_confirmed": true,
+          "venue": "StoneX Stadium",
+          "venue_id": 3474,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 2581,
+            "name": "Saracens",
+            "short_name": "Saracens",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 3964,
+            "name": "Sale Sharks",
+            "short_name": "Sharks",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "label": "3",
+      "fixtures": [
+        {
+          "match_id": 294918,
+          "round": 3,
+          "round_label": "3",
+          "home_team": "Leicester Tigers",
+          "away_team": "Gloucester Rugby",
+          "kickoff_utc": "2026-10-09T18:45:00+00:00",
+          "time_confirmed": true,
+          "venue": "Mattioli Woods Welford Road",
+          "venue_id": 3458,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 1711,
+            "name": "Leicester Tigers",
+            "short_name": "Tigers",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 4293,
+            "name": "Gloucester Rugby",
+            "short_name": "Gloucester",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294919,
+          "round": 3,
+          "round_label": "3",
+          "home_team": "Northampton Saints",
+          "away_team": "Bath Rugby",
+          "kickoff_utc": "2026-10-10T14:05:00+00:00",
+          "time_confirmed": true,
+          "venue": "Franklin's Gardens",
+          "venue_id": 2746,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 3436,
+            "name": "Northampton Saints",
+            "short_name": "Saints",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 2448,
+            "name": "Bath Rugby",
+            "short_name": "Bath",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294920,
+          "round": 3,
+          "round_label": "3",
+          "home_team": "Saracens",
+          "away_team": "Bristol Bears",
+          "kickoff_utc": "2026-10-10T16:30:00+00:00",
+          "time_confirmed": true,
+          "venue": "StoneX Stadium",
+          "venue_id": 3474,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 2581,
+            "name": "Saracens",
+            "short_name": "Saracens",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 4581,
+            "name": "Bristol Bears",
+            "short_name": "Bears",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294922,
+          "round": 3,
+          "round_label": "3",
+          "home_team": "Exeter Chiefs",
+          "away_team": "Newcastle Red Bulls",
+          "kickoff_utc": "2026-10-11T14:00:00+00:00",
+          "time_confirmed": true,
+          "venue": "Sandy Park",
+          "venue_id": 1552,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 1574,
+            "name": "Exeter Chiefs",
+            "short_name": "Chiefs",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 2038,
+            "name": "Newcastle Red Bulls",
+            "short_name": "Red Bulls",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294921,
+          "round": 3,
+          "round_label": "3",
+          "home_team": "Sale Sharks",
+          "away_team": "Harlequins",
+          "kickoff_utc": "2026-10-11T14:00:00+00:00",
+          "time_confirmed": true,
+          "venue": "CorpAcq Stadium",
+          "venue_id": 3515,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 3964,
+            "name": "Sale Sharks",
+            "short_name": "Sharks",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 1229,
+            "name": "Harlequins",
+            "short_name": "Quins",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        }
+      ]
+    },
+    {
+      "round": 4,
+      "label": "4",
+      "fixtures": [
+        {
+          "match_id": 294923,
+          "round": 4,
+          "round_label": "4",
+          "home_team": "Gloucester Rugby",
+          "away_team": "Bath Rugby",
+          "kickoff_utc": "2026-10-23T18:45:00+00:00",
+          "time_confirmed": true,
+          "venue": "Kingsholm Stadium",
+          "venue_id": 2955,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 4293,
+            "name": "Gloucester Rugby",
+            "short_name": "Gloucester",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 2448,
+            "name": "Bath Rugby",
+            "short_name": "Bath",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294924,
+          "round": 4,
+          "round_label": "4",
+          "home_team": "Newcastle Red Bulls",
+          "away_team": "Sale Sharks",
+          "kickoff_utc": "2026-10-23T18:45:00+00:00",
+          "time_confirmed": true,
+          "venue": "Kingston Park",
+          "venue_id": 1193,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 2038,
+            "name": "Newcastle Red Bulls",
+            "short_name": "Red Bulls",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 3964,
+            "name": "Sale Sharks",
+            "short_name": "Sharks",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294925,
+          "round": 4,
+          "round_label": "4",
+          "home_team": "Leicester Tigers",
+          "away_team": "Northampton Saints",
+          "kickoff_utc": "2026-10-24T14:05:00+00:00",
+          "time_confirmed": true,
+          "venue": "Mattioli Woods Welford Road",
+          "venue_id": 3458,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 1711,
+            "name": "Leicester Tigers",
+            "short_name": "Tigers",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 3436,
+            "name": "Northampton Saints",
+            "short_name": "Saints",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294926,
+          "round": 4,
+          "round_label": "4",
+          "home_team": "Bristol Bears",
+          "away_team": "Exeter Chiefs",
+          "kickoff_utc": "2026-10-24T16:30:00+00:00",
+          "time_confirmed": true,
+          "venue": "Ashton Gate",
+          "venue_id": 1098,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 4581,
+            "name": "Bristol Bears",
+            "short_name": "Bears",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 1574,
+            "name": "Exeter Chiefs",
+            "short_name": "Chiefs",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294927,
+          "round": 4,
+          "round_label": "4",
+          "home_team": "Harlequins",
+          "away_team": "Saracens",
+          "kickoff_utc": "2026-10-25T15:00:00+00:00",
+          "time_confirmed": true,
+          "venue": "Twickenham Stoop",
+          "venue_id": 4267,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 1229,
+            "name": "Harlequins",
+            "short_name": "Quins",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 2581,
+            "name": "Saracens",
+            "short_name": "Saracens",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        }
+      ]
+    },
+    {
+      "round": 5,
+      "label": "5",
+      "fixtures": [
+        {
+          "match_id": 294928,
+          "round": 5,
+          "round_label": "5",
+          "home_team": "Bristol Bears",
+          "away_team": "Leicester Tigers",
+          "kickoff_utc": "2026-10-30T19:45:00+00:00",
+          "time_confirmed": true,
+          "venue": "Ashton Gate",
+          "venue_id": 1098,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 4581,
+            "name": "Bristol Bears",
+            "short_name": "Bears",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 1711,
+            "name": "Leicester Tigers",
+            "short_name": "Tigers",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294929,
+          "round": 5,
+          "round_label": "5",
+          "home_team": "Exeter Chiefs",
+          "away_team": "Harlequins",
+          "kickoff_utc": "2026-10-31T15:00:00+00:00",
+          "time_confirmed": true,
+          "venue": "Sandy Park",
+          "venue_id": 1552,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 1574,
+            "name": "Exeter Chiefs",
+            "short_name": "Chiefs",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 1229,
+            "name": "Harlequins",
+            "short_name": "Quins",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294930,
+          "round": 5,
+          "round_label": "5",
+          "home_team": "Saracens",
+          "away_team": "Newcastle Red Bulls",
+          "kickoff_utc": "2026-10-31T15:00:00+00:00",
+          "time_confirmed": true,
+          "venue": "StoneX Stadium",
+          "venue_id": 3474,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 2581,
+            "name": "Saracens",
+            "short_name": "Saracens",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 2038,
+            "name": "Newcastle Red Bulls",
+            "short_name": "Red Bulls",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294931,
+          "round": 5,
+          "round_label": "5",
+          "home_team": "Bath Rugby",
+          "away_team": "Sale Sharks",
+          "kickoff_utc": "2026-10-31T15:05:00+00:00",
+          "time_confirmed": true,
+          "venue": "The Rec",
+          "venue_id": 2340,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 2448,
+            "name": "Bath Rugby",
+            "short_name": "Bath",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 3964,
+            "name": "Sale Sharks",
+            "short_name": "Sharks",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294932,
+          "round": 5,
+          "round_label": "5",
+          "home_team": "Northampton Saints",
+          "away_team": "Gloucester Rugby",
+          "kickoff_utc": "2026-10-31T17:30:00+00:00",
+          "time_confirmed": true,
+          "venue": "Franklin's Gardens",
+          "venue_id": 2746,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 3436,
+            "name": "Northampton Saints",
+            "short_name": "Saints",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 4293,
+            "name": "Gloucester Rugby",
+            "short_name": "Gloucester",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        }
+      ]
+    },
+    {
+      "round": 6,
+      "label": "6",
+      "fixtures": [
+        {
+          "match_id": 294933,
+          "round": 6,
+          "round_label": "6",
+          "home_team": "Bath Rugby",
+          "away_team": "Bristol Bears",
+          "kickoff_utc": "2026-12-04T19:45:00+00:00",
+          "time_confirmed": true,
+          "venue": "The Rec",
+          "venue_id": 2340,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 2448,
+            "name": "Bath Rugby",
+            "short_name": "Bath",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 4581,
+            "name": "Bristol Bears",
+            "short_name": "Bears",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294935,
+          "round": 6,
+          "round_label": "6",
+          "home_team": "Gloucester Rugby",
+          "away_team": "Newcastle Red Bulls",
+          "kickoff_utc": "2026-12-05T15:00:00+00:00",
+          "time_confirmed": true,
+          "venue": "Kingsholm Stadium",
+          "venue_id": 2955,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 4293,
+            "name": "Gloucester Rugby",
+            "short_name": "Gloucester",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 2038,
+            "name": "Newcastle Red Bulls",
+            "short_name": "Red Bulls",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294936,
+          "round": 6,
+          "round_label": "6",
+          "home_team": "Harlequins",
+          "away_team": "Leicester Tigers",
+          "kickoff_utc": "2026-12-05T15:05:00+00:00",
+          "time_confirmed": true,
+          "venue": "Twickenham Stoop",
+          "venue_id": 4267,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 1229,
+            "name": "Harlequins",
+            "short_name": "Quins",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 1711,
+            "name": "Leicester Tigers",
+            "short_name": "Tigers",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294934,
+          "round": 6,
+          "round_label": "6",
+          "home_team": "Saracens",
+          "away_team": "Northampton Saints",
+          "kickoff_utc": "2026-12-05T17:30:00+00:00",
+          "time_confirmed": true,
+          "venue": "StoneX Stadium",
+          "venue_id": 3474,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 2581,
+            "name": "Saracens",
+            "short_name": "Saracens",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 3436,
+            "name": "Northampton Saints",
+            "short_name": "Saints",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294937,
+          "round": 6,
+          "round_label": "6",
+          "home_team": "Sale Sharks",
+          "away_team": "Exeter Chiefs",
+          "kickoff_utc": "2026-12-06T15:00:00+00:00",
+          "time_confirmed": true,
+          "venue": "CorpAcq Stadium",
+          "venue_id": 3515,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 3964,
+            "name": "Sale Sharks",
+            "short_name": "Sharks",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 1574,
+            "name": "Exeter Chiefs",
+            "short_name": "Chiefs",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        }
+      ]
+    },
+    {
+      "round": 7,
+      "label": "7",
+      "fixtures": [
+        {
+          "match_id": 294938,
+          "round": 7,
+          "round_label": "7",
+          "home_team": "Newcastle Red Bulls",
+          "away_team": "Bath Rugby",
+          "kickoff_utc": "2026-12-18T19:45:00+00:00",
+          "time_confirmed": true,
+          "venue": "Kingston Park",
+          "venue_id": 1193,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 2038,
+            "name": "Newcastle Red Bulls",
+            "short_name": "Red Bulls",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 2448,
+            "name": "Bath Rugby",
+            "short_name": "Bath",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294939,
+          "round": 7,
+          "round_label": "7",
+          "home_team": "Gloucester Rugby",
+          "away_team": "Saracens",
+          "kickoff_utc": "2026-12-19T15:00:00+00:00",
+          "time_confirmed": true,
+          "venue": "Kingsholm Stadium",
+          "venue_id": 2955,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 4293,
+            "name": "Gloucester Rugby",
+            "short_name": "Gloucester",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 2581,
+            "name": "Saracens",
+            "short_name": "Saracens",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294940,
+          "round": 7,
+          "round_label": "7",
+          "home_team": "Leicester Tigers",
+          "away_team": "Sale Sharks",
+          "kickoff_utc": "2026-12-19T15:05:00+00:00",
+          "time_confirmed": true,
+          "venue": "Mattioli Woods Welford Road",
+          "venue_id": 3458,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 1711,
+            "name": "Leicester Tigers",
+            "short_name": "Tigers",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 3964,
+            "name": "Sale Sharks",
+            "short_name": "Sharks",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294941,
+          "round": 7,
+          "round_label": "7",
+          "home_team": "Northampton Saints",
+          "away_team": "Exeter Chiefs",
+          "kickoff_utc": "2026-12-19T17:30:00+00:00",
+          "time_confirmed": true,
+          "venue": "Franklin's Gardens",
+          "venue_id": 2746,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 3436,
+            "name": "Northampton Saints",
+            "short_name": "Saints",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 1574,
+            "name": "Exeter Chiefs",
+            "short_name": "Chiefs",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294942,
+          "round": 7,
+          "round_label": "7",
+          "home_team": "Bristol Bears",
+          "away_team": "Harlequins",
+          "kickoff_utc": "2026-12-20T15:00:00+00:00",
+          "time_confirmed": true,
+          "venue": "Ashton Gate",
+          "venue_id": 1098,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 4581,
+            "name": "Bristol Bears",
+            "short_name": "Bears",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 1229,
+            "name": "Harlequins",
+            "short_name": "Quins",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        }
+      ]
+    },
+    {
+      "round": 8,
+      "label": "8",
+      "fixtures": [
+        {
+          "match_id": 294944,
+          "round": 8,
+          "round_label": "8",
+          "home_team": "Bristol Bears",
+          "away_team": "Newcastle Red Bulls",
+          "kickoff_utc": "2026-12-26T15:00:00+00:00",
+          "time_confirmed": true,
+          "venue": "Ashton Gate",
+          "venue_id": 1098,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 4581,
+            "name": "Bristol Bears",
+            "short_name": "Bears",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 2038,
+            "name": "Newcastle Red Bulls",
+            "short_name": "Red Bulls",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294943,
+          "round": 8,
+          "round_label": "8",
+          "home_team": "Bath Rugby",
+          "away_team": "Leicester Tigers",
+          "kickoff_utc": "2026-12-26T15:05:00+00:00",
+          "time_confirmed": true,
+          "venue": "The Rec",
+          "venue_id": 2340,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 2448,
+            "name": "Bath Rugby",
+            "short_name": "Bath",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 1711,
+            "name": "Leicester Tigers",
+            "short_name": "Tigers",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294945,
+          "round": 8,
+          "round_label": "8",
+          "home_team": "Sale Sharks",
+          "away_team": "Gloucester Rugby",
+          "kickoff_utc": "2026-12-26T17:30:00+00:00",
+          "time_confirmed": true,
+          "venue": "CorpAcq Stadium",
+          "venue_id": 3515,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 3964,
+            "name": "Sale Sharks",
+            "short_name": "Sharks",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 4293,
+            "name": "Gloucester Rugby",
+            "short_name": "Gloucester",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294946,
+          "round": 8,
+          "round_label": "8",
+          "home_team": "Exeter Chiefs",
+          "away_team": "Saracens",
+          "kickoff_utc": "2026-12-27T15:05:00+00:00",
+          "time_confirmed": true,
+          "venue": "Sandy Park",
+          "venue_id": 1552,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 1574,
+            "name": "Exeter Chiefs",
+            "short_name": "Chiefs",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 2581,
+            "name": "Saracens",
+            "short_name": "Saracens",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294947,
+          "round": 8,
+          "round_label": "8",
+          "home_team": "Harlequins",
+          "away_team": "Northampton Saints",
+          "kickoff_utc": "2026-12-28T17:00:00+00:00",
+          "time_confirmed": true,
+          "venue": "Allianz Stadium",
+          "venue_id": 3320,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 1229,
+            "name": "Harlequins",
+            "short_name": "Quins",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 3436,
+            "name": "Northampton Saints",
+            "short_name": "Saints",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        }
+      ]
+    },
+    {
+      "round": 9,
+      "label": "9",
+      "fixtures": [
+        {
+          "match_id": 294948,
+          "round": 9,
+          "round_label": "9",
+          "home_team": "Gloucester Rugby",
+          "away_team": "Bristol Bears",
+          "kickoff_utc": "2027-01-01T19:45:00+00:00",
+          "time_confirmed": true,
+          "venue": "Kingsholm Stadium",
+          "venue_id": 2955,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 4293,
+            "name": "Gloucester Rugby",
+            "short_name": "Gloucester",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 4581,
+            "name": "Bristol Bears",
+            "short_name": "Bears",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294949,
+          "round": 9,
+          "round_label": "9",
+          "home_team": "Saracens",
+          "away_team": "Bath Rugby",
+          "kickoff_utc": "2027-01-02T15:05:00+00:00",
+          "time_confirmed": true,
+          "venue": "StoneX Stadium",
+          "venue_id": 3474,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 2581,
+            "name": "Saracens",
+            "short_name": "Saracens",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 2448,
+            "name": "Bath Rugby",
+            "short_name": "Bath",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294950,
+          "round": 9,
+          "round_label": "9",
+          "home_team": "Leicester Tigers",
+          "away_team": "Exeter Chiefs",
+          "kickoff_utc": "2027-01-02T17:30:00+00:00",
+          "time_confirmed": true,
+          "venue": "Mattioli Woods Welford Road",
+          "venue_id": 3458,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 1711,
+            "name": "Leicester Tigers",
+            "short_name": "Tigers",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 1574,
+            "name": "Exeter Chiefs",
+            "short_name": "Chiefs",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294951,
+          "round": 9,
+          "round_label": "9",
+          "home_team": "Newcastle Red Bulls",
+          "away_team": "Harlequins",
+          "kickoff_utc": "2027-01-02T17:30:00+00:00",
+          "time_confirmed": true,
+          "venue": "Kingston Park",
+          "venue_id": 1193,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 2038,
+            "name": "Newcastle Red Bulls",
+            "short_name": "Red Bulls",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 1229,
+            "name": "Harlequins",
+            "short_name": "Quins",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294952,
+          "round": 9,
+          "round_label": "9",
+          "home_team": "Northampton Saints",
+          "away_team": "Sale Sharks",
+          "kickoff_utc": "2027-01-03T15:00:00+00:00",
+          "time_confirmed": true,
+          "venue": "Franklin's Gardens",
+          "venue_id": 2746,
+          "broadcasters": [
+            "TNT-HBO"
+          ],
+          "home": {
+            "id": 3436,
+            "name": "Northampton Saints",
+            "short_name": "Saints",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 3964,
+            "name": "Sale Sharks",
+            "short_name": "Sharks",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        }
+      ]
+    },
+    {
+      "round": 10,
+      "label": "10",
+      "fixtures": [
+        {
+          "match_id": 294953,
+          "round": 10,
+          "round_label": "10",
+          "home_team": "Bath Rugby",
+          "away_team": "Northampton Saints",
+          "kickoff_utc": "2027-01-23T15:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "The Rec",
+          "venue_id": 2340,
+          "broadcasters": [],
+          "home": {
+            "id": 2448,
+            "name": "Bath Rugby",
+            "short_name": "Bath",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 3436,
+            "name": "Northampton Saints",
+            "short_name": "Saints",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294954,
+          "round": 10,
+          "round_label": "10",
+          "home_team": "Exeter Chiefs",
+          "away_team": "Bristol Bears",
+          "kickoff_utc": "2027-01-23T15:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Sandy Park",
+          "venue_id": 1552,
+          "broadcasters": [],
+          "home": {
+            "id": 1574,
+            "name": "Exeter Chiefs",
+            "short_name": "Chiefs",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 4581,
+            "name": "Bristol Bears",
+            "short_name": "Bears",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294955,
+          "round": 10,
+          "round_label": "10",
+          "home_team": "Harlequins",
+          "away_team": "Gloucester Rugby",
+          "kickoff_utc": "2027-01-23T15:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Twickenham Stoop",
+          "venue_id": 4267,
+          "broadcasters": [],
+          "home": {
+            "id": 1229,
+            "name": "Harlequins",
+            "short_name": "Quins",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 4293,
+            "name": "Gloucester Rugby",
+            "short_name": "Gloucester",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294956,
+          "round": 10,
+          "round_label": "10",
+          "home_team": "Newcastle Red Bulls",
+          "away_team": "Saracens",
+          "kickoff_utc": "2027-01-23T15:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Kingston Park",
+          "venue_id": 1193,
+          "broadcasters": [],
+          "home": {
+            "id": 2038,
+            "name": "Newcastle Red Bulls",
+            "short_name": "Red Bulls",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 2581,
+            "name": "Saracens",
+            "short_name": "Saracens",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294957,
+          "round": 10,
+          "round_label": "10",
+          "home_team": "Sale Sharks",
+          "away_team": "Leicester Tigers",
+          "kickoff_utc": "2027-01-23T15:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "CorpAcq Stadium",
+          "venue_id": 3515,
+          "broadcasters": [],
+          "home": {
+            "id": 3964,
+            "name": "Sale Sharks",
+            "short_name": "Sharks",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 1711,
+            "name": "Leicester Tigers",
+            "short_name": "Tigers",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        }
+      ]
+    },
+    {
+      "round": 11,
+      "label": "11",
+      "fixtures": [
+        {
+          "match_id": 294958,
+          "round": 11,
+          "round_label": "11",
+          "home_team": "Bath Rugby",
+          "away_team": "Gloucester Rugby",
+          "kickoff_utc": "2027-03-20T15:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "The Rec",
+          "venue_id": 2340,
+          "broadcasters": [],
+          "home": {
+            "id": 2448,
+            "name": "Bath Rugby",
+            "short_name": "Bath",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 4293,
+            "name": "Gloucester Rugby",
+            "short_name": "Gloucester",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294959,
+          "round": 11,
+          "round_label": "11",
+          "home_team": "Bristol Bears",
+          "away_team": "Sale Sharks",
+          "kickoff_utc": "2027-03-20T15:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Ashton Gate",
+          "venue_id": 1098,
+          "broadcasters": [],
+          "home": {
+            "id": 4581,
+            "name": "Bristol Bears",
+            "short_name": "Bears",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 3964,
+            "name": "Sale Sharks",
+            "short_name": "Sharks",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294960,
+          "round": 11,
+          "round_label": "11",
+          "home_team": "Exeter Chiefs",
+          "away_team": "Northampton Saints",
+          "kickoff_utc": "2027-03-20T15:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Sandy Park",
+          "venue_id": 1552,
+          "broadcasters": [],
+          "home": {
+            "id": 1574,
+            "name": "Exeter Chiefs",
+            "short_name": "Chiefs",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 3436,
+            "name": "Northampton Saints",
+            "short_name": "Saints",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294961,
+          "round": 11,
+          "round_label": "11",
+          "home_team": "Leicester Tigers",
+          "away_team": "Newcastle Red Bulls",
+          "kickoff_utc": "2027-03-20T15:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Mattioli Woods Welford Road",
+          "venue_id": 3458,
+          "broadcasters": [],
+          "home": {
+            "id": 1711,
+            "name": "Leicester Tigers",
+            "short_name": "Tigers",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 2038,
+            "name": "Newcastle Red Bulls",
+            "short_name": "Red Bulls",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294962,
+          "round": 11,
+          "round_label": "11",
+          "home_team": "Saracens",
+          "away_team": "Harlequins",
+          "kickoff_utc": "2027-03-20T15:00:00+00:00",
+          "time_confirmed": false,
+          "venue": null,
+          "venue_id": null,
+          "broadcasters": [],
+          "home": {
+            "id": 2581,
+            "name": "Saracens",
+            "short_name": "Saracens",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 1229,
+            "name": "Harlequins",
+            "short_name": "Quins",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        }
+      ]
+    },
+    {
+      "round": 12,
+      "label": "12",
+      "fixtures": [
+        {
+          "match_id": 294963,
+          "round": 12,
+          "round_label": "12",
+          "home_team": "Gloucester Rugby",
+          "away_team": "Leicester Tigers",
+          "kickoff_utc": "2027-03-27T15:00:00+00:00",
+          "time_confirmed": false,
+          "venue": null,
+          "venue_id": null,
+          "broadcasters": [],
+          "home": {
+            "id": 4293,
+            "name": "Gloucester Rugby",
+            "short_name": "Gloucester",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 1711,
+            "name": "Leicester Tigers",
+            "short_name": "Tigers",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294964,
+          "round": 12,
+          "round_label": "12",
+          "home_team": "Harlequins",
+          "away_team": "Exeter Chiefs",
+          "kickoff_utc": "2027-03-27T15:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Twickenham Stoop",
+          "venue_id": 4267,
+          "broadcasters": [],
+          "home": {
+            "id": 1229,
+            "name": "Harlequins",
+            "short_name": "Quins",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 1574,
+            "name": "Exeter Chiefs",
+            "short_name": "Chiefs",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294965,
+          "round": 12,
+          "round_label": "12",
+          "home_team": "Newcastle Red Bulls",
+          "away_team": "Bristol Bears",
+          "kickoff_utc": "2027-03-27T15:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Kingston Park",
+          "venue_id": 1193,
+          "broadcasters": [],
+          "home": {
+            "id": 2038,
+            "name": "Newcastle Red Bulls",
+            "short_name": "Red Bulls",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 4581,
+            "name": "Bristol Bears",
+            "short_name": "Bears",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294966,
+          "round": 12,
+          "round_label": "12",
+          "home_team": "Northampton Saints",
+          "away_team": "Saracens",
+          "kickoff_utc": "2027-03-27T15:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Franklin's Gardens",
+          "venue_id": 2746,
+          "broadcasters": [],
+          "home": {
+            "id": 3436,
+            "name": "Northampton Saints",
+            "short_name": "Saints",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 2581,
+            "name": "Saracens",
+            "short_name": "Saracens",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294967,
+          "round": 12,
+          "round_label": "12",
+          "home_team": "Sale Sharks",
+          "away_team": "Bath Rugby",
+          "kickoff_utc": "2027-03-27T15:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "CorpAcq Stadium",
+          "venue_id": 3515,
+          "broadcasters": [],
+          "home": {
+            "id": 3964,
+            "name": "Sale Sharks",
+            "short_name": "Sharks",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 2448,
+            "name": "Bath Rugby",
+            "short_name": "Bath",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        }
+      ]
+    },
+    {
+      "round": 13,
+      "label": "13",
+      "fixtures": [
+        {
+          "match_id": 294968,
+          "round": 13,
+          "round_label": "13",
+          "home_team": "Bath Rugby",
+          "away_team": "Newcastle Red Bulls",
+          "kickoff_utc": "2027-04-17T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "The Rec",
+          "venue_id": 2340,
+          "broadcasters": [],
+          "home": {
+            "id": 2448,
+            "name": "Bath Rugby",
+            "short_name": "Bath",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 2038,
+            "name": "Newcastle Red Bulls",
+            "short_name": "Red Bulls",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294969,
+          "round": 13,
+          "round_label": "13",
+          "home_team": "Bristol Bears",
+          "away_team": "Gloucester Rugby",
+          "kickoff_utc": "2027-04-17T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Principality Stadium",
+          "venue_id": 4055,
+          "broadcasters": [],
+          "home": {
+            "id": 4581,
+            "name": "Bristol Bears",
+            "short_name": "Bears",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 4293,
+            "name": "Gloucester Rugby",
+            "short_name": "Gloucester",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294970,
+          "round": 13,
+          "round_label": "13",
+          "home_team": "Exeter Chiefs",
+          "away_team": "Sale Sharks",
+          "kickoff_utc": "2027-04-17T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Sandy Park",
+          "venue_id": 1552,
+          "broadcasters": [],
+          "home": {
+            "id": 1574,
+            "name": "Exeter Chiefs",
+            "short_name": "Chiefs",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 3964,
+            "name": "Sale Sharks",
+            "short_name": "Sharks",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294971,
+          "round": 13,
+          "round_label": "13",
+          "home_team": "Northampton Saints",
+          "away_team": "Harlequins",
+          "kickoff_utc": "2027-04-17T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Franklin's Gardens",
+          "venue_id": 2746,
+          "broadcasters": [],
+          "home": {
+            "id": 3436,
+            "name": "Northampton Saints",
+            "short_name": "Saints",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 1229,
+            "name": "Harlequins",
+            "short_name": "Quins",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294972,
+          "round": 13,
+          "round_label": "13",
+          "home_team": "Saracens",
+          "away_team": "Leicester Tigers",
+          "kickoff_utc": "2027-04-17T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "StoneX Stadium",
+          "venue_id": 3474,
+          "broadcasters": [],
+          "home": {
+            "id": 2581,
+            "name": "Saracens",
+            "short_name": "Saracens",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 1711,
+            "name": "Leicester Tigers",
+            "short_name": "Tigers",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        }
+      ]
+    },
+    {
+      "round": 14,
+      "label": "14",
+      "fixtures": [
+        {
+          "match_id": 294973,
+          "round": 14,
+          "round_label": "14",
+          "home_team": "Gloucester Rugby",
+          "away_team": "Northampton Saints",
+          "kickoff_utc": "2027-04-24T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Kingsholm Stadium",
+          "venue_id": 2955,
+          "broadcasters": [],
+          "home": {
+            "id": 4293,
+            "name": "Gloucester Rugby",
+            "short_name": "Gloucester",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 3436,
+            "name": "Northampton Saints",
+            "short_name": "Saints",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294974,
+          "round": 14,
+          "round_label": "14",
+          "home_team": "Harlequins",
+          "away_team": "Bristol Bears",
+          "kickoff_utc": "2027-04-24T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Twickenham Stoop",
+          "venue_id": 4267,
+          "broadcasters": [],
+          "home": {
+            "id": 1229,
+            "name": "Harlequins",
+            "short_name": "Quins",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 4581,
+            "name": "Bristol Bears",
+            "short_name": "Bears",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294975,
+          "round": 14,
+          "round_label": "14",
+          "home_team": "Leicester Tigers",
+          "away_team": "Bath Rugby",
+          "kickoff_utc": "2027-04-24T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Mattioli Woods Welford Road",
+          "venue_id": 3458,
+          "broadcasters": [],
+          "home": {
+            "id": 1711,
+            "name": "Leicester Tigers",
+            "short_name": "Tigers",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 2448,
+            "name": "Bath Rugby",
+            "short_name": "Bath",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294976,
+          "round": 14,
+          "round_label": "14",
+          "home_team": "Newcastle Red Bulls",
+          "away_team": "Exeter Chiefs",
+          "kickoff_utc": "2027-04-24T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Kingston Park",
+          "venue_id": 1193,
+          "broadcasters": [],
+          "home": {
+            "id": 2038,
+            "name": "Newcastle Red Bulls",
+            "short_name": "Red Bulls",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 1574,
+            "name": "Exeter Chiefs",
+            "short_name": "Chiefs",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294977,
+          "round": 14,
+          "round_label": "14",
+          "home_team": "Sale Sharks",
+          "away_team": "Saracens",
+          "kickoff_utc": "2027-04-24T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "CorpAcq Stadium",
+          "venue_id": 3515,
+          "broadcasters": [],
+          "home": {
+            "id": 3964,
+            "name": "Sale Sharks",
+            "short_name": "Sharks",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 2581,
+            "name": "Saracens",
+            "short_name": "Saracens",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        }
+      ]
+    },
+    {
+      "round": 15,
+      "label": "15",
+      "fixtures": [
+        {
+          "match_id": 294978,
+          "round": 15,
+          "round_label": "15",
+          "home_team": "Bristol Bears",
+          "away_team": "Saracens",
+          "kickoff_utc": "2027-05-08T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Ashton Gate",
+          "venue_id": 1098,
+          "broadcasters": [],
+          "home": {
+            "id": 4581,
+            "name": "Bristol Bears",
+            "short_name": "Bears",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 2581,
+            "name": "Saracens",
+            "short_name": "Saracens",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294979,
+          "round": 15,
+          "round_label": "15",
+          "home_team": "Exeter Chiefs",
+          "away_team": "Bath Rugby",
+          "kickoff_utc": "2027-05-08T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Sandy Park",
+          "venue_id": 1552,
+          "broadcasters": [],
+          "home": {
+            "id": 1574,
+            "name": "Exeter Chiefs",
+            "short_name": "Chiefs",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 2448,
+            "name": "Bath Rugby",
+            "short_name": "Bath",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294980,
+          "round": 15,
+          "round_label": "15",
+          "home_team": "Gloucester Rugby",
+          "away_team": "Sale Sharks",
+          "kickoff_utc": "2027-05-08T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Kingsholm Stadium",
+          "venue_id": 2955,
+          "broadcasters": [],
+          "home": {
+            "id": 4293,
+            "name": "Gloucester Rugby",
+            "short_name": "Gloucester",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 3964,
+            "name": "Sale Sharks",
+            "short_name": "Sharks",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294981,
+          "round": 15,
+          "round_label": "15",
+          "home_team": "Harlequins",
+          "away_team": "Newcastle Red Bulls",
+          "kickoff_utc": "2027-05-08T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Allianz Stadium",
+          "venue_id": 3320,
+          "broadcasters": [],
+          "home": {
+            "id": 1229,
+            "name": "Harlequins",
+            "short_name": "Quins",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 2038,
+            "name": "Newcastle Red Bulls",
+            "short_name": "Red Bulls",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294982,
+          "round": 15,
+          "round_label": "15",
+          "home_team": "Northampton Saints",
+          "away_team": "Leicester Tigers",
+          "kickoff_utc": "2027-05-08T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Franklin's Gardens",
+          "venue_id": 2746,
+          "broadcasters": [],
+          "home": {
+            "id": 3436,
+            "name": "Northampton Saints",
+            "short_name": "Saints",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 1711,
+            "name": "Leicester Tigers",
+            "short_name": "Tigers",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        }
+      ]
+    },
+    {
+      "round": 16,
+      "label": "16",
+      "fixtures": [
+        {
+          "match_id": 294983,
+          "round": 16,
+          "round_label": "16",
+          "home_team": "Bath Rugby",
+          "away_team": "Harlequins",
+          "kickoff_utc": "2027-05-15T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "The Rec",
+          "venue_id": 2340,
+          "broadcasters": [],
+          "home": {
+            "id": 2448,
+            "name": "Bath Rugby",
+            "short_name": "Bath",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 1229,
+            "name": "Harlequins",
+            "short_name": "Quins",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294984,
+          "round": 16,
+          "round_label": "16",
+          "home_team": "Leicester Tigers",
+          "away_team": "Bristol Bears",
+          "kickoff_utc": "2027-05-15T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Mattioli Woods Welford Road",
+          "venue_id": 3458,
+          "broadcasters": [],
+          "home": {
+            "id": 1711,
+            "name": "Leicester Tigers",
+            "short_name": "Tigers",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 4581,
+            "name": "Bristol Bears",
+            "short_name": "Bears",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294985,
+          "round": 16,
+          "round_label": "16",
+          "home_team": "Newcastle Red Bulls",
+          "away_team": "Gloucester Rugby",
+          "kickoff_utc": "2027-05-15T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Kingston Park",
+          "venue_id": 1193,
+          "broadcasters": [],
+          "home": {
+            "id": 2038,
+            "name": "Newcastle Red Bulls",
+            "short_name": "Red Bulls",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 4293,
+            "name": "Gloucester Rugby",
+            "short_name": "Gloucester",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294986,
+          "round": 16,
+          "round_label": "16",
+          "home_team": "Sale Sharks",
+          "away_team": "Northampton Saints",
+          "kickoff_utc": "2027-05-15T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "CorpAcq Stadium",
+          "venue_id": 3515,
+          "broadcasters": [],
+          "home": {
+            "id": 3964,
+            "name": "Sale Sharks",
+            "short_name": "Sharks",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 3436,
+            "name": "Northampton Saints",
+            "short_name": "Saints",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294987,
+          "round": 16,
+          "round_label": "16",
+          "home_team": "Saracens",
+          "away_team": "Exeter Chiefs",
+          "kickoff_utc": "2027-05-15T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "StoneX Stadium",
+          "venue_id": 3474,
+          "broadcasters": [],
+          "home": {
+            "id": 2581,
+            "name": "Saracens",
+            "short_name": "Saracens",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 1574,
+            "name": "Exeter Chiefs",
+            "short_name": "Chiefs",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        }
+      ]
+    },
+    {
+      "round": 17,
+      "label": "17",
+      "fixtures": [
+        {
+          "match_id": 294988,
+          "round": 17,
+          "round_label": "17",
+          "home_team": "Bristol Bears",
+          "away_team": "Bath Rugby",
+          "kickoff_utc": "2027-05-29T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Ashton Gate",
+          "venue_id": 1098,
+          "broadcasters": [],
+          "home": {
+            "id": 4581,
+            "name": "Bristol Bears",
+            "short_name": "Bears",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 2448,
+            "name": "Bath Rugby",
+            "short_name": "Bath",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294989,
+          "round": 17,
+          "round_label": "17",
+          "home_team": "Exeter Chiefs",
+          "away_team": "Leicester Tigers",
+          "kickoff_utc": "2027-05-29T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Sandy Park",
+          "venue_id": 1552,
+          "broadcasters": [],
+          "home": {
+            "id": 1574,
+            "name": "Exeter Chiefs",
+            "short_name": "Chiefs",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 1711,
+            "name": "Leicester Tigers",
+            "short_name": "Tigers",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294990,
+          "round": 17,
+          "round_label": "17",
+          "home_team": "Harlequins",
+          "away_team": "Sale Sharks",
+          "kickoff_utc": "2027-05-29T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Twickenham Stoop",
+          "venue_id": 4267,
+          "broadcasters": [],
+          "home": {
+            "id": 1229,
+            "name": "Harlequins",
+            "short_name": "Quins",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 3964,
+            "name": "Sale Sharks",
+            "short_name": "Sharks",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294991,
+          "round": 17,
+          "round_label": "17",
+          "home_team": "Newcastle Red Bulls",
+          "away_team": "Northampton Saints",
+          "kickoff_utc": "2027-05-29T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Kingston Park",
+          "venue_id": 1193,
+          "broadcasters": [],
+          "home": {
+            "id": 2038,
+            "name": "Newcastle Red Bulls",
+            "short_name": "Red Bulls",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 3436,
+            "name": "Northampton Saints",
+            "short_name": "Saints",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294992,
+          "round": 17,
+          "round_label": "17",
+          "home_team": "Saracens",
+          "away_team": "Gloucester Rugby",
+          "kickoff_utc": "2027-05-29T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "StoneX Stadium",
+          "venue_id": 3474,
+          "broadcasters": [],
+          "home": {
+            "id": 2581,
+            "name": "Saracens",
+            "short_name": "Saracens",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 4293,
+            "name": "Gloucester Rugby",
+            "short_name": "Gloucester",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        }
+      ]
+    },
+    {
+      "round": 18,
+      "label": "18",
+      "fixtures": [
+        {
+          "match_id": 294993,
+          "round": 18,
+          "round_label": "18",
+          "home_team": "Bath Rugby",
+          "away_team": "Saracens",
+          "kickoff_utc": "2027-06-05T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "The Rec",
+          "venue_id": 2340,
+          "broadcasters": [],
+          "home": {
+            "id": 2448,
+            "name": "Bath Rugby",
+            "short_name": "Bath",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 2581,
+            "name": "Saracens",
+            "short_name": "Saracens",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294994,
+          "round": 18,
+          "round_label": "18",
+          "home_team": "Gloucester Rugby",
+          "away_team": "Exeter Chiefs",
+          "kickoff_utc": "2027-06-05T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Kingsholm Stadium",
+          "venue_id": 2955,
+          "broadcasters": [],
+          "home": {
+            "id": 4293,
+            "name": "Gloucester Rugby",
+            "short_name": "Gloucester",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 1574,
+            "name": "Exeter Chiefs",
+            "short_name": "Chiefs",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294995,
+          "round": 18,
+          "round_label": "18",
+          "home_team": "Leicester Tigers",
+          "away_team": "Harlequins",
+          "kickoff_utc": "2027-06-05T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Mattioli Woods Welford Road",
+          "venue_id": 3458,
+          "broadcasters": [],
+          "home": {
+            "id": 1711,
+            "name": "Leicester Tigers",
+            "short_name": "Tigers",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 1229,
+            "name": "Harlequins",
+            "short_name": "Quins",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294996,
+          "round": 18,
+          "round_label": "18",
+          "home_team": "Northampton Saints",
+          "away_team": "Bristol Bears",
+          "kickoff_utc": "2027-06-05T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "Franklin's Gardens",
+          "venue_id": 2746,
+          "broadcasters": [],
+          "home": {
+            "id": 3436,
+            "name": "Northampton Saints",
+            "short_name": "Saints",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 4581,
+            "name": "Bristol Bears",
+            "short_name": "Bears",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294997,
+          "round": 18,
+          "round_label": "18",
+          "home_team": "Sale Sharks",
+          "away_team": "Newcastle Red Bulls",
+          "kickoff_utc": "2027-06-05T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": "CorpAcq Stadium",
+          "venue_id": 3515,
+          "broadcasters": [],
+          "home": {
+            "id": 3964,
+            "name": "Sale Sharks",
+            "short_name": "Sharks",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 2038,
+            "name": "Newcastle Red Bulls",
+            "short_name": "Red Bulls",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        }
+      ]
+    },
+    {
+      "round": 19,
+      "label": "PO",
+      "fixtures": [
+        {
+          "match_id": 294998,
+          "round": 19,
+          "round_label": "PO",
+          "home_team": "TBC",
+          "away_team": "TBC",
+          "kickoff_utc": "2027-06-12T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": null,
+          "venue_id": null,
+          "broadcasters": [],
+          "home": {
+            "id": 0,
+            "name": "TBC",
+            "short_name": "TBC",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 0,
+            "name": "TBC",
+            "short_name": "TBC",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        },
+        {
+          "match_id": 294999,
+          "round": 19,
+          "round_label": "PO",
+          "home_team": "TBC",
+          "away_team": "TBC",
+          "kickoff_utc": "2027-06-12T14:00:00+00:00",
+          "time_confirmed": false,
+          "venue": null,
+          "venue_id": null,
+          "broadcasters": [],
+          "home": {
+            "id": 0,
+            "name": "TBC",
+            "short_name": "TBC",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 0,
+            "name": "TBC",
+            "short_name": "TBC",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        }
+      ]
+    },
+    {
+      "round": 20,
+      "label": "F",
+      "fixtures": [
+        {
+          "match_id": 295000,
+          "round": 20,
+          "round_label": "F",
+          "home_team": "TBC",
+          "away_team": "TBC",
+          "kickoff_utc": "2027-06-19T14:00:00+00:00",
+          "time_confirmed": true,
+          "venue": "Allianz Stadium",
+          "venue_id": 3320,
+          "broadcasters": [],
+          "home": {
+            "id": 0,
+            "name": "TBC",
+            "short_name": "TBC",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "away": {
+            "id": 0,
+            "name": "TBC",
+            "short_name": "TBC",
+            "score": null,
+            "half_time_score": null,
+            "eighty_min_score": null,
+            "extra_time_score": null,
+            "kicking_comp_score": null
+          },
+          "status": "fixture",
+          "match_winner": null,
+          "attendance": null
+        }
+      ]
+    }
+  ]
+}

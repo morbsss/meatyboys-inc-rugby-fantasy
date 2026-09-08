@@ -54,7 +54,8 @@
     <a href="/transfers" class="mtyby-tab {% if current_page == 'transfers' %}is-active{% endif %}">Transfers</a>
     {# Secondary screens #}
     <a href="/draft" class="mtyby-tab {% if current_page == 'draft' %}is-active{% endif %}">Draft</a>
-    
+    <a href="/rules" class="mtyby-tab {% if current_page == 'rules' %}is-active{% endif %}">Rules</a>
+
   </nav>
   {% endif %}
 
@@ -196,6 +197,10 @@
             <div id="reset-member-result" style="font-size:12px; color:var(--ink-muted); margin-top:8px;"></div>
           </div>
         </div>
+
+        <!-- League rules — the bottom nav is full, so this is the mobile route in. -->
+        <a class="mtyby-btn mtyby-btn--ghost mtyby-btn--block" href="/rules"
+           style="text-decoration:none; margin-bottom:10px;">League rules</a>
 
         <button class="mtyby-btn mtyby-btn--ghost mtyby-btn--block" onclick="logout()">Sign out</button>
       </div>

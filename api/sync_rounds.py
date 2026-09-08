@@ -1,13 +1,21 @@
 """
-Fetch the Premiership Rugby season schedule from ESPN and upsert first/last
-kickoff times for each round into the local rounds table.
+ESPN season-schedule reader.
 
-Usage:
-    python api/sync_rounds.py              # current season (end year 2026)
-    python api/sync_rounds.py --year 2027  # next season
+DEPRECATED as the app's fixture source. Rounds and fixtures now come from the
+official Premiership feed captured in data/prem_fixtures_2026_27.json — see
+api/prem_fixtures.py and api/datasource/live.py. ESPN is retained only for
+match-day LINEUPS (api/real_lineups.py), which it alone publishes.
 
-The rounds table drives the pick-lockout logic in the app: selections lock
-the moment the first match of each round kicks off (all times UTC).
+ESPN has no round numbers, so `fetch_rounds` below infers them from gaps between
+match dates; a single postponed fixture renumbers the rest of the season. It
+also rate-limits hard (HTTP 403). Both are why the calendar moved off it. This
+module is kept for ad-hoc comparison against the official list:
+
+    python api/sync_rounds.py --dry-run
+
+Writing to the DB from here is discouraged: it targets the legacy league-less
+`rounds` shape. Use the scheduler (/api/cron/tick) or /api/cron/sync-rounds,
+which go through api/ingest.ingest_rounds and set league_id.
 """
 
 import os

@@ -1,0 +1,424 @@
+{% extends "base.html" %}
+
+{% block page_title %}Rules — {{ brand }} Fantasy{% endblock %}
+
+{% block extra_styles %}<link rel="stylesheet" href="/static/css/rules.css">{% endblock %}
+
+{#
+  Every figure below comes from `rules` (api/rules.py), which reads the engine
+  constants. Don't type numbers into this file — add them to the payload so the
+  rules and the code that enforces them can't drift apart.
+#}
+{% set sq = rules.squad %}
+{% set tb = rules.table %}
+{% set se = rules.season %}
+{% set dr = rules.draft %}
+{% set sc = rules.scoring %}
+
+{% block content %}
+<div class="content">
+
+  <div class="page-head">
+    <div class="page-title">Rules</div>
+    <div class="page-sub">{{ rules.league.name }} · {{ rules.league.competition }}</div>
+  </div>
+
+  <nav class="rules-toc" aria-label="Rule sections">
+    <a href="#format" class="rules-toc-link">Format</a>
+    <a href="#squad" class="rules-toc-link">Squad</a>
+    <a href="#draft" class="rules-toc-link">Draft</a>
+    <a href="#scoring" class="rules-toc-link">Scoring</a>
+    <a href="#table" class="rules-toc-link">Table</a>
+    <a href="#deadlines" class="rules-toc-link">Deadlines</a>
+    <a href="#transfers" class="rules-toc-link">Transfers</a>
+    <a href="#finals" class="rules-toc-link">Finals</a>
+  </nav>
+
+  <!-- ── Format ─────────────────────────────────────────────────────────── -->
+  <section class="rules-section" id="format">
+    <h2 class="rules-h">The format</h2>
+    <p class="rules-p">
+      You manage a fantasy squad of real {{ rules.league.competition }} players. Each
+      round your team is scored on what your players actually did on the pitch, and
+      you play a head-to-head match against another manager in the league.
+    </p>
+
+    <div class="rules-grid">
+      <div class="rules-stat">
+        <span class="rules-stat-num">{{ se.regular_rounds }}</span>
+        <span class="rules-stat-label">Regular rounds</span>
+      </div>
+      <div class="rules-stat">
+        <span class="rules-stat-num">{{ se.total_rounds }}</span>
+        <span class="rules-stat-label">Rounds inc. finals</span>
+      </div>
+      <div class="rules-stat">
+        <span class="rules-stat-num">{{ sq.squad_size }}</span>
+        <span class="rules-stat-label">
+          {% if sq.fr_unit %}Players (+ front row){% else %}Player squad{% endif %}
+        </span>
+      </div>
+    </div>
+
+    <ul class="rules-list">
+      <li>
+        <strong>Rounds 1–{{ se.regular_rounds }}</strong> are the regular season — a
+        round-robin where everyone plays everyone, cycling until the rounds are used up.
+        Home and away alternate each full cycle so pairings even out.
+      </li>
+      <li>
+        <strong>Odd number of teams?</strong> One team gets a bye each round, rotating.
+        A bye isn't a free win: your score is compared against the
+        <em>average score of every other team that round</em>, and it counts as a win,
+        loss or draw like any other match.
+      </li>
+      <li>
+        <strong>Rounds {{ se.semi_leg1 }}–{{ se.final_round }}</strong> are the finals.
+        See <a href="#finals">Finals</a>.
+      </li>
+      <li>
+        All deadlines are driven by real kickoff times. The league is scored in
+        <strong>{{ rules.league.timezone }}</strong>.
+      </li>
+    </ul>
+  </section>
+
+  <!-- ── Squad ──────────────────────────────────────────────────────────── -->
+  <section class="rules-section" id="squad">
+    <h2 class="rules-h">Your squad</h2>
+
+    {% if sq.fr_unit %}
+      <p class="rules-p">
+        You field <strong>{{ sq.starter_count }} individual starters</strong>, an
+        optional <strong>club front-row unit</strong>, and a
+        <strong>{{ sq.bench_count }}-player bench</strong>.
+      </p>
+      <div class="rules-callout">
+        <div class="rules-callout-title">Props and hookers work differently</div>
+        <p>
+          You don't draft {{ sq.fr_positions|join(' and ') }} individually. Instead you
+          own one club's <strong>entire front row as a single unit</strong>. It fills one
+          starting spot and scores the combined points of that club's front-rowers who
+          made the real matchday squad. It's optional — skip it and draft another
+          individual instead.
+        </p>
+      </div>
+    {% else %}
+      <p class="rules-p">
+        A real rugby matchday {{ sq.squad_size }}:
+        <strong>{{ sq.starter_count }} starters</strong> plus a bench of
+        <strong>{{ sq.bench_count }}</strong>, with every position named.
+      </p>
+    {% endif %}
+
+    <div class="rules-cols">
+      <div class="rules-col">
+        <h3 class="rules-h3">Starting {{ sq.starter_count }}</h3>
+        <table class="rules-table">
+          <tbody>
+            {% for s in sq.starters %}
+            <tr><td>{{ s.label }}</td><td class="num">{{ s.count }}</td></tr>
+            {% endfor %}
+            {% if sq.fr_unit %}
+            <tr class="is-optional">
+              <td>Club front-row unit</td><td class="num">1<span class="opt">opt</span></td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="rules-col">
+        <h3 class="rules-h3">Bench ({{ sq.bench_count }})</h3>
+        {% if sq.positioned_bench %}
+          <table class="rules-table">
+            <tbody>
+              {% for b in sq.bench %}
+              <tr><td>{{ b.label }}</td><td class="num">{{ b.count }}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <p class="rules-p rules-p--tight">
+            Any {{ sq.bench_count }} players, any positions. The bench is free —
+            it's cover, not a shape you have to match.
+          </p>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if sq.strict %}
+      <p class="rules-note">
+        <strong>This shape is enforced.</strong> Your starting {{ sq.starter_count }} must
+        match those counts exactly and your bench must hold exactly one of each position,
+        or the squad won't save.
+      </p>
+    {% else %}
+      <p class="rules-note">
+        <strong>Composition is advisory.</strong> Only the squad size and the
+        no-individual-front-rowers rule are enforced — otherwise pick who you like.
+      </p>
+    {% endif %}
+  </section>
+
+  <!-- ── Draft ──────────────────────────────────────────────────────────── -->
+  <section class="rules-section" id="draft">
+    <h2 class="rules-h">The draft</h2>
+    <p class="rules-p">
+      Squads are built in a live <strong>snake draft</strong> before the season starts.
+      Every player is owned by exactly one manager — there is no salary cap and no
+      duplicate ownership.
+    </p>
+
+    <ul class="rules-list">
+      <li>
+        <strong>Snake order.</strong> Round one runs first-to-last, round two runs
+        last-to-first, and it keeps alternating. Picking last means picking first next
+        time, so no one is stuck at the back of every round.
+      </li>
+      <li>
+        <strong>{{ dr.picks_per_team }} picks each.</strong>
+        {% if dr.optional_fr_pick %}
+          That's {{ sq.squad_size }} individuals plus one pick you may spend on a club
+          front-row unit. Skip the unit and you simply draft an extra individual.
+        {% else %}
+          One for every place in the matchday {{ sq.squad_size }}.
+        {% endif %}
+      </li>
+      <li>
+        <strong>{{ dr.pick_seconds }} seconds per pick.</strong> Let the clock run out and
+        you're auto-drafted: the system fills your most urgent unfilled position first,
+        then takes the best player available.
+      </li>
+      <li>
+        <strong>The commissioner</strong> sets the draft order and date. The draft must be
+        scheduled to finish <em>before</em> the first kickoff of round 1.
+      </li>
+      <li>
+        <strong>Draft rankings</strong> are last season's total points, matched by player
+        name. Newcomers with no history start at zero — rank is a guide, not a valuation.
+      </li>
+    </ul>
+
+    <p class="rules-note">
+      When the draft ends your squad is placed automatically: the highest-ranked player in
+      each position starts, the rest go to the bench. Rearrange it on the Squad page before
+      the deadline.
+    </p>
+  </section>
+
+  <!-- ── Scoring ────────────────────────────────────────────────────────── -->
+  <section class="rules-section" id="scoring">
+    <h2 class="rules-h">How points are scored</h2>
+    <p class="rules-p">
+      Player points come from the official fantasy stats for
+      {{ rules.league.competition }}. Those totals are cumulative across the season, so
+      <strong>your score for a round is the player's total after the round minus their
+      total before it</strong> — what they earned that week, and nothing else.
+    </p>
+
+    <ul class="rules-list">
+      <li><strong>Kicking points always count.</strong> There's no designated goal kicker to nominate.</li>
+
+      {% if sc.captain %}
+      <li>
+        <strong>Captain scores double.</strong> Name one captain each round and their
+        round points are multiplied by {{ sc.captain_multiplier }}. Pick a captain who
+        is actually starting — see auto-subs below.
+      </li>
+      {% endif %}
+
+      {% if sc.fr_unit %}
+      <li>
+        <strong>The front-row unit</strong> scores the combined points of that club's
+        props and hookers who were named in the real matchday squad that round. If no
+        lineup has been published yet, all of the club's front-rowers count.
+      </li>
+      {% endif %}
+    </ul>
+
+    {% if sc.auto_sub %}
+    <div class="rules-callout">
+      <div class="rules-callout-title">Auto-substitution</div>
+      <p>
+        Only your <strong>effective starting {{ sq.starter_count }}</strong> scores — the
+        bench is cover, not extra points.
+      </p>
+      <p>
+        If one of your starters isn't in their club's real starting line-up that round,
+        they're automatically replaced by a bench player <strong>in the same
+        position</strong> who <em>is</em> starting for real. No same-position cover on
+        your bench? Your starter stays in and scores whatever they got — usually nothing.
+      </p>
+      <p class="rules-callout-foot">
+        Before real line-ups are published, your named starters score as picked.
+      </p>
+    </div>
+    {% else %}
+    <p class="rules-note">
+      Every player you select scores — starters and bench alike. There's no
+      auto-substitution to rescue a player who didn't take the field.
+    </p>
+    {% endif %}
+  </section>
+
+  <!-- ── Table ──────────────────────────────────────────────────────────── -->
+  <section class="rules-section" id="table">
+    <h2 class="rules-h">The league table</h2>
+
+    {% if tb.bonus %}
+      <p class="rules-p">
+        Your round score is compared with your opponent's. Higher score wins the match and
+        earns league points, exactly like real rugby — including bonus points.
+      </p>
+      <table class="rules-table rules-table--wide">
+        <thead><tr><th>Result</th><th class="num">League points</th></tr></thead>
+        <tbody>
+          <tr><td>Win</td><td class="num">{{ tb.win }}</td></tr>
+          <tr><td>Draw</td><td class="num">{{ tb.draw }}</td></tr>
+          <tr><td>Loss</td><td class="num">{{ tb.loss }}</td></tr>
+          <tr>
+            <td>Bonus — win by {{ tb.winner_bp_margin }}+</td>
+            <td class="num">+{{ tb.bp }}</td>
+          </tr>
+          <tr>
+            <td>Bonus — lose by {{ tb.loser_bp_margin }} or fewer</td>
+            <td class="num">+{{ tb.bp }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="rules-note">
+        Both bonus points can be awarded in the same match — a big winner and a narrow
+        loser are different teams, so only one side can claim each.
+      </p>
+    {% else %}
+      <p class="rules-p">
+        Win your head-to-head and you bank a win. This league keeps it simple:
+        <strong>no league points and no bonus points</strong> — the table is driven by
+        wins alone.
+      </p>
+    {% endif %}
+
+    <p class="rules-p">
+      <strong>Teams are ranked by:</strong> {{ tb.rank_by|lower }}. "Points for" is the
+      total fantasy points your team has scored all season, so it's the tie-breaker that
+      rewards consistently high scoring.
+    </p>
+  </section>
+
+  <!-- ── Deadlines ──────────────────────────────────────────────────────── -->
+  <section class="rules-section" id="deadlines">
+    <h2 class="rules-h">Deadlines &amp; lockout</h2>
+    <p class="rules-p">
+      <strong>Your team locks at the first kickoff of the round.</strong> Not a fixed
+      day or time — the actual first whistle of the round's earliest real match.
+    </p>
+    <ul class="rules-list">
+      <li>
+        Once locked, you can't change your line-up{% if sc.captain %}, your captain,{% endif %}
+        or make any transfer for that round.
+      </li>
+      <li>Picks reopen when the round's last match finishes, and you build the next round's team.</li>
+      <li>
+        If you don't change anything, your team carries forward — you're never left with
+        an empty side.
+      </li>
+      <li>
+        Kickoff times come from the official fixture list. Some later rounds are published
+        as provisional slots until the league confirms them, so check the Fixtures page
+        rather than assuming a usual kickoff time.
+      </li>
+    </ul>
+  </section>
+
+  <!-- ── Transfers ──────────────────────────────────────────────────────── -->
+  <section class="rules-section" id="transfers">
+    <h2 class="rules-h">Transfers &amp; trades</h2>
+    <p class="rules-p">
+      Squads change in two ways: pick up an unowned player, or trade with another manager.
+      Both are locked as soon as the round kicks off.
+    </p>
+
+    <h3 class="rules-h3">Free agents</h3>
+    <ul class="rules-list">
+      <li>
+        Any player no one owns is a free agent. Pick one up by
+        <strong>dropping one of your own players</strong> — always one in, one out, so
+        your squad size never changes.
+      </li>
+      <li>Free-agent moves are <strong>immediate</strong>. There's no waiver period and no bidding — first in gets the player.</li>
+      <li>The incoming player inherits the slot of the player they replaced (starter or bench).</li>
+    </ul>
+
+    <h3 class="rules-h3">Trades with other managers</h3>
+    <ul class="rules-list">
+      <li><strong>One-for-one only.</strong> Propose a swap; it happens only if the other manager accepts.</li>
+      <li>Either side can cancel or decline while the offer is still pending.</li>
+      {% if sq.strict %}
+      <li>
+        <strong>Like-for-like.</strong> Both players must be the
+        <strong>same position</strong> — a lock for a lock. This keeps every squad legal,
+        since the matchday {{ sq.squad_size }} has no spare slots to absorb a mismatch.
+      </li>
+      {% endif %}
+      {% if sq.fr_unit %}
+      <li>
+        <strong>Front-row units are tradeable</strong> as a single asset — for another
+        club's unit, or for an individual player. You can only ever hold one, so drop
+        yours before picking up another.
+      </li>
+      <li>
+        Individual {{ sq.fr_positions|join(' and ') }} can't be traded — they belong to
+        the club unit, not to you.
+      </li>
+      {% endif %}
+    </ul>
+  </section>
+
+  <!-- ── Finals ─────────────────────────────────────────────────────────── -->
+  <section class="rules-section" id="finals">
+    <h2 class="rules-h">Finals</h2>
+    <p class="rules-p">
+      After round {{ se.regular_rounds }} the table seeds two brackets, and both run
+      two-legged semi-finals in rounds {{ se.semi_leg1 }} and {{ se.semi_leg2 }} with the
+      final in round {{ se.final_round }}.
+    </p>
+
+    <div class="rules-cols">
+      <div class="rules-col">
+        <h3 class="rules-h3 rules-h3--champ">Championship</h3>
+        <ul class="rules-list rules-list--tight">
+          <li>The <strong>top 4</strong> qualify.</li>
+          <li>Semi-finals are 1 v 4 and 2 v 3.</li>
+          <li>Both legs are added together — highest aggregate advances.</li>
+          <li>Level on aggregate? The <strong>higher seed</strong> goes through.</li>
+          <li>Win the final and you're champion.</li>
+        </ul>
+      </div>
+      <div class="rules-col">
+        <h3 class="rules-h3 rules-h3--sacko">Sacko</h3>
+        <ul class="rules-list rules-list--tight">
+          <li>The <strong>bottom 4</strong> are dragged in.</li>
+          <li>It's inverted: <strong>losing advances you</strong>. Win and you escape.</li>
+          <li>Needs at least {{ se.sacko_min_teams }} teams in the league to run.</li>
+          <li>
+            <strong>Lose the final and the wooden spoon is yours</strong> — and it goes on
+            your record permanently.
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="rules-note">
+      Championships and sackos are attached to your account, not your team name. Rename
+      your team, or come back next season, and your honours follow you.
+    </p>
+  </section>
+
+  <p class="rules-foot">
+    These rules are generated from the scoring engine itself, so they always match how the
+    app actually calculates results.
+  </p>
+
+</div>
+{% endblock %}

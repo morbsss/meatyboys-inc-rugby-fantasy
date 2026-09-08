@@ -4,13 +4,15 @@ Fantasy Rugby Competition Table.
 Reads fixtures from fixtures.csv and calculates weekly team scores
 from team_selections + weekly_stats in fantasy_2025_26.db.
 
-Scoring:
-  Win  = 4 league pts
-  Draw = 2 league pts each
-  Loss = 0 league pts
-  Winning BP  = +1 if winning margin >= 81
-  Losing BP   = +1 if losing margin <= 18
-  Bye  = 2 league pts (no match played)
+Scoring (the constants below are the source of truth — see also api/rules.py,
+which publishes them on the Rules page):
+  Win  = WIN_PTS league pts
+  Draw = DRAW_PTS league pts each
+  Loss = LOSS_PTS league pts
+  Winning BP = +BP_PTS if the winning margin >= WINNER_BP_MARGIN
+  Losing BP  = +BP_PTS if the losing margin <= LOSER_BP_MARGIN
+  Bye  = scored against the average of every other team that round, then
+         treated as a normal win/draw/loss.
 """
 
 import re

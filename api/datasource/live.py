@@ -17,7 +17,7 @@ from .base import (
     PlayerRecord, RoundRecord, MatchRecord, LineupEntry, ScoreRecord,
 )
 
-_SUPERBRU_URL = 'https://www.superbru.com/premiershiprugbyfantasy/ajax/f_write_player_stats.php?'
+_SUPERBRU_URL = 'https://www.superbru.com/premrugbyfantasy/ajax/f_write_player_stats.php?'
 _SUPERBRU_POS = {1: 'PR', 2: 'HK', 3: 'LK', 4: 'LF', 5: 'SH', 6: 'FH', 7: 'MID', 8: 'OBK'}
 _HEADERS = {
     'User-Agent': (
@@ -43,32 +43,51 @@ def _to_float(val) -> float:
 
 class LiveAdapter(PlayerSource, FixtureSource, LineupSource, ScoreSource):
 
-    # --- §4.2 fixtures (ESPN) --------------------------------------------
+    # --- §4.2 fixtures (official premiershiprugby.com feed) ---------------
     def fetch_rounds(self, competition: str) -> list[RoundRecord]:
+        """Rounds come from data/prem_fixtures_2026_27.json (see api/prem_fixtures),
+        not ESPN: it carries explicit round numbers, current club names and real
+        venues, and doesn't rate-limit. Teams are emitted as canonical codes so
+        they join straight to `players.team`."""
         cfg = _config(competition)
-        from ..sync_rounds import fetch_rounds as espn_fetch_rounds
-        # sync_rounds is currently Premiership-pinned; future work parametrises
-        # it by cfg['espn_league_id']. Treat failures as "no data".
         if cfg['competition'] != 'premiership':
             return []
+        from .. import prem_fixtures
+
         out: list[RoundRecord] = []
-        for round_num, first_ko, last_ko, matches in espn_fetch_rounds():
+        for rd in prem_fixtures.rounds():
+            window = prem_fixtures.round_window(rd['round'])
+            if not window:
+                continue
+            matches = []
+            for f in rd['fixtures']:
+                home = prem_fixtures.resolve_team(f.get('home_team'))
+                away = prem_fixtures.resolve_team(f.get('away_team'))
+                # Play-off slots are 'TBC' until the regular season ends.
+                if not home or not away:
+                    continue
+                matches.append(MatchRecord(home=home, away=away,
+                                           kickoff=f['kickoff_utc']))
             out.append(RoundRecord(
-                round_number=round_num, first_kickoff=first_ko, last_kickoff=last_ko,
-                matches=[MatchRecord(home=m['home'], away=m['away'],
-                                     kickoff=m['kickoff']) for m in matches],
+                round_number=rd['round'],
+                first_kickoff=window[0], last_kickoff=window[1],
+                matches=matches,
             ))
         return out
 
     # --- §4.3 lineups (ESPN) ---------------------------------------------
     def fetch_lineups(self, competition: str, round_number: int) -> list[LineupEntry]:
+        """Match-day lineups stay on ESPN — it's the only source that publishes
+        them. Only the round-to-matches mapping and the team naming are taken
+        from the fixtures file, so lineups land on the right round under the
+        same team codes the rest of the app uses."""
         cfg = _config(competition)
         if cfg['competition'] != 'premiership':
             return []
-        from ..real_lineups import (
-            fetch_json, get_round_events, extract_lineups, format_name,
-        )
-        events = get_round_events(round_number)
+        from ..real_lineups import fetch_json, extract_lineups, format_name
+        from .. import prem_fixtures
+
+        events = self._espn_round_events(cfg, round_number)
         entries: list[LineupEntry] = []
         for event in events:
             game_id = event['id']
@@ -81,14 +100,49 @@ class LiveAdapter(PlayerSource, FixtureSource, LineupSource, ScoreSource):
             except Exception:
                 continue
             for team in teams:
+                # Prefer ESPN's abbreviation (already our code); fall back to
+                # resolving its display name, which can lag a club rebrand.
+                real_team = (prem_fixtures.resolve_team(team.get('abbreviation'))
+                             or prem_fixtures.resolve_team(team.get('name'))
+                             or team.get('name'))
                 for p in team['players']:
                     if not p['name']:
                         continue
                     entries.append(LineupEntry(
-                        player_name=format_name(p['name']), real_team=team['name'],
+                        player_name=format_name(p['name']), real_team=real_team,
                         jersey=p['jersey'], status='B' if p['is_bench'] else 'S',
                     ))
         return entries
+
+    @staticmethod
+    def _espn_round_events(cfg: dict, round_number: int) -> list[dict]:
+        """ESPN events belonging to a round, selected by the round's kickoff
+        window from the fixtures file.
+
+        ESPN publishes no round numbers, so the previous approach split the
+        season on gaps between match dates — which renumbers every later round
+        the moment a match is rescheduled. Matching on the official round's date
+        window keeps lineups aligned with the fixture list.
+        """
+        from .. import prem_fixtures
+        from ..real_lineups import fetch_json
+        from datetime import date, timedelta
+
+        window = prem_fixtures.round_window(round_number)
+        if not window:
+            return []
+        first = date.fromisoformat(window[0][:10]) - timedelta(days=1)
+        last = date.fromisoformat(window[1][:10]) + timedelta(days=1)
+        url = (
+            f'https://site.api.espn.com/apis/site/v2/sports/rugby'
+            f'/{cfg["espn_league_id"]}/scoreboard'
+            f'?dates={first:%Y%m%d}-{last:%Y%m%d}&limit=200'
+        )
+        try:
+            data = fetch_json(url)
+        except Exception:
+            return []
+        return data.get('events', [])
 
     # --- §4.1 players / §4.4 scores (SuperBru) ---------------------------
     def _scrape_superbru(self, competition: str) -> list[dict]:
@@ -102,27 +156,33 @@ class LiveAdapter(PlayerSource, FixtureSource, LineupSource, ScoreSource):
         for page in range(1, 9):
             resp = requests.get(
                 f'{_SUPERBRU_URL}pg={page}&tbl={table}',
-                headers=_HEADERS, timeout=10, verify=False,
+                headers=_HEADERS, timeout=15, verify=False,
             )
             resp.raise_for_status()
             soup = BeautifulSoup(resp.text, 'html.parser')
-            tbl = soup.find('tbody')
-            if not tbl:
+            thead, tbody = soup.find('thead'), soup.find('tbody')
+            if not tbody:
                 continue
-            for row in tbl.find_all('tr'):
+            # Header-driven column map: stat columns follow the Team + Player
+            # headers, and each row has an empty colspan filler cell after the
+            # name, so its stat cells start at index 3. This survives column-set
+            # changes (e.g. a 'Kicking' column appearing/disappearing).
+            labels = [th.get_text(strip=True) for th in thead.find_all('th')][2:] if thead else []
+            for row in tbody.find_all('tr'):
                 cells = [td.get_text(strip=True) for td in row.find_all('td')]
-                if len(cells) < 8:
-                    cells.insert(5, '0')
+                if len(cells) < 4 or not cells[1]:
+                    continue
+                stats = dict(zip(labels, cells[3:3 + len(labels)]))
                 rows.append({
                     'team': cells[0],
-                    'name': cells[1][:-1] if cells[1] else '',
+                    'name': cells[1],
                     'position': _SUPERBRU_POS[page],
-                    'total_points': _to_float(cells[3]),
-                    'price': _to_float(cells[4]) * 1_000_000,
-                    'kicking': _to_float(cells[5]),
-                    'points_per_game': cells[6],
-                    'popularity': cells[7],
-                    'form': cells[8] if len(cells) > 8 else '',
+                    'total_points': _to_float(stats.get('Points', 0)),
+                    'price': _to_float(stats.get('Price', 0)) * 1_000_000,
+                    'kicking': _to_float(stats.get('Kicking', 0)),
+                    'points_per_game': stats.get('Points per game', ''),
+                    'popularity': stats.get('Popularity', ''),
+                    'form': stats.get('Form', ''),
                 })
         return rows
 
