@@ -68,7 +68,7 @@ def authenticate_user(conn, identifier: str, password: str) -> dict:
     ph = '%s' if _is_postgres(conn) else '?'
     cursor = conn.cursor()
     cursor.execute(
-        f'SELECT user_id, username, password_hash, team_name, league_id '
+        f'SELECT user_id, username, password_hash, team_name, league_id, must_change_password '
         f'FROM users WHERE LOWER(email) = LOWER({ph}) OR LOWER(username) = LOWER({ph})',
         (identifier, identifier),
     )
@@ -84,8 +84,10 @@ def authenticate_user(conn, identifier: str, password: str) -> dict:
         team_name = user['team_name']
         username_val = user['username']
         league_id = user['league_id']
+        must_change = user['must_change_password']
     else:
-        user_id, username_val, user_password_hash, team_name, league_id = user
+        (user_id, username_val, user_password_hash, team_name, league_id,
+         must_change) = user
 
     if not verify_password(password, user_password_hash):
         return {'error': 'Invalid username or password'}
@@ -95,6 +97,9 @@ def authenticate_user(conn, identifier: str, password: str) -> dict:
         'username': username_val,
         'team_name': team_name,
         'league_id': league_id,
+        # Set by a commissioner reset: the password just used is temporary, so
+        # the front end sends them straight to the profile to choose a new one.
+        'must_change_password': bool(must_change),
     }
 
 

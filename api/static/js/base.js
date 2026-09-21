@@ -117,37 +117,108 @@ function renderProfile(user) {
     if (user.is_commissioner) { resetBox.style.display = ''; populateResetMembers(); }
     else { resetBox.style.display = 'none'; }
   }
+
+  applyForcedPasswordChange(!!user.must_change_password);
 }
 
-// Fill the member picker with this league's claimed teams (excluding yourself).
+// ---- Forced password change (after a commissioner reset) -------------------
+
+// True while the signed-in user is on a temporary password. The profile sheet
+// is pinned open until they set a real one.
+window.__mtybyForcePw = false;
+
+function applyForcedPasswordChange(forced) {
+  window.__mtybyForcePw = forced;
+  const banner = document.getElementById('profile-force-pw');
+  const sheet = document.getElementById('profile-sheet');
+  if (banner) banner.hidden = !forced;
+  // The sheet isn't rendered on the auth page (base.html gates it on
+  // current_page != 'auth'); the redirect to / paints it a moment later.
+  if (!forced || !sheet) return;
+
+  // Pin the profile open on the password field: this is the "take them to the
+  // profile" step of the reset flow.
+  sheet.classList.add('is-open');
+  startPwChange();
+  const cancel = document.querySelector('#profile-pw-edit button[onclick="cancelPwChange()"]');
+  if (cancel) cancel.style.display = 'none';   // nothing to go back to
+  const cur = document.getElementById('profile-pw-current');
+  if (cur) cur.placeholder = 'Temporary password';
+}
+
+/** Close the profile sheet, unless a temporary password still needs replacing. */
+function dismissProfileSheet() {
+  const sheet = document.getElementById('profile-sheet');
+  if (window.__mtybyForcePw) {
+    mtybyToast('Set a new password to continue', 'err');
+    const nw = document.getElementById('profile-pw-new');
+    if (nw) nw.focus();
+    return;
+  }
+  if (sheet) sheet.classList.remove('is-open');
+}
+
+// Fill the member picker from /api/league/members — every signed-up manager in
+// the commissioner's league. (It used to read /api/auth/teams, which only lists
+// teams that already have squad selections, so brand-new members were missing.)
 async function populateResetMembers() {
   const sel = document.getElementById('reset-member-select');
   if (!sel) return;
-  const mine = (window.__mtybyUser && window.__mtybyUser.team_name) || '';
   try {
-    const teams = await (await fetch('/api/auth/teams')).json();
-    const members = (teams || []).filter((t) => t.owner && t.name !== mine);
-    sel.innerHTML = members.length
-      ? members.map((t) => `<option value="${escAttr(t.name)}">${esc(t.name)} (${esc(t.owner)})</option>`).join('')
+    const res = await fetch('/api/league/members');
+    if (!res.ok) throw new Error('members');
+    const members = await res.json();
+    sel.innerHTML = (members && members.length)
+      ? members.map((m) => {
+          // team_name defaults to username until they name a team; don't show "a (a)".
+          const label = (m.team_name && m.team_name !== m.username)
+            ? `${m.username} · ${m.team_name}` : m.username;
+          const flag = m.awaiting_reset ? ' — reset pending' : '';
+          return `<option value="${escAttr(String(m.user_id))}">${esc(label + flag)}</option>`;
+        }).join('')
       : '<option value="">No other members yet</option>';
   } catch (_) {
     sel.innerHTML = '<option value="">Could not load members</option>';
   }
 }
 
-// Reset a member's password to a random temporary one and show it to share.
+// Issue a member a temporary password and show it for the commissioner to pass on.
 async function resetMemberPassword() {
   const sel = document.getElementById('reset-member-select');
   const out = document.getElementById('reset-member-result');
-  const team = sel && sel.value;
-  if (!team) { mtybyToast('Pick a member first', 'err'); return; }
-  const { ok, data } = await apiFetch('/api/league/reset-member-password', { team_name: team });
+  const userId = sel && sel.value;
+  if (!userId) { mtybyToast('Pick a member first', 'err'); return; }
+  const { ok, data } = await apiFetch('/api/league/reset-member-password',
+                                      { user_id: Number(userId) });
   if (ok && data) {
-    out.innerHTML = `Temporary password for <b>${esc(data.team_name)}</b>: `
-      + `<code style="background:var(--surface-2); padding:2px 6px; border-radius:4px; font-weight:700; color:var(--ink);">${esc(data.temp_password)}</code>`
-      + `<br>Share it with them — they can change it from their own Password section.`;
+    const who = (data.team_name && data.team_name !== data.username)
+      ? `${data.username} · ${data.team_name}` : data.username;
+    out.innerHTML =
+      `Temporary password for <b>${esc(who)}</b>: `
+      + `<code id="reset-temp-pw" style="background:var(--surface-2); padding:2px 6px; border-radius:4px; font-weight:700; color:var(--ink);">${esc(data.temp_password)}</code> `
+      + `<button type="button" class="mtyby-btn mtyby-btn--ghost mtyby-btn--sm" onclick="copyTempPassword()">Copy</button>`
+      + `<br>Send it to them. They'll be taken straight to their profile to set a `
+      + `new password when they sign in with it.`;
+    populateResetMembers();   // refresh the "reset pending" markers
   } else {
     mtybyToast((data && data.error) || 'Could not reset password', 'err');
+  }
+}
+
+/** Copy the freshly issued temporary password so it can be pasted to the member. */
+function copyTempPassword() {
+  const el = document.getElementById('reset-temp-pw');
+  if (!el) return;
+  const text = el.textContent || '';
+  const done = () => mtybyToast('Temporary password copied');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done, () => mtybyToast('Copy failed', 'err'));
+  } else {
+    // http:// origins (the VM before HTTPS) don't expose the async clipboard.
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch (_) { mtybyToast('Copy failed', 'err'); }
+    document.body.removeChild(ta);
   }
 }
 
@@ -228,6 +299,7 @@ function startPwChange() {
 }
 
 function cancelPwChange() {
+  if (window.__mtybyForcePw) return;   // the form must stay open until it's done
   const edit = document.getElementById('profile-pw-edit');
   const btn = document.getElementById('profile-pw-edit-btn');
   if (edit) edit.style.display = 'none';
@@ -240,8 +312,18 @@ async function savePwChange() {
   if (!current) { mtybyToast('Enter your current password', 'error'); return; }
   if (next.length < 6) { mtybyToast('New password must be at least 6 characters', 'error'); return; }
   const { ok, data } = await apiFetch('/api/auth/password', { current_password: current, new_password: next });
-  if (ok) { mtybyToast('Password updated'); cancelPwChange(); }
-  else mtybyToast((data && data.error) || 'Could not change password', 'error');
+  if (ok) {
+    mtybyToast('Password updated');
+    if (window.__mtybyForcePw) {
+      // Forced reset is over: unpin the sheet and repaint from the server.
+      applyForcedPasswordChange(false);
+      const cancel = document.querySelector('#profile-pw-edit button[onclick="cancelPwChange()"]');
+      if (cancel) cancel.style.display = '';
+      document.getElementById('profile-sheet').classList.remove('is-open');
+      checkUserSession();
+    }
+    cancelPwChange();
+  } else mtybyToast((data && data.error) || 'Could not change password', 'error');
 }
 
 // ---- Trade-offer notification ---------------------------------------------

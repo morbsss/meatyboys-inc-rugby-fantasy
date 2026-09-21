@@ -530,6 +530,12 @@ def _ensure_league_schema(conn, cursor) -> None:
     # Club front-row unit picks (front-row redesign).
     if not _column_exists(cursor, 'draft_picks', 'fr_club'):
         cursor.execute('ALTER TABLE draft_picks ADD COLUMN fr_club TEXT')
+    # Commissioner password resets hand out a temporary password; this flag
+    # forces the member to set their own on next sign-in (cleared by
+    # /api/auth/password).
+    if not _column_exists(cursor, 'users', 'must_change_password'):
+        cursor.execute(
+            'ALTER TABLE users ADD COLUMN must_change_password INTEGER NOT NULL DEFAULT 0')
     # Front-row unit is captainable/benchable like any squad player.
     if not _column_exists(cursor, 'team_front_row', 'is_captain'):
         cursor.execute('ALTER TABLE team_front_row ADD COLUMN is_captain INTEGER NOT NULL DEFAULT 0')
