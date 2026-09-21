@@ -18,8 +18,9 @@ first kickoff.
 
 ```
 Tue 12:00  ──────── OPEN ────────  Fri 19:45  ─────── LOCKED ───────  Tue 12:00
-           pick your XV,                      fixtures play,                    round N final,
-           transfers, trades                  Mon: scores finalised             round N+1 opens
+           pick your XV,                      fixtures play,                scores finalised,
+           transfers, trades                  scores update live           round N final,
+                                                                          round N+1 opens
 ```
 
 | Window | Current round | Squad + transfers |
@@ -46,9 +47,15 @@ is the most common source of "why can't I edit my team?".
 
 ### Why Tuesday noon
 
-The authoritative scoring scrape (`finalize`) runs **Monday 12:00** league-local
-(`api/scheduler.py`). Rolling over 24 hours later means scores have settled
-before anyone can change a squad, and a completed round can never be reopened.
+Tuesday noon is a single boundary that several things hang off, which is the
+point of putting them all there rather than on separate weekdays:
+
+- the round rolls over and the next one opens for picks;
+- the finished round's table and fixtures go final;
+- the authoritative scoring scrape (`finalize`) runs — see §5.
+
+Because the rollover is always *after* the round's last kickoff, a round can
+never be finalised, or reopened, while it is still being played.
 
 ---
 
@@ -143,39 +150,67 @@ point 1 — awarded to the winner at a margin ≥ 27 and to the loser at ≤ 11.
 
 ## 5. Ingestion schedule
 
-`api/scheduler.py` decides what runs when, evaluated in `Europe/London`:
+### One cron entry, four jobs
 
-| Job | When | Targets |
-|---|---|---|
-| `sync_rounds` | daily | refreshes the calendar + fixture list |
-| `lineups` | Thu 14:00 → Sun 18:00, every 2h | the current round |
-| `live_scoring` | every 3 min while a match is live | the current round |
-| `finalize` | Mon 12:00, once per round | the current round |
+The VM's crontab has exactly **one** line:
 
-A cron on the VM pings `/api/cron/tick` every 10 minutes; the scheduler decides
-what is actually due. All writes are idempotent upserts.
+```cron
+*/10 * * * * curl -fsS -m 90 -H "Authorization: Bearer <CRON_SECRET>" \
+             http://127.0.0.1:5000/api/cron/tick >> /root/meatyboys/cron.log 2>&1
+```
 
-Because the round no longer rolls over at its last kickoff, `finalize` on Monday
-targets the round that has just been played (previously it had to compensate
-with `active_round - 1`).
+It decides nothing. It pokes `/api/cron/tick`, which loops over both leagues and
+asks `api/scheduler.py` which jobs are due **in that league's own timezone**
+(`Europe/London` for OFDS) — so BST/GMT are handled automatically and the
+schedule lives in code, not in crontab.
+
+Every write is an idempotent upsert, so a double-fire changes nothing, and each
+run is logged to `job_runs` — which is also how "once per round" is enforced.
+
+| Job | When (London) | Min gap | Round it targets |
+|---|---|---|---|
+| `sync_rounds` | any tick, daily | 24h | — (whole calendar) |
+| `lineups` | Thu 14:00 → Sun 18:00 | 2h | current |
+| `live_scoring` | while a match is live | 3 min | current |
+| `finalize` | **Tue 12:00 — the rollover**, once per round | once | the round that just rolled |
+
+**`sync_rounds`** — reads `data/prem_fixtures_2026_27.json` and upserts `rounds`
+(which drives the lockout) and `real_fixtures` (who each club plays).
+
+**`lineups`** — writes `match_lineups`: who is starting vs benched, which is what
+auto-subs read. Window-gated because lineups aren't published before Thursday.
+
+**`live_scoring`** — fires only when `now` is within `MATCH_WINDOW` (2h) of a
+kickoff **in the current round**. Upserts provisional scores and carries picks
+forward. This is why the round must not roll over at its last kickoff: it used
+to, and the scheduler then checked the *next* round's fixtures, concluded nothing
+was live, and skipped the final match of every round.
+
+**`finalize`** — the authoritative rescrape that overwrites the weekend's
+provisional numbers, pinned to the **Tuesday-noon rollover**.
+
+Two consequences of tying finalize to the rollover rather than a fixed weekday:
+
+- It can **never run before a round's last fixture has finished**, because the
+  rollover is by construction the first Tuesday noon *after* the last kickoff.
+  A fixed Monday noon could not promise that — round 8 of 2026-27 ends Mon 28 Dec
+  17:00, five hours *after* a Monday-noon finalize would have run and recorded
+  itself done, leaving that round with live scores only.
+- The round has **already advanced** by the time it fires, so it settles the
+  round that just rolled, not the active one (`_round_to_finalize` in
+  `api/index.py`). Finalising `active_round` here would write the definitive
+  scrape against a gameweek that has not been played.
+
+### Manual escape hatches
+
+`/api/cron/sync-rounds`, `/api/cron/lineups` and `/api/cron/player-data` still
+exist and default to OFDS. Nothing calls them. They **bypass the scheduler**, so
+they run their job regardless of window or cadence — useful for a backfill,
+risky by accident.
 
 ---
 
-## 6. Known issue: round 8 finalize
-
-**Round 8's last fixture is Monday 28 Dec 17:00, but `finalize` fires Monday at
-12:00 — five hours earlier.** It then records itself as done for that round and
-never re-runs, so round 8's final match never receives its authoritative scoring
-pass. Live scoring does cover the match, so totals are close but not guaranteed
-final.
-
-This affects only rounds whose last fixture falls on a Monday. The fix is to
-gate `finalize` on "all fixtures in the round have finished" rather than on a
-weekday. Not yet implemented.
-
----
-
-## 7. Deployment
+## 6. Deployment
 
 **Deploys run in CI only.** `.github/workflows/deploy.yml` ships the repo to the
 VM when `main` moves — i.e. when a branch is merged — so whatever is running in

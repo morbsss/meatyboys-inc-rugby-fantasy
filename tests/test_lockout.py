@@ -213,12 +213,28 @@ def test_unrestricted_edits_bypasses_the_lock(conn, monkeypatch):
 
 
 # ---------------------------------------------------------------------------
-# Monday's finalize must target the round that just finished
+# Finalize fires AT the rollover, so it settles the round that just rolled
 # ---------------------------------------------------------------------------
 
-def test_finalize_targets_the_active_round(conn, monkeypatch):
-    """With a Tuesday rollover, Monday's active round IS the finished one — so
-    the old `active_round - 1` would now finalize the wrong round."""
+def test_round_to_finalize_is_the_one_that_just_rolled(conn, monkeypatch):
+    # Before round 1 has rolled, there is nothing to settle.
+    _at(monkeypatch, _utc(2026, 9, 27, 20))       # Sunday evening
+    assert idx._round_to_finalize(conn, 2) is None
+
+    # At the rollover, round 1 is done and round 2 is active.
+    _at(monkeypatch, _utc(2026, 9, 29, 11, 1))    # Tue 12:01 BST
+    assert idx._round_to_finalize(conn, 2) == 1
+    assert idx.get_next_round(conn, 2) == 2
+
+    # Next week it moves on with the calendar.
+    _at(monkeypatch, _utc(2026, 10, 6, 11, 1))    # Tue 12:01 BST
+    assert idx._round_to_finalize(conn, 2) == 2
+
+
+def test_finalize_settles_the_finished_round_not_the_active_one(conn, monkeypatch):
+    """The trap: at Tuesday noon the round has already advanced, so finalising
+    `active_round` would write the definitive scrape against a gameweek that
+    hasn't been played."""
     called = {}
 
     def _fake(conn_, league_id, competition, round_number, finalize=False):
@@ -226,10 +242,33 @@ def test_finalize_targets_the_active_round(conn, monkeypatch):
         return 42
 
     monkeypatch.setattr(idx.ingest, 'ingest_player_scores', _fake)
-    _at(monkeypatch, _utc(2026, 9, 28, 11))       # Monday 12:00 BST
+    _at(monkeypatch, _utc(2026, 9, 29, 11, 1))    # Tue 12:01 BST — at the rollover
     active = idx.get_next_round(conn, 2)
-    assert active == 1
+    assert active == 2, 'the round has rolled by the time finalize runs'
 
     rnd, detail = idx._run_job(conn, 2, 'premiership', 'finalize', active)
     assert called == {'round_number': 1, 'finalize': True}
     assert rnd == 1 and '42' in detail
+
+
+def test_finalize_never_precedes_a_monday_evening_fixture(conn, monkeypatch):
+    """Round 8 of 2026-27 ends Mon 28 Dec 17:00. A Monday-noon finalize ran five
+    hours early and marked itself done; the rollover cannot."""
+    conn.execute('INSERT INTO rounds VALUES (8, ?, ?, 2)',
+                 ('2026-12-26T15:00:00+00:00', '2026-12-28T17:00:00+00:00'))
+    conn.commit()
+
+    # Monday noon — the old finalize moment, still mid-round.
+    _at(monkeypatch, _utc(2026, 12, 28, 12))
+    assert idx._round_to_finalize(conn, 2) != 8, 'round 8 is not finished yet'
+
+    # The rollover is after the last fixture, so round 8 settles correctly.
+    _at(monkeypatch, _utc(2026, 12, 29, 12, 1))   # Tue 12:01 GMT
+    assert idx._round_to_finalize(conn, 2) == 8
+
+
+def test_finalize_is_a_noop_before_any_round_completes(conn, monkeypatch):
+    _at(monkeypatch, _utc(2026, 9, 1, 12))        # pre-season
+    rnd, detail = idx._run_job(conn, 2, 'premiership', 'finalize',
+                               idx.get_next_round(conn, 2))
+    assert 'no completed round' in detail
