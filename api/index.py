@@ -303,6 +303,42 @@ def get_next_round(conn, league_id=None) -> int:
     return _round_after_last_scraped(conn, league_id)
 
 
+def _round_to_finalize(conn, league_id=None):
+    """The round whose rollover has most recently passed, or None.
+
+    This is the round that has just been played and gone final. The `finalize`
+    job fires AT the Tuesday-noon rollover, by which point get_next_round has
+    already advanced to the next round — so finalising the active round would
+    write the definitive scrape against a gameweek that hasn't been played yet.
+    """
+    now = datetime.now(timezone.utc)
+    cursor = _get_cursor(conn)
+    if league_id is None:
+        cursor.execute(
+            'SELECT round_number, last_kickoff FROM rounds ORDER BY round_number ASC')
+    else:
+        cursor.execute(
+            'SELECT round_number, last_kickoff FROM rounds WHERE league_id = ? '
+            'ORDER BY round_number ASC',
+            (league_id,)
+        )
+    rows = cursor.fetchall()
+    cursor.close()
+
+    tz_name = _league_tz(conn, league_id)
+    finished = None
+    for row in rows:
+        rd = dict(row) if not isinstance(row, dict) else row
+        last_ko = datetime.fromisoformat(rd['last_kickoff'])
+        if last_ko.tzinfo is None:
+            last_ko = last_ko.replace(tzinfo=timezone.utc)
+        if _rollover_at(last_ko, tz_name) <= now:
+            finished = rd['round_number']      # rows are ascending; keep the last
+        else:
+            break
+    return finished
+
+
 def _round_after_last_scraped(conn, league_id=None) -> int:
     """MAX(weekly_stats.round) + 1, or 1 if empty. Used by the player-data
     cron to label the round whose stats it's about to record."""
@@ -3211,13 +3247,16 @@ def _run_job(conn, league_id, competition, job, active_round):
         _carry_forward_picks(conn, league_id, active_round)
         return active_round, f'{n} players'
     if job == 'finalize':
-        # Finalize runs Monday, and the round doesn't roll over until Tuesday
-        # noon, so the just-finished gameweek IS the active round. (It used to
-        # be active_round - 1, back when the round rolled at the last kickoff
-        # and Monday already belonged to the next one.)
-        n = ingest.ingest_player_scores(conn, league_id, competition, active_round,
+        # Fires AT the Tuesday-noon rollover, so the round has already advanced:
+        # the gameweek to settle is the one that just rolled, not the active one.
+        # Tying it to the rollover guarantees it never runs before the round's
+        # last fixture has finished (which a fixed Monday noon did not).
+        fin_round = _round_to_finalize(conn, league_id)
+        if fin_round is None:
+            return active_round, 'no completed round to finalize'
+        n = ingest.ingest_player_scores(conn, league_id, competition, fin_round,
                                         finalize=True)
-        return active_round, f'{n} players (final)'
+        return fin_round, f'{n} players (final)'
     return active_round, 'noop'
 
 
@@ -3248,10 +3287,13 @@ def cron_tick():
 
         last_runs = {j: _last_run(conn, league_id, j)
                      for j in ('sync_rounds', 'lineups', 'live_scoring')}
+        # The once-per-round gate has to ask about the same round _run_job will
+        # settle — the one that just rolled over, not the newly active one.
+        fin_round = _round_to_finalize(conn, league_id)
         due = scheduler.due_jobs(
             competition, now, cfg['timezone'], last_runs, live_now,
-            # Monday's finalize targets the active round (see _run_job).
-            finalize_done=_finalize_done(conn, league_id, active_round),
+            finalize_done=(fin_round is None
+                           or _finalize_done(conn, league_id, fin_round)),
             rounds_known=_rounds_known(conn, league_id),
         )
 
