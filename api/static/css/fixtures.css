@@ -58,10 +58,23 @@
   border-bottom: 1px solid var(--border);
   display: flex; justify-content: space-between; align-items: center;
 }
-.week-status { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: var(--r-full);
-  text-transform: uppercase; letter-spacing: .04em; }
-.week-status.played   { color: var(--success); background: rgba(46,125,79,.12); }
-.week-status.upcoming { color: var(--ink-faint); background: var(--surface-2); border: 1px solid var(--border); }
+/* Header, top-right: the round's date, or LIVE while it's being played. */
+.week-date { font-size: 11px; font-weight: 700; letter-spacing: .04em;
+  color: var(--ink-muted); text-transform: none; font-variant-numeric: tabular-nums; }
+
+.week-live { display: inline-flex; align-items: center; gap: 6px;
+  font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em;
+  color: #c0392b; padding: 2px 8px; border-radius: var(--r-full);
+  background: rgba(192,57,43,.10); border: 1px solid rgba(192,57,43,.30); }
+.live-dot { width: 7px; height: 7px; border-radius: 50%; background: #c0392b;
+  flex: 0 0 auto; animation: live-pulse 1.6s ease-in-out infinite; }
+@keyframes live-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+/* Respect a reduced-motion preference — a pulsing dot is decorative. */
+@media (prefers-reduced-motion: reduce) { .live-dot { animation: none; } }
+
+/* Lift the round in play out of a long list of week-cards. */
+.week-card.is-live { border-color: rgba(192,57,43,.35); }
+.week-card.is-live .week-card-header { background: rgba(192,57,43,.06); }
 
 /* The centre column is a FIXED width, not `auto`.
    With `auto` it sized itself to whatever the score text happened to be, so
@@ -92,7 +105,10 @@
 
 .upcoming-row { color: var(--ink-muted); }
 .upcoming-row .away-name { text-align: right; }
-.upcoming-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: var(--r-full);
+/* justify-self keeps the pill its natural width: as a grid item it would
+   otherwise stretch to fill the fixed centre column and read as a wide empty bar. */
+.upcoming-badge { justify-self: center; font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: var(--r-full);
   background: rgba(11,59,46,.06); color: var(--forest); border: 1px solid var(--border); white-space: nowrap; }
 
 .bye-row { padding: 11px 16px; font-size: 13px; color: var(--ink-muted); border-bottom: 1px solid var(--border); }

@@ -303,6 +303,38 @@ def get_next_round(conn, league_id=None) -> int:
     return _round_after_last_scraped(conn, league_id)
 
 
+# British style: three-letter months except September, which takes four.
+_MONTH_ABBR = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+               'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec']
+
+
+def _round_timing(conn, league_id, round_num) -> dict:
+    """Kickoff window, date label and live flag for one round's header.
+
+    The label is formatted HERE, in the league's own timezone, rather than in
+    the browser: a kickoff at 18:45 UTC on Friday is already Saturday in Sydney,
+    so client-side formatting would show a manager abroad the wrong date for an
+    English fixture.
+
+    `is_live` spans the whole round — first kickoff until MATCH_WINDOW after the
+    last — so it reads LIVE across a Friday-to-Sunday weekend rather than only
+    during a single match, and clears once the last game ends (well before the
+    Tuesday rollover).
+    """
+    first_ko, last_ko = _round_kickoffs(conn, round_num, league_id)
+    if first_ko is None:
+        return {'first_kickoff': None, 'last_kickoff': None,
+                'date_label': None, 'is_live': False}
+    local = scheduler.to_local(first_ko, _league_tz(conn, league_id))
+    now = datetime.now(timezone.utc)
+    return {
+        'first_kickoff': first_ko.isoformat(),
+        'last_kickoff': last_ko.isoformat(),
+        'date_label': f'{local.day} {_MONTH_ABBR[local.month - 1]} {local.year}',
+        'is_live': first_ko <= now <= last_ko + scheduler.MATCH_WINDOW,
+    }
+
+
 def _round_to_finalize(conn, league_id=None):
     """The round whose rollover has most recently passed, or None.
 
@@ -3143,14 +3175,18 @@ def competition_data():
         row['champs'] = h.get('champs', 0)
         row['sackos'] = h.get('sackos', 0)
 
+    # Kickoff dates + live flag per round, for the week-card header. Built before
+    # the connection closes.
+    results = [
+        {'week': w, 'matches': m, **_round_timing(conn, league_id, w)}
+        for w, m in sorted(all_weeks.items())
+    ]
+
     conn.close()
     return jsonify({
         'max_round': max_round,
         'table': table_rows,
-        'results': [
-            {'week': w, 'matches': m}
-            for w, m in sorted(all_weeks.items())
-        ],
+        'results': results,
         'playoffs': playoffs,
         'position_history': position_history,
         'regular_rounds': REGULAR_ROUNDS,
