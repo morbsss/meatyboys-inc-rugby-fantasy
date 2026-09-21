@@ -175,6 +175,54 @@ weekday. Not yet implemented.
 
 ---
 
+## 7. Deployment
+
+**Deploys run in CI only.** `.github/workflows/deploy.yml` ships the repo to the
+VM when `main` moves — i.e. when a branch is merged — so whatever is running in
+production always corresponds to a commit on `main` that passed its tests.
+
+| Trigger | What runs |
+|---|---|
+| Pull request | tests only |
+| Push/merge to `main` | tests → deploy → smoke test |
+| Actions → "CI / Deploy" → Run workflow | same, manually |
+
+The deploy job rsyncs `api/ tools/ nginx/ data/` plus `requirements.txt` and
+`deploy.sh`, writes `.env` from the `ENV_PRODUCTION` secret, then runs
+`deploy.sh` on the VM. Databases are excluded from the sync and never written by
+a deploy.
+
+### Local deploys are blocked
+
+- `deploy.ps1` is retired — it exits with a pointer to CI.
+- `deploy.sh` refuses to run on the VM unless `CI_DEPLOY=1` is set, which only
+  the workflow does.
+
+A local deploy shipped whatever happened to be in someone's working tree —
+uncommitted edits included — with no tests in the way and no record of what went
+out. Break-glass for an outage when CI itself is down:
+
+```bash
+ssh root@<vm> 'cd ~/meatyboys && ALLOW_MANUAL_DEPLOY=1 bash deploy.sh'
+```
+
+Push the same code through CI afterwards so the VM and `main` agree again.
+
+### Required GitHub secrets
+
+Settings → Secrets and variables → Actions:
+
+| Secret | Contents |
+|---|---|
+| `VM_SSH_KEY` | private half of the CI deploy key (`~/.ssh/meatyboys_ci_deploy`) |
+| `VM_KNOWN_HOSTS` | the VM's host keys, pinned (`~/.ssh/meatyboys_known_hosts`) |
+| `ENV_PRODUCTION` | full contents of `.env.production` |
+
+Optional repo *variables* override the defaults baked into the workflow:
+`VM_HOST`, `VM_USER`, `VM_SSH_PORT`, `VM_APP_DIR`.
+
+---
+
 ## Appendix: current live state (audited 2026-09-21)
 
 At the time of writing, production (`45.32.106.113`) is **not** behaving as

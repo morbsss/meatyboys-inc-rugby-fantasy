@@ -11,6 +11,29 @@ set -e
 APP_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$APP_DIR"
 
+# ── deploy source guard ───────────────────────────────────────────────────────
+# Deploys come from CI only (.github/workflows/deploy.yml), so whatever is
+# running on the VM always corresponds to a commit on main that passed its
+# tests. A laptop deploy would overwrite that with someone's working tree, with
+# no record of what actually shipped.
+#
+# Break-glass for an outage when CI itself is unavailable:
+#     ALLOW_MANUAL_DEPLOY=1 bash deploy.sh
+# Use it only to restore service, then push the same code through CI so the VM
+# and main agree again.
+if [ "${CI_DEPLOY:-}" != "1" ] && [ "${ALLOW_MANUAL_DEPLOY:-}" != "1" ]; then
+    echo "[blocked] Manual deploys are disabled."
+    echo "          Merge to main and let CI deploy (.github/workflows/deploy.yml),"
+    echo "          or re-run the workflow from the Actions tab."
+    echo "          Break-glass (outage only): ALLOW_MANUAL_DEPLOY=1 bash deploy.sh"
+    exit 1
+fi
+if [ "${CI_DEPLOY:-}" = "1" ]; then
+    echo "[deploy] Source: CI"
+else
+    echo "[deploy] Source: MANUAL BREAK-GLASS — push this code through CI afterwards."
+fi
+
 # ── env ───────────────────────────────────────────────────────────────────────
 [ -f .env ] || { echo "[error] .env not found in $APP_DIR (copy .env.example)"; exit 1; }
 # Parse KEY=VALUE lines WITHOUT executing them, so values with spaces or other
@@ -69,15 +92,37 @@ CRON
 # ── (re)start gunicorn ────────────────────────────────────────────────────────
 echo "[deploy] Restarting gunicorn on ${APP_HOST}:${APP_PORT}..."
 pkill -f "gunicorn.*api.index:app" 2>/dev/null || true
-sleep 1
+sleep 2
+# setsid + closed stdin detaches gunicorn from the invoking session. With a bare
+# `nohup ... &` the new process stays in the SSH session's process group and is
+# killed when the connection closes — which leaves the site down after a remote
+# deploy, silently, because the script has already exited 0 by then.
 # 1 worker + threads keeps SQLite writes single-process safe.
-nohup .venv/bin/gunicorn \
+setsid .venv/bin/gunicorn \
     -w 1 --threads 4 \
     -b "${APP_HOST}:${APP_PORT}" \
     --access-logfile "$APP_DIR/gunicorn.log" \
     api.index:app \
-    >> "$APP_DIR/gunicorn.log" 2>&1 &
-sleep 1
+    < /dev/null >> "$APP_DIR/gunicorn.log" 2>&1 &
+disown 2>/dev/null || true
+
+# Don't report success until it actually serves: a deploy that leaves the app
+# down should fail the pipeline, not pass quietly.
+echo -n "[deploy] Waiting for the app to respond"
+for _i in $(seq 1 30); do
+    if curl -fsS -m 2 -o /dev/null "http://${APP_HOST}:${APP_PORT}/" 2>/dev/null; then
+        echo " — up."
+        break
+    fi
+    if [ "$_i" -eq 30 ]; then
+        echo ""
+        echo "[error] gunicorn did not come up within 30s. Last log lines:"
+        tail -20 "$APP_DIR/gunicorn.log"
+        exit 1
+    fi
+    echo -n "."
+    sleep 1
+done
 
 # ── nginx reverse proxy + optional HTTPS ──────────────────────────────────────
 echo "[setup] Configuring nginx (port 80 → gunicorn ${APP_PORT})..."
