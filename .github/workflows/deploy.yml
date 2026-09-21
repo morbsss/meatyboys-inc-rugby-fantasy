@@ -1,0 +1,119 @@
+name: CI / Deploy
+
+# Tests run on every push and pull request. Deployment happens only when main
+# moves — i.e. when a branch is merged — so what runs on the VM is always a
+# commit that exists on main and passed its tests. Local deploys are blocked
+# (see deploy.ps1 and the guard in deploy.sh).
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:          # sanctioned manual re-deploy, from the Actions tab
+
+env:
+  PYTHON_VERSION: '3.12'
+  # Not secrets — these are already in the repo's history. Override with repo
+  # variables (Settings → Secrets and variables → Actions → Variables).
+  VM_HOST: ${{ vars.VM_HOST || '45.32.106.113' }}
+  VM_USER: ${{ vars.VM_USER || 'root' }}
+  VM_SSH_PORT: ${{ vars.VM_SSH_PORT || '22' }}
+  VM_APP_DIR: ${{ vars.VM_APP_DIR || '/root/meatyboys' }}
+  PUBLIC_URL: ${{ vars.PUBLIC_URL || 'https://meatyboys.com' }}
+
+jobs:
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Run tests
+        run: python -m pytest tests -q
+
+  deploy:
+    name: Deploy to VM
+    needs: test
+    # Only main deploys. A pull_request run stops after `test`.
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment: production        # lets you add required reviewers later
+    # Scoped to this job, not the workflow: a workflow-level group would queue
+    # unrelated PR test runs behind a production deploy. Queue rather than
+    # cancel, so a deploy already copying files is allowed to finish — the app
+    # is a single gunicorn process over one SQLite file.
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.VM_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          # Pin the host key rather than trusting on first use, so a hijacked
+          # DNS/IP can't harvest the deploy key.
+          printf '%s\n' "${{ secrets.VM_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Write production .env
+        run: |
+          umask 077
+          printf '%s\n' "${{ secrets.ENV_PRODUCTION }}" > .env.deploy
+          # Fail early on a missing/empty secret rather than shipping a broken
+          # .env and taking the site down.
+          grep -q '^SECRET_KEY=' .env.deploy || { echo "::error::ENV_PRODUCTION secret is missing or malformed"; exit 1; }
+
+      - name: Copy application files
+        run: |
+          SSH="ssh -i ~/.ssh/deploy_key -p ${VM_SSH_PORT} -o BatchMode=yes"
+          TARGET="${VM_USER}@${VM_HOST}:${VM_APP_DIR}"
+          $SSH ${VM_USER}@${VM_HOST} "mkdir -p ${VM_APP_DIR}"
+          # --delete keeps the VM identical to main for the directories the repo
+          # owns. The .venv, logs and .env live at the app root and are never
+          # touched. Databases are excluded explicitly: they are gitignored, so
+          # without this --delete would destroy any DB sitting inside a synced
+          # directory (tools/db_modelling/super_rugby_2026.db is one), and a
+          # deploy must never write live data either way.
+          rsync -az --delete \
+                --exclude='__pycache__' --exclude='*.pyc' \
+                --exclude='*.db' --exclude='*.sqlite' --exclude='*.sqlite3' \
+                -e "$SSH" api tools nginx data "$TARGET/"
+          rsync -az -e "$SSH" requirements.txt deploy.sh "$TARGET/"
+
+      - name: Install .env
+        run: |
+          scp -i ~/.ssh/deploy_key -P ${VM_SSH_PORT} -o BatchMode=yes \
+              .env.deploy "${VM_USER}@${VM_HOST}:${VM_APP_DIR}/.env"
+
+      - name: Run deploy.sh on the VM
+        run: |
+          ssh -i ~/.ssh/deploy_key -p ${VM_SSH_PORT} -o BatchMode=yes \
+              "${VM_USER}@${VM_HOST}" \
+              "cd ${VM_APP_DIR} && sed -i 's/\r$//' deploy.sh && CI_DEPLOY=1 bash deploy.sh"
+
+      - name: Smoke test
+        run: |
+          # Behind nginx, on the VM itself.
+          ssh -i ~/.ssh/deploy_key -p ${VM_SSH_PORT} -o BatchMode=yes \
+              "${VM_USER}@${VM_HOST}" \
+              'curl -fsS -m 10 -o /dev/null -w "app on VM: HTTP %{http_code}\n" http://127.0.0.1:5000/'
+          # And end-to-end over the public hostname, with TLS verified — hitting
+          # the bare IP would need --insecure and would hide a broken cert.
+          curl -fsSL -m 20 -o /dev/null \
+               -w "public %{url_effective}: HTTP %{http_code}\n" "${PUBLIC_URL}/"
+
+      - name: Clean up secrets
+        if: always()
+        run: rm -f ~/.ssh/deploy_key .env.deploy
