@@ -3224,6 +3224,50 @@ def _last_run(conn, league_id, job):
     return row['m'] if isinstance(row, dict) else row[0]
 
 
+def _launch_predict(league_id, round_number) -> str:
+    """Start api.predict for one league in a detached process.
+
+    Deliberately NOT run in-process. A full fit takes well over a minute, the
+    app runs a single gunicorn worker, and the cron curl gives up after 90s —
+    so an in-process run would stall requests and look like an outage. It also
+    keeps numpy/pandas/scipy/sklearn out of the web process entirely.
+
+    predict.py writes its own job_runs row on completion, so the outcome is
+    visible even though this returns immediately.
+    """
+    import subprocess
+    import sys
+    cmd = [sys.executable, '-m', 'api.predict', '--league', str(league_id)]
+    if round_number:
+        cmd += ['--round', str(round_number)]
+    try:
+        subprocess.Popen(
+            cmd,
+            cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True,      # survives the request that spawned it
+        )
+        return f'launched for round {round_number}'
+    except Exception as e:
+        return f'launch failed: {e}'
+
+
+def _predict_done(conn, league_id, round_number):
+    """Predictions already computed (or launched) for this round."""
+    if round_number is None:
+        return True
+    cursor = _get_cursor(conn)
+    cursor.execute(
+        "SELECT 1 FROM job_runs WHERE league_id = ? AND job = 'predict' "
+        "AND round_number = ? AND status = 'ok' LIMIT 1",
+        (league_id, round_number))
+    done = cursor.fetchone() is not None
+    cursor.close()
+    return done
+
+
 def _finalize_done(conn, league_id, round_number):
     cursor = _get_cursor(conn)
     cursor.execute(
@@ -3293,6 +3337,8 @@ def _run_job(conn, league_id, competition, job, active_round):
         n = ingest.ingest_player_scores(conn, league_id, competition, fin_round,
                                         finalize=True)
         return fin_round, f'{n} players (final)'
+    if job == 'predict':
+        return active_round, _launch_predict(league_id, active_round)
     return active_round, 'noop'
 
 
@@ -3331,6 +3377,9 @@ def cron_tick():
             finalize_done=(fin_round is None
                            or _finalize_done(conn, league_id, fin_round)),
             rounds_known=_rounds_known(conn, league_id),
+            # Predictions are for the round now being picked, not the one just
+            # settled — so this gate asks about active_round, unlike finalize.
+            predict_done=_predict_done(conn, league_id, active_round),
         )
 
         ran = []

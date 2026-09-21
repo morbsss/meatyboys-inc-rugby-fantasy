@@ -22,6 +22,7 @@ Usage:
 """
 import os
 import sqlite3
+from datetime import datetime, timezone
 
 import numpy as np
 import pandas as pd
@@ -40,8 +41,15 @@ DB_PATH = os.getenv('DB_PATH', 'mock_fantasy.db')
 # when computing opposition deltas (mirrors the reference model).
 POSITION_PLAYER_COUNTS = {'OBK': 3, 'LF': 2, 'MID': 2}
 MIN_DIST_ROWS = 5
+# NOTE: `opp_pos_strength` is deliberately NOT a feature. It is derived from the
+# points a team actually conceded *in the round being predicted* (see _engineer),
+# so during training it is contemporaneous with the label — a near-oracle signal.
+# At prediction time that value cannot exist, and _prediction_features
+# substitutes the opponent's most recent PAST round instead. The model therefore
+# learned to lean on a feature that means something different when served.
+# `opp_pos_last3` is the lagged form of the same idea and is safe.
 GBM_FEATURES = ['avg_3', 'max_3', 'max_5', 'p75_3', 'vol_3',
-                'opp_pos_strength', 'opp_pos_last3', 'season_avg', 'season_max']
+                'opp_pos_last3', 'season_avg', 'season_max']
 
 
 # ── Distribution helpers ─────────────────────────────────────────────────────
@@ -84,6 +92,37 @@ def _weibull_p50(scores, delta=0.0):
 
 # ── Data loading (cumulative weekly_stats → per-round deltas) ────────────────
 
+def _previous_season_prior(con, league_id, rounds=None):
+    """{player_id: per-round points last season} — the cold-start prior.
+
+    Without this every projection is 0.0 until several rounds are banked: a
+    player with no weekly_stats rows has no mean, no distribution and no GBM
+    features, so the Analysis page is useless for the opening weeks of a season
+    — the weeks when managers most need help ranking players they can't yet
+    judge on form.
+
+    `previous_season` stores a season TOTAL (points_per_game is often null), so
+    it is spread across the regular season to get a per-round figure.
+    """
+    n = rounds or REGULAR_ROUNDS
+    out = {}
+    try:
+        rows = con.execute(
+            'SELECT player_id, total_points, points_per_game FROM previous_season '
+            'WHERE league_id = ?', (league_id,)).fetchall()
+    except Exception:
+        return out
+    for r in rows:
+        pid = r['player_id'] if isinstance(r, sqlite3.Row) else r[0]
+        total = r['total_points'] if isinstance(r, sqlite3.Row) else r[1]
+        ppg = r['points_per_game'] if isinstance(r, sqlite3.Row) else r[2]
+        if ppg:
+            out[pid] = float(ppg)
+        elif total:
+            out[pid] = float(total) / n
+    return out
+
+
 def _load_scores(con, league_id):
     df = pd.read_sql(
         'SELECT ws.player_id AS playerid, ws.round AS round_num, ws.total_points, '
@@ -92,6 +131,10 @@ def _load_scores(con, league_id):
         'WHERE ws.league_id = ? ORDER BY ws.player_id, ws.round',
         con, params=(league_id,))
     if df.empty:
+        # Keep the full column set so the cold-start path (no rounds played yet)
+        # can filter and index this frame like any other instead of KeyError-ing.
+        for col in ('prev', 'total', 'opposition', 'home'):
+            df[col] = pd.Series(dtype='float64')
         return df
     df['prev'] = df.groupby('playerid')['total_points'].shift(1).fillna(0.0)
     df['total'] = (df['total_points'] - df['prev']).astype(float)
@@ -251,12 +294,43 @@ def _has_fr_unit(con, league_id):
     return bool(_league_model(con, league_id).get('fr_unit'))
 
 
-def compute_league(con, league_id):
+def _target_round(con, league_id, scores):
+    """The round to project: the one managers are currently picking for.
+
+    That is `get_next_round`, which holds the current round until the Tuesday
+    rollover — so during a fixture weekend it is the live round (projections
+    sit next to actual scores), and from Tuesday noon it is the upcoming one.
+
+    It used to be MAX(weekly_stats.round), i.e. the last round *scored*. That is
+    the same round for most of the week, but wrong for the entire Tue->Fri
+    window when squads are open — exactly when projections are needed, the page
+    was showing the round that had already finished.
+
+    Imported lazily: api.index owns the rollover arithmetic and importing it at
+    module scope would pull Flask into every use of this module.
+    """
+    try:
+        from api.index import get_next_round
+        return int(get_next_round(con, league_id))
+    except Exception:
+        # Standalone fallback (no rounds table / import trouble): last scored round.
+        return int(scores['round_num'].max())
+
+
+def compute_league(con, league_id, target=None):
     scores = _load_scores(con, league_id)
-    if scores.empty:
-        return None, [], []
-    max_round = int(scores['round_num'].max())
-    target = max_round                               # the live round (incl. playoffs)
+    if target is None:
+        if scores.empty:
+            # Nothing scored yet: there is no "last scored round" to fall back
+            # on, so the calendar has to say which round we're picking for.
+            try:
+                from api.index import get_next_round
+                target = int(get_next_round(con, league_id))
+            except Exception:
+                return None, [], []
+        else:
+            target = _target_round(con, league_id, scores)
+    target = int(target)
     award_bonus = _award_bonus(con, league_id)
 
     hist = scores[scores['round_num'] < target]      # clean pre-round history
@@ -277,6 +351,9 @@ def compute_league(con, league_id):
 
     players = pd.read_sql('SELECT player_id AS playerid, name, team, position '
                           'FROM players WHERE league_id=?', con, params=(league_id,))
+    # Last season's per-round scoring, used only where a player has no history
+    # in THIS season yet (opening rounds, or a new signing).
+    prior_ppr = _previous_season_prior(con, league_id)
     # gamma percentile arrays per player, for the win-probability model
     pct_cache = {}
     rows = []
@@ -287,8 +364,9 @@ def compute_league(con, league_id):
         if opp[0] is None:
             continue
         d = deltas.get((opp[0], p['position']), 0.0)
-        ssn = float(np.mean(ph)) if ph else 0.0
-        a3 = float(np.mean(ph[-3:])) if ph else 0.0
+        prior = prior_ppr.get(pid)
+        ssn = float(np.mean(ph)) if ph else (prior or 0.0)
+        a3 = float(np.mean(ph[-3:])) if ph else (prior or 0.0)
         gp50 = _gamma_p50(ph)
         wp50 = _weibull_p50(ph, d)
         gbm_pred = None
@@ -296,7 +374,15 @@ def compute_league(con, league_id):
             fr = _prediction_features(pid, p['team'], opp[0], p['position'], hist, feat)
             if fr is not None:
                 gbm_pred = round(float(gbm.predict(pd.DataFrame([fr])[GBM_FEATURES].fillna(0))[0]), 1)
-        proj = gbm_pred if gbm_pred is not None else (round(gp50, 1) if ph else round(ssn, 1))
+        # Fallback chain: model -> distribution -> season mean -> last season.
+        if gbm_pred is not None:
+            proj = gbm_pred
+        elif ph:
+            proj = round(gp50, 1)
+        elif prior is not None:
+            proj = round(prior, 1)
+        else:
+            proj = round(ssn, 1)
         nm = (p['name'] or '').replace("'", '')
         status = lineup.get((nm, p['team']))
         if status is None and p['team'] in teams_named:
@@ -349,7 +435,13 @@ def compute_league(con, league_id):
                 'gamma_p50': round(gp50, 1), 'weibull_p50': round(gp50, 1),
             })
 
-    matchups = _win_probabilities(con, league_id, target, pct_cache, fr_pct, hist, fr_series, award_bonus)
+    # Win probabilities need real distributions. With no rounds played every
+    # player's array is flat, so every fixture would come out a 100% draw (or a
+    # 100/0 split off the priors) — confidently wrong. Publish nothing instead;
+    # the page already says "No matchups available yet."
+    matchups = (_win_probabilities(con, league_id, target, pct_cache, fr_pct,
+                                   hist, fr_series, award_bonus)
+                if not hist.empty else [])
     return target, rows, matchups
 
 
@@ -451,20 +543,58 @@ def _write(con, league_id, target, players, matchups):
     con.commit()
 
 
-def main():
+def _log_run(con, league_id, round_number, status, detail):
+    """Mirror the cron scheduler's job_runs logging, so a run launched in the
+    background is still visible next to the other ingestion jobs."""
+    try:
+        con.execute(
+            'INSERT INTO job_runs (league_id, job, round_number, status, detail, run_at) '
+            'VALUES (?, ?, ?, ?, ?, ?)',
+            (league_id, 'predict', round_number, status, detail[:200],
+             datetime.now(timezone.utc).isoformat()))
+        con.commit()
+    except Exception as e:                       # logging must never fail the job
+        print(f'  (job_runs) could not log: {e}')
+
+
+def main(argv=None):
+    import argparse
     from api.db import ensure_schema
-    con = sqlite3.connect(DB_PATH)
+
+    ap = argparse.ArgumentParser(description='Compute analysis predictions.')
+    ap.add_argument('--league', type=int, default=None,
+                    help='league_id to compute (default: all)')
+    ap.add_argument('--round', type=int, default=None,
+                    help='target round (default: the round being picked for)')
+    args = ap.parse_args(argv)
+
+    # The web app writes to this file too; wait rather than failing on a lock.
+    con = sqlite3.connect(DB_PATH, timeout=30)
     con.row_factory = sqlite3.Row
     ensure_schema(con)
-    leagues = [r[0] for r in con.execute('SELECT league_id FROM leagues ORDER BY league_id').fetchall()]
+    leagues = ([args.league] if args.league is not None else
+               [r[0] for r in con.execute(
+                   'SELECT league_id FROM leagues ORDER BY league_id').fetchall()])
+    failures = 0
     for lid in leagues:
-        target, prows, mrows = compute_league(con, lid)
+        try:
+            target, prows, mrows = compute_league(con, lid, args.round)
+        except Exception as e:
+            failures += 1
+            print(f'league {lid}: FAILED - {e}')
+            _log_run(con, lid, args.round, 'error', str(e))
+            continue
         if target is None:
-            print(f'league {lid}: no scores — skipped'); continue
+            print(f'league {lid}: no scores and no calendar — skipped')
+            _log_run(con, lid, None, 'ok', 'skipped (no data)')
+            continue
         _write(con, lid, target, prows, mrows)
-        print(f'league {lid}: round {target} - {len(prows)} player rows, {len(mrows)} matchups')
+        detail = f'{len(prows)} player rows, {len(mrows)} matchups'
+        print(f'league {lid}: round {target} - {detail}')
+        _log_run(con, lid, target, 'ok', detail)
     con.close()
+    return 1 if failures else 0
 
 
 if __name__ == '__main__':
-    main()
+    raise SystemExit(main())

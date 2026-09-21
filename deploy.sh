@@ -67,6 +67,16 @@ echo "[setup] Installing dependencies..."
 pip install -q --upgrade pip
 pip install -q -r requirements.txt
 
+# Analysis job deps (numpy/pandas/scipy/sklearn). Separate from the web deps
+# because only the out-of-process predict job imports them. Non-fatal: if the
+# wheels won't build on this box the site still deploys, and only the Analysis
+# page goes stale — the scheduler logs the failure to job_runs.
+if [ -f requirements-analysis.txt ]; then
+    echo "[setup] Installing analysis dependencies (this can take a while)..."
+    pip install -q -r requirements-analysis.txt \
+        || echo "[warn] analysis deps failed to install — predictions will not run."
+fi
+
 # ── database ──────────────────────────────────────────────────────────────────
 # The real DB is SCP'd by deploy.ps1. If it's genuinely missing, seed a mock one
 # so the app still boots.

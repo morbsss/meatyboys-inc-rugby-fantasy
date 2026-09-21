@@ -121,6 +121,7 @@ def due_jobs(
     live_now: bool,
     finalize_done: bool,
     rounds_known: bool,
+    predict_done: bool = True,
 ) -> list[str]:
     """Ordered list of jobs to run now for one league.
 
@@ -128,6 +129,8 @@ def due_jobs(
     `live_now`      : caller-computed (a match is currently live).
     `finalize_done` : finalize already recorded for the target gameweek.
     `rounds_known`  : the rounds calendar exists for this league.
+    `predict_done`  : analysis predictions already computed for that gameweek.
+                      Defaults True so a caller that doesn't know stays put.
     """
     if now_utc.tzinfo is None:
         now_utc = now_utc.replace(tzinfo=timezone.utc)
@@ -147,5 +150,12 @@ def due_jobs(
 
     if is_finalize_time(local) and not finalize_done:
         due.append('finalize')
+
+    # Analysis predictions, at the same rollover and AFTER finalize in this
+    # list, so the model trains on the settled scores rather than the weekend's
+    # provisional ones. Runs out-of-process (see _run_job): a model fit takes
+    # over a minute and must not occupy the single gunicorn worker.
+    if is_finalize_time(local) and not predict_done:
+        due.append('predict')
 
     return due
