@@ -8,7 +8,9 @@ Control pick locking behavior via environment variables:
 
   ALLOW_UNRESTRICTED_EDITS
   - 'true': All picks can be edited anytime (development mode)
-  - 'false' or unset: Picks locked Friday 19:30-Tuesday 23:59 UTC (production mode)
+  - 'false' or unset: picks lock at the round's first kickoff and reopen at the
+    Tuesday-noon rollover, in the league's own timezone (production mode).
+    See ROLLOVER_WEEKDAY / get_next_round below, and README.md.
 
   DB_TYPE
   - 'sqlite': Uses local SQLite database (development, default)
@@ -222,31 +224,82 @@ def _get_cursor(conn):
     return _CursorWrapper(conn.cursor())
 
 
+# The weekly clean break. A round stays "current" from its first kickoff right
+# through to the following Tuesday at noon in the league's own timezone; at that
+# moment the round rolls over, its table and fixtures are final, and squads and
+# transfers reopen for the next one.
+#
+# Deliberately NOT the last kickoff: rolling over there reopened squads on Sunday
+# afternoon, before Monday's finalize scrape had settled the scores, and left the
+# round's final match being scored against the *next* round's fixture list.
+ROLLOVER_WEEKDAY = 1                     # Tuesday (Mon=0, as in api/scheduler.py)
+ROLLOVER_HOUR, ROLLOVER_MINUTE = 12, 0
+
+
+def _league_tz(conn, league_id=None) -> str:
+    """IANA timezone for a league, falling back to the default league's."""
+    slug = _slug_for_league_id(conn, league_id) if league_id is not None else None
+    league = LEAGUES.get(slug) or LEAGUES[DEFAULT_LEAGUE]
+    return league['timezone']
+
+
+def _rollover_at(last_kickoff: datetime, tz_name: str) -> datetime:
+    """The first Tuesday 12:00 league-local strictly after `last_kickoff`.
+
+    Timezone-aware so BST/GMT (and AEST/AEDT) switch on their own: the noon is
+    noon to the managers, whatever the UTC offset is that week.
+    """
+    local = scheduler.to_local(last_kickoff, tz_name)
+    days = (ROLLOVER_WEEKDAY - local.weekday()) % 7
+    rollover = (local + timedelta(days=days)).replace(
+        hour=ROLLOVER_HOUR, minute=ROLLOVER_MINUTE,
+        second=0, microsecond=0)
+    if rollover <= local:
+        rollover += timedelta(days=7)
+    return rollover
+
+
+def round_rollover(conn, round_num, league_id=None):
+    """When `round_num` goes final and the next round opens, or None."""
+    _, last_ko = _round_kickoffs(conn, round_num, league_id)
+    if last_ko is None:
+        return None
+    return _rollover_at(last_ko, _league_tz(conn, league_id))
+
+
 def get_next_round(conn, league_id=None) -> int:
     """The round users are currently picking for (or playing in).
 
-    Time-based: smallest round_number in `rounds` whose last_kickoff is in
-    the future. Falls back to MAX(weekly_stats.round) + 1 when the rounds
-    table is empty or every scheduled round has finished. Scoped to `league_id`.
+    Time-based: the smallest round_number in `rounds` whose *rollover* (the
+    Tuesday noon after its last kickoff) is still in the future. Falls back to
+    MAX(weekly_stats.round) + 1 when the rounds table is empty or every
+    scheduled round has rolled over. Scoped to `league_id`.
+
+    The Tuesday arithmetic is timezone-dependent, so it can't live in the SQL;
+    a season is ~20 rows per league, so the rows are resolved in Python.
     """
-    now_iso = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(timezone.utc)
     cursor = _get_cursor(conn)
     if league_id is None:
         cursor.execute(
-            'SELECT round_number FROM rounds WHERE last_kickoff > ? '
-            'ORDER BY round_number ASC LIMIT 1',
-            (now_iso,)
-        )
+            'SELECT round_number, last_kickoff FROM rounds ORDER BY round_number ASC')
     else:
         cursor.execute(
-            'SELECT round_number FROM rounds WHERE last_kickoff > ? AND league_id = ? '
-            'ORDER BY round_number ASC LIMIT 1',
-            (now_iso, league_id)
+            'SELECT round_number, last_kickoff FROM rounds WHERE league_id = ? '
+            'ORDER BY round_number ASC',
+            (league_id,)
         )
-    row = cursor.fetchone()
+    rows = cursor.fetchall()
     cursor.close()
-    if row:
-        return row['round_number'] if isinstance(row, dict) else row[0]
+
+    tz_name = _league_tz(conn, league_id)
+    for row in rows:
+        rd = dict(row) if not isinstance(row, dict) else row
+        last_ko = datetime.fromisoformat(rd['last_kickoff'])
+        if last_ko.tzinfo is None:
+            last_ko = last_ko.replace(tzinfo=timezone.utc)
+        if _rollover_at(last_ko, tz_name) > now:
+            return rd['round_number']
     return _round_after_last_scraped(conn, league_id)
 
 
@@ -309,7 +362,12 @@ def _round_kickoffs(conn, round_num, league_id=None):
 
 
 def is_locked(conn=None, league_id=None) -> bool:
-    """Picks lock at the first kickoff of the round being picked for."""
+    """Picks lock at the first kickoff of the round being picked for.
+
+    No cool-down logic is needed here: `get_next_round` holds the round current
+    until the Tuesday-noon rollover, so this stays true right through the
+    weekend and Monday, and flips false the moment the round rolls.
+    """
     if ALLOW_UNRESTRICTED_EDITS:
         return False
     _owned = conn is None
@@ -341,17 +399,24 @@ def next_lock_time(conn, next_round, league_id=None) -> str:
 
 
 def reopen_time(conn, next_round, league_id=None) -> str:
-    """ISO string of estimated unlock: last kickoff of next_round (round ends)."""
-    _, last_ko = _round_kickoffs(conn, next_round, league_id)
-    if last_ko:
-        return last_ko.isoformat()
-    # Fallback: next Tuesday 23:59 UTC
-    now = datetime.now(timezone.utc)
-    days_since_friday = (now.weekday() - 4) % 7
-    last_friday = (now - timedelta(days=days_since_friday)).replace(
-        hour=19, minute=30, second=0, microsecond=0)
-    return (last_friday + timedelta(days=4)).replace(
-        hour=23, minute=59, second=0, microsecond=0).isoformat()
+    """ISO string of the unlock: the Tuesday-noon rollover of next_round.
+
+    This is what the squad screen counts down to, so it has to match the moment
+    `get_next_round` actually rolls — not the last kickoff, which is when the
+    fixtures finish but the round is still closed.
+    """
+    rollover = round_rollover(conn, next_round, league_id)
+    if rollover:
+        return rollover.isoformat()
+    # Fallback (no calendar yet): the next Tuesday noon in the league's zone.
+    tz_name = _league_tz(conn, league_id)
+    now_local = scheduler.to_local(datetime.now(timezone.utc), tz_name)
+    days = (ROLLOVER_WEEKDAY - now_local.weekday()) % 7
+    tuesday = (now_local + timedelta(days=days)).replace(
+        hour=ROLLOVER_HOUR, minute=ROLLOVER_MINUTE, second=0, microsecond=0)
+    if tuesday <= now_local:
+        tuesday += timedelta(days=7)
+    return tuesday.isoformat()
 
 
 # ---------------------------------------------------------------------------
@@ -2520,6 +2585,16 @@ def _finalize_draft(conn, league_id, order):
             p['rank'] = 0
         starters, bench = draft_engine.choose_starting_xi(roster, model)
         bench = bench[:model_bench_count(model)]
+        # A strict squad has a slot per pick, so anything unplaced means the
+        # draft let a position overfill (see _quota_blocked). Say so loudly —
+        # this used to vanish silently and leave a manager a player short.
+        placed = {id(p) for p in starters} | {id(p) for p in bench}
+        dropped = [p for p in roster if id(p) not in placed]
+        if dropped and not model.get('soft'):
+            app.logger.warning(
+                'draft: %s has %d drafted player(s) with no squad slot: %s — '
+                'squad will be short. Check the draft quota validation.',
+                team, len(dropped), ', '.join(str(p.get('player_id')) for p in dropped))
         cursor.execute(
             'DELETE FROM team_selections WHERE league_id = ? AND team_name = ? AND round = ?',
             (league_id, team, next_round))
@@ -2710,6 +2785,34 @@ def api_draft_start():
     return jsonify({'status': 'live'})
 
 
+def _quota_blocked(position, owned_positions, model, has_fr):
+    """Why `position` can't be drafted right now, or None if it's fine.
+
+    A strict model (OFDS) drafts exactly one player per squad slot — 23 picks
+    for 23 slots — so taking a position that is already full strands a slot that
+    the remaining picks can no longer fill. The squad then cannot be fielded,
+    and _finalize_draft silently drops the surplus player, leaving the manager a
+    man short with nothing to explain it. Refuse the pick instead.
+
+    Auto-picks already avoid this (draft.auto_pick fills unmet needs first); it
+    was only the manual path that let it through. Flexible models (meatyboys)
+    treat composition as advisory, so they're exempt.
+    """
+    if model.get('soft'):
+        return None
+    needs = draft_engine.unmet_needs(owned_positions, model)
+    if needs.get(position, 0) > 0:
+        return None
+    used = len(owned_positions) + (1 if has_fr else 0)
+    picks_left = model_draft_picks(model) - used          # including this pick
+    if sum(needs.values()) <= picks_left - 1:
+        return None                                        # surplus still affordable
+    still = ', '.join(f'{n}x{POSITION_LABELS.get(p, p)}'
+                      for p, n in sorted(needs.items()) if n > 0)
+    return (f'Your squad is already full at {POSITION_LABELS.get(position, position)}. '
+            f'With {picks_left} pick{"s" if picks_left != 1 else ""} left you still need: {still}.')
+
+
 def _make_pick(conn, league_id, player_id, fr_club, by_user_team, is_auto):
     """Shared pick logic for an individual player OR a club front-row unit.
     Returns (status_code, payload)."""
@@ -2749,6 +2852,9 @@ def _make_pick(conn, league_id, player_id, fr_club, by_user_team, is_auto):
         p = next((x for x in available if x['id'] == player_id), None)
         if not p:
             return 409, {'error': 'Player is unavailable or already drafted'}
+        blocked = _quota_blocked(p['position'], owned, model, has_fr)
+        if blocked:
+            return 409, {'error': blocked}
         label = p['name']
 
     done = _record_pick_and_advance(conn, league_id, state, team, player_id, fr_club, is_auto)
@@ -3105,10 +3211,13 @@ def _run_job(conn, league_id, competition, job, active_round):
         _carry_forward_picks(conn, league_id, active_round)
         return active_round, f'{n} players'
     if job == 'finalize':
-        # The just-finished gameweek is the round before the upcoming one.
-        fin_round = max(1, active_round - 1)
-        n = ingest.ingest_player_scores(conn, league_id, competition, fin_round, finalize=True)
-        return fin_round, f'{n} players (final)'
+        # Finalize runs Monday, and the round doesn't roll over until Tuesday
+        # noon, so the just-finished gameweek IS the active round. (It used to
+        # be active_round - 1, back when the round rolled at the last kickoff
+        # and Monday already belonged to the next one.)
+        n = ingest.ingest_player_scores(conn, league_id, competition, active_round,
+                                        finalize=True)
+        return active_round, f'{n} players (final)'
     return active_round, 'noop'
 
 
@@ -3139,10 +3248,10 @@ def cron_tick():
 
         last_runs = {j: _last_run(conn, league_id, j)
                      for j in ('sync_rounds', 'lineups', 'live_scoring')}
-        fin_round = max(1, active_round - 1)
         due = scheduler.due_jobs(
             competition, now, cfg['timezone'], last_runs, live_now,
-            finalize_done=_finalize_done(conn, league_id, fin_round),
+            # Monday's finalize targets the active round (see _run_job).
+            finalize_done=_finalize_done(conn, league_id, active_round),
             rounds_known=_rounds_known(conn, league_id),
         )
 
