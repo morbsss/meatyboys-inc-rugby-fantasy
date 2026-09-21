@@ -46,9 +46,10 @@ function setFilter(week) {
 }
 
 function render() {
-  const wrap  = document.getElementById('fixtures-wrap');
+  const wrap = document.getElementById('fixtures-wrap');
+  // The API sends weeks ascending; "All" reads round 1 → 15, like a fixture list.
   const weeks = activeWeek === 'ALL'
-    ? [...allResults].reverse()
+    ? allResults
     : allResults.filter(r => r.week === activeWeek);
 
   if (!weeks.length) {
@@ -56,10 +57,11 @@ function render() {
     return;
   }
 
+  // One container for both views, so a single week's card is laid out on the
+  // same grid track as in "All" and keeps its size. Filtering to one round used
+  // to swap in a narrower centred wrapper, which visibly shrank the table.
   const cards = weeks.map(({ week, matches }) => makeWeekCard(week, matches)).join('');
-  wrap.innerHTML = activeWeek === 'ALL'
-    ? `<div class="weeks-grid">${cards}</div>`
-    : `<div class="single-round">${cards}</div>`;
+  wrap.innerHTML = `<div class="weeks-grid">${cards}</div>`;
 }
 
 function makeWeekCard(week, matches) {

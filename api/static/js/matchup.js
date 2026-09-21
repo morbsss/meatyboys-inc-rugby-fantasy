@@ -115,16 +115,39 @@ const mtybyRank = pos => {
   return i === -1 ? MTYBY_ORDER.length : i;
 };
 
-// Put the front row in real jersey order — loosehead prop, hooker, tighthead
-// prop (PR, HK, PR) — then the rest of the XV in their existing grouped order.
+// OFDS line-up order, TOP → BOTTOM: the starting XV as it is read out on a team
+// sheet. Front row interleaves (loosehead prop, hooker, tighthead prop), which a
+// position-grouped sort can't express — hence an explicit 15-slot template
+// rather than a ranking function.
+const OFDS_STARTER_ORDER = [
+  'PR', 'HK', 'PR',               // front row
+  'LK', 'LK',                     // second row
+  'LF', 'LF', 'LF',               // back row
+  'SH', 'FH',                     // half backs
+  'MID', 'MID',                   // centres
+  'OBK', 'OBK', 'OBK',            // back three
+];
+
+// Fill the template in order, taking players of each position as they come.
 function orderStarters(starters) {
-  const props = starters.filter(p => p.position === 'PR');
-  const hooks = starters.filter(p => p.position === 'HK');
-  const front = [props[0], hooks[0], props[1]].filter(Boolean);
-  const seen = new Set(front);
-  const rest = starters.filter(p => !seen.has(p) && p.position !== 'PR' && p.position !== 'HK');
-  const spareFront = [...props, ...hooks].filter(p => !seen.has(p));   // defensive: odd counts
-  return [...front, ...spareFront, ...rest];
+  const byPos = new Map();
+  starters.forEach((p) => {
+    if (!byPos.has(p.position)) byPos.set(p.position, []);
+    byPos.get(p.position).push(p);
+  });
+
+  const out = [];
+  OFDS_STARTER_ORDER.forEach((pos) => {
+    const queue = byPos.get(pos);
+    if (queue && queue.length) out.push(queue.shift());
+  });
+
+  // A line-up that doesn't match the template (an auto-sub covering out of
+  // position, or a squad short somewhere) leaves players unplaced. Append them
+  // rather than dropping them — a missing name on a match-day table reads as
+  // lost points.
+  byPos.forEach((queue) => queue.forEach((p) => out.push(p)));
+  return out;
 }
 
 function colHTML(team) {
