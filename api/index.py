@@ -489,6 +489,8 @@ def login():
     if slug:
         session['league_slug'] = slug
 
+    # Signed in with a commissioner-issued temporary password: the client sends
+    # them to the profile to set a real one (see must_change_password in db.py).
     return jsonify({'status': 'success', 'message': 'Logged in', **result}), 200
 
 
@@ -529,6 +531,9 @@ def get_user():
         'team_name': team_name,
         'current_round': current_round,
         'is_commissioner': bool(ctx and ctx['is_commissioner']),
+        # Signed in on a commissioner-issued temporary password: base.js pins the
+        # profile open until they set their own.
+        'must_change_password': bool(ctx and ctx['must_change_password']),
         'commissioner_user_id': commissioner_id,
         'commissioner_name': commissioner_name,
         'can_edit_team': can_edit_team,
@@ -766,19 +771,60 @@ def change_password():
         cursor.close(); conn.close()
         return jsonify({'error': 'Current password is incorrect'}), 401
 
-    cursor.execute('UPDATE users SET password_hash = ? WHERE user_id = ?',
-                   (hash_password(new), session['user_id']))
+    # Clearing must_change_password here is what ends a forced reset: the member
+    # signed in with the commissioner's temporary password and has now chosen
+    # their own, so the profile stops being sticky.
+    cursor.execute(
+        'UPDATE users SET password_hash = ?, must_change_password = 0 WHERE user_id = ?',
+        (hash_password(new), session['user_id']))
     conn.commit()
     cursor.close()
     conn.close()
     return jsonify({'status': 'success'}), 200
 
 
+@app.route('/api/league/members')
+def league_members():
+    """Commissioner-only: everyone in the commissioner's own league.
+
+    Read straight from `users` scoped by league_id. The old picker was built
+    from /api/auth/teams, which lists DISTINCT team_selections.team_name — so a
+    member who had signed up but not yet picked a squad never appeared, which is
+    exactly the person most likely to need a password reset.
+    """
+    if not session.get('user_id'):
+        return jsonify({'error': 'Not logged in'}), 401
+    conn = get_db()
+    ensure_schema(conn)
+    ctx = _user_context(conn)
+    if not ctx or not ctx['is_commissioner']:
+        conn.close()
+        return jsonify({'error': 'Only the league commissioner can list members'}), 403
+
+    cursor = _get_cursor(conn)
+    cursor.execute(
+        'SELECT user_id, username, team_name, must_change_password FROM users '
+        'WHERE league_id = ? AND user_id != ? ORDER BY LOWER(username)',
+        (ctx['league_id'], ctx['user_id']))
+    rows = [dict(r) for r in cursor.fetchall()]
+    cursor.close()
+    conn.close()
+    return jsonify([{
+        'user_id': r['user_id'],
+        'username': r['username'],
+        'team_name': r['team_name'],
+        'awaiting_reset': bool(r['must_change_password']),
+    } for r in rows]), 200
+
+
 @app.route('/api/league/reset-member-password', methods=['POST'])
 def reset_member_password():
-    """Commissioner-only: reset a league member's password to a random temporary
-    one and return it, so the commissioner can pass it on. Used by the sign-in
-    'Forgot password?' flow (no email needed). Scoped to the commissioner's league."""
+    """Commissioner-only: issue a random temporary password to a member of the
+    commissioner's league and return it, so the commissioner can pass it on.
+
+    Sets must_change_password, so the member is taken to their profile to choose
+    a real password the moment they sign in with the temporary one.
+    """
     import secrets
     if not session.get('user_id'):
         return jsonify({'error': 'Not logged in'}), 401
@@ -789,34 +835,44 @@ def reset_member_password():
         conn.close()
         return jsonify({'error': 'Only the league commissioner can reset passwords'}), 403
 
-    team_name = (request.get_json(silent=True) or {}).get('team_name', '').strip()
-    if not team_name:
+    data = request.get_json(silent=True) or {}
+    user_id = data.get('user_id')
+    team_name = (data.get('team_name') or '').strip()   # legacy callers
+    if not user_id and not team_name:
         conn.close()
         return jsonify({'error': 'Choose a member to reset'}), 400
 
     cursor = _get_cursor(conn)
-    cursor.execute('SELECT user_id, username, team_name, league_id FROM users WHERE team_name = ?',
-                   (team_name,))
+    if user_id:
+        cursor.execute(
+            'SELECT user_id, username, team_name, league_id FROM users WHERE user_id = ?',
+            (user_id,))
+    else:
+        cursor.execute(
+            'SELECT user_id, username, team_name, league_id FROM users WHERE team_name = ?',
+            (team_name,))
     row = cursor.fetchone()
     if not row:
         cursor.close(); conn.close()
-        return jsonify({'error': 'No member with that team'}), 404
-    r = dict(row) if not isinstance(row, dict) else row
+        return jsonify({'error': 'No such member'}), 404
+    r = dict(row)
     if r['league_id'] != ctx['league_id']:
         cursor.close(); conn.close()
         return jsonify({'error': 'That member is in another league'}), 403
-    if r['user_id'] == session['user_id']:
+    if r['user_id'] == ctx['user_id']:
         cursor.close(); conn.close()
         return jsonify({'error': 'Change your own password from the Password section'}), 400
 
-    temp = secrets.token_hex(5)   # 10-char temporary password (member changes it)
-    cursor.execute('UPDATE users SET password_hash = ? WHERE user_id = ?',
-                   (hash_password(temp), r['user_id']))
+    temp = secrets.token_hex(5)   # 10-char temporary password
+    cursor.execute(
+        'UPDATE users SET password_hash = ?, must_change_password = 1 WHERE user_id = ?',
+        (hash_password(temp), r['user_id']))
     conn.commit()
     cursor.close()
     conn.close()
-    return jsonify({'status': 'success', 'team_name': r['team_name'],
-                    'username': r['username'], 'temp_password': temp}), 200
+    return jsonify({'status': 'success', 'user_id': r['user_id'],
+                    'team_name': r['team_name'], 'username': r['username'],
+                    'temp_password': temp}), 200
 
 
 @app.route('/api/auth/teams')
@@ -2356,7 +2412,9 @@ def _user_context(conn):
     if not user_id:
         return None
     cursor = _get_cursor(conn)
-    cursor.execute('SELECT team_name, league_id FROM users WHERE user_id = ?', (user_id,))
+    cursor.execute(
+        'SELECT team_name, league_id, must_change_password FROM users WHERE user_id = ?',
+        (user_id,))
     row = cursor.fetchone()
     cursor.close()
     if not row:
@@ -2367,6 +2425,7 @@ def _user_context(conn):
     return {
         'user_id': user_id, 'team_name': rd['team_name'], 'league_id': league_id,
         'is_commissioner': meta.get('commissioner_user_id') == user_id,
+        'must_change_password': bool(rd.get('must_change_password')),
     }
 
 
