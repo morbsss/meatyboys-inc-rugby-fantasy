@@ -17,19 +17,40 @@
 .round-chip.played.active { background: var(--forest); border-color: var(--forest); color: var(--cream); }
 .round-chip.upcoming { border-color: var(--border); color: var(--ink-faint); }
 
-.content { max-width: 1100px; margin: 0 auto; padding: 18px 16px 64px; }
+/* Wider than the other pages: a week-card is a fixture table (two team names,
+   scores and a bye row per match), so it reads badly when squeezed.
+   1650 - 32px padding = a 1618px table, ~50% wider than the previous 1068px. */
+.content { max-width: 1650px; margin: 0 auto; padding: 18px 16px 64px; }
 @media (max-width: 768px) { .content { padding: 14px 10px calc(var(--bottom-nav-h,56px) + 28px); } }
 .page-title { font-family: var(--font-display); font-size: 30px; font-weight: 800;
   letter-spacing: .02em; text-transform: uppercase; color: var(--forest); line-height: 1; margin-bottom: 14px; }
 @media (max-width: 768px) { .page-title { font-size: 24px; } }
 
-/* All-rounds view: 3 round-cards per row (responsive — fewer as it narrows). */
-.weeks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(660px, 1fr)); gap: 14px; }
-@media (max-width: 520px) { .weeks-grid { grid-template-columns: 1fr; } }
-/* Single-round filter: one card, centered. */
-.single-round { max-width: 640px; margin: 0 auto; }
+/* One round-card per row, filling the content width.
+   The track minimum has to stay above half the container, or auto-fill packs
+   two cards per row and each one gets NARROWER as the page gets wider — which
+   is what would happen at 1618px with the old 660px minimum.
+   min(..., 100%) keeps the track from exceeding the container on tablets and
+   phones, where a bare 990px minimum would overflow horizontally. */
+.weeks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(990px, 100%), 1fr)); gap: 14px; }
+/* Both "All" and a single-week filter render into .weeks-grid, so one week's
+   card sits on the same track and keeps the same width. (.single-round used to
+   cap it at 640px and centre it, which made the table shrink on filtering.) */
 
-.week-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow-1); }
+.week-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow-1);
+  /* Fixed width for the centre score column — see .match-row. Sized so the
+     widest score a team can realistically post still fits without the column
+     having to grow; headroom is deliberate, since font metrics vary by
+     platform and a too-tight box would reintroduce the shifting. */
+  --fx-score-col: 152px;
+  --fx-score-w: 58px;
+}
+/* Phones: claw some width back for team names, which ellipsis at this size. */
+@media (max-width: 520px) {
+  .week-card { --fx-score-col: 132px; --fx-score-w: 50px; }
+}
 .week-card-header {
   padding: 9px 14px; font-family: var(--font-display);
   font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em;
@@ -42,8 +63,15 @@
 .week-status.played   { color: var(--success); background: rgba(46,125,79,.12); }
 .week-status.upcoming { color: var(--ink-faint); background: var(--surface-2); border: 1px solid var(--border); }
 
+/* The centre column is a FIXED width, not `auto`.
+   With `auto` it sized itself to whatever the score text happened to be, so
+   "5.0 v 12.0" and "123.4 v 98.7" produced different column widths — the team
+   names then sat in a different place in every round, and shifted again the
+   moment a round went from Upcoming (a badge) to Played (two scores).
+   Fixing the middle column makes all three columns identical in every round. */
 .match-row, .upcoming-row {
-  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px;
+  display: grid; grid-template-columns: 1fr var(--fx-score-col) 1fr;
+  align-items: center; gap: 8px;
   padding: 11px 16px; border-bottom: 1px solid var(--border); font-size: 14px;
 }
 .match-row:last-child, .upcoming-row:last-child { border-bottom: none; }
@@ -52,7 +80,10 @@
 .match-home .tn, .match-away .tn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .match-home.winner, .match-away.winner { color: var(--success); font-weight: 800; }
 .match-score-wrap { display: flex; align-items: center; gap: 4px; white-space: nowrap; justify-content: center; }
-.match-score { font-family: var(--font-display); font-weight: 800; font-size: 15px; min-width: 36px; text-align: center; color: var(--ink); }
+/* width, not min-width: a fixed box each side keeps the " v " dead centre and
+   stops a 3-digit score nudging the separator across. */
+.match-score { font-family: var(--font-display); font-weight: 800; font-size: 15px;
+  width: var(--fx-score-w); text-align: center; color: var(--ink); }
 .match-score.winner { color: var(--success); }
 .match-vsep { color: var(--ink-faint); font-size: 12px; }
 .bp-tag { flex: 0 0 auto; font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 4px;
