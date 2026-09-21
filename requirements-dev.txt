@@ -1,3 +1,8 @@
 # Dev/test dependencies (not shipped to Vercel — api/requirements.txt is runtime).
 -r api/requirements.txt
 pytest>=8.0
+# The analysis job's deps. Deliberately NOT in api/requirements.txt: the web
+# process must stay light, and predict.py runs out-of-process. They belong here
+# so CI can actually exercise the prediction model rather than skipping it —
+# untested statistics is how the opponent-feature leak survived as long as it did.
+-r requirements-analysis.txt

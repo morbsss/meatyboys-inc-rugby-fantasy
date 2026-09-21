@@ -67,9 +67,20 @@ echo "[setup] Installing dependencies..."
 pip install -q --upgrade pip
 pip install -q -r requirements.txt
 
+# Analysis job deps (numpy/pandas/scipy/sklearn). Separate from the web deps
+# because only the out-of-process predict job imports them. Non-fatal: if the
+# wheels won't build on this box the site still deploys, and only the Analysis
+# page goes stale — the scheduler logs the failure to job_runs.
+if [ -f requirements-analysis.txt ]; then
+    echo "[setup] Installing analysis dependencies (this can take a while)..."
+    pip install -q -r requirements-analysis.txt \
+        || echo "[warn] analysis deps failed to install — predictions will not run."
+fi
+
 # ── database ──────────────────────────────────────────────────────────────────
-# The real DB is SCP'd by deploy.ps1. If it's genuinely missing, seed a mock one
-# so the app still boots.
+# CI never ships a database — the live data stays on the VM and is excluded from
+# the deploy sync. If the file is genuinely missing (a fresh box), seed a mock
+# one so the app still boots.
 DB_FILE="${DB_PATH:-fantasy_2025_26.db}"
 if [ "${DB_TYPE:-sqlite}" = "sqlite" ] && [ ! -f "$DB_FILE" ]; then
     echo "[setup] $DB_FILE missing — seeding a mock DB..."
@@ -88,6 +99,35 @@ echo "[setup] Installing cron..."
 */10 * * * * curl -fsS -m 90 -H "Authorization: Bearer ${CRON_SECRET}" http://127.0.0.1:${APP_PORT}/api/cron/tick >> ${APP_DIR}/cron.log 2>&1
 CRON
 ) | crontab -
+
+# ── log rotation ──────────────────────────────────────────────────────────────
+# gunicorn.log and cron.log had no rotation and grew unbounded (~31 MB in the
+# first month). Nothing was going to clear them, so on a 25 GB disk they were a
+# slow leak. Rotated weekly, or sooner if one spikes past 20 MB.
+#
+# copytruncate matters here: gunicorn holds its access log open for the life of
+# the process (--access-logfile, no pidfile to signal). A plain rename would
+# leave it writing to the old inode and the fresh file would stay empty, so the
+# log would silently stop updating until the next deploy restarted it.
+echo "[setup] Installing logrotate rule..."
+cat > /etc/logrotate.d/meatyboys <<LOGROTATE
+${APP_DIR}/gunicorn.log ${APP_DIR}/cron.log {
+    weekly
+    maxsize 20M
+    rotate 8
+    compress
+    missingok
+    notifempty
+    copytruncate
+}
+LOGROTATE
+# No delaycompress: that exists for the rename-and-signal pattern, where a
+# process may still be writing to the rotated file. copytruncate leaves .1 as a
+# finished copy, so compressing it straight away is safe and reclaims the space
+# a cycle sooner (~90% of it — these are highly compressible access logs).
+# Fail the deploy on a malformed rule rather than discovering it weeks later.
+logrotate -d /etc/logrotate.d/meatyboys >/dev/null 2>&1 \
+    || echo "[warn] logrotate rule failed validation — logs will keep growing."
 
 # ── (re)start gunicorn ────────────────────────────────────────────────────────
 echo "[deploy] Restarting gunicorn on ${APP_HOST}:${APP_PORT}..."

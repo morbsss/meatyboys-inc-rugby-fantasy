@@ -253,15 +253,22 @@ def _front_row_score(conn, team_name: str, round_num: int) -> float:
     return float((row['s'] if isinstance(row, dict) else row[0]) or 0)
 
 
-def _ofds_team_score(conn, team_name: str, round_num: int) -> float:
-    """Score a full-XV (OFDS) team for a round with the real-lineup auto-sub.
+def effective_lineup(conn, team_name: str, round_num: int) -> list[dict]:
+    """The XV that actually scores for an auto-sub (OFDS) team in a round.
 
-    Only the effective starting XV scores. A fantasy starter who isn't in the
-    real ESPN starting line-up is replaced by a same-position fantasy bench
-    player who IS starting for real (rule 4); if no such cover exists the starter
-    stays (and simply scores whatever they got, ~0 if they didn't play). Before
-    any real line-up is published the named starters score as picked. Captain
-    points double when the captain is in the effective XV.
+    A fantasy starter who isn't in the real starting line-up is replaced by a
+    same-position fantasy bench player who IS starting for real (rule 4); if no
+    such cover exists the starter stays (and scores whatever they got, ~0 if they
+    didn't play). Before any real line-up is published the named starters stand
+    as picked — which is the normal case when projecting a round that hasn't been
+    played yet, since lineups aren't scraped until the Thursday.
+
+    Returned dicts carry `cap`, so the caller can apply captain doubling.
+
+    Shared with api/predict.py so the projection model fields the same XV the
+    scorer will. Reimplementing this in the model would let the two drift, and a
+    win probability computed off a different XV than the one that scores is
+    worse than no win probability at all.
     """
     ph = _get_placeholder(conn)
     cur = conn.cursor()
@@ -283,9 +290,10 @@ def _ofds_team_score(conn, team_name: str, round_num: int) -> float:
     real = {((rt['real_team'] if isinstance(rt, dict) else rt[0]),
              (rt['player_name'] if isinstance(rt, dict) else rt[1])) for rt in cur.fetchall()}
     have_lineup = bool(real)
+    cur.close()
 
     def starting_real(pl):
-        return (pl['team'], pl['name'].replace("'", "")) in real
+        return (pl['team'], (pl['name'] or '').replace("'", "")) in real
 
     starters = [r for r in rows if not r['bench']]
     bench_by_pos: dict[str, list] = defaultdict(list)
@@ -293,20 +301,31 @@ def _ofds_team_score(conn, team_name: str, round_num: int) -> float:
         bench_by_pos[b['pos']].append(b)
 
     if not have_lineup:
-        effective = starters
-    else:
-        effective, used = [], set()
-        for s in starters:
-            if starting_real(s):
-                effective.append(s)
-                continue
-            sub = next((b for b in bench_by_pos[s['pos']]
-                        if id(b) not in used and starting_real(b)), None)
-            if sub:
-                used.add(id(sub))
-                effective.append(sub)
-            else:
-                effective.append(s)   # no cover — keep the starter
+        return starters
+
+    effective, used = [], set()
+    for s in starters:
+        if starting_real(s):
+            effective.append(s)
+            continue
+        sub = next((b for b in bench_by_pos[s['pos']]
+                    if id(b) not in used and starting_real(b)), None)
+        if sub:
+            used.add(id(sub))
+            effective.append(sub)
+        else:
+            effective.append(s)   # no cover — keep the starter
+    return effective
+
+
+def _ofds_team_score(conn, team_name: str, round_num: int) -> float:
+    """Score a full-XV (OFDS) team for a round, over the effective line-up.
+
+    Captain points double when the captain is in the effective XV.
+    """
+    ph = _get_placeholder(conn)
+    cur = conn.cursor()
+    effective = effective_lineup(conn, team_name, round_num)
 
     total = 0.0
     for pl in effective:
