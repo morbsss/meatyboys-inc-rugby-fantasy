@@ -55,7 +55,11 @@ fi
 
 # ── cron: ping the unified tick endpoint (scheduler decides what's due) ────────
 echo "[setup] Installing cron..."
-(crontab -l 2>/dev/null | grep -v 'meatyboys-cron') | crontab - || true
+# Strip BOTH the marker comment and the curl line itself. Filtering on
+# 'meatyboys-cron' alone only matched the comment, so every deploy left the
+# previous schedule behind and the crontab grew by one line each time (18 by the
+# time it was noticed, 6 of them still using a rotated CRON_SECRET → 401s).
+(crontab -l 2>/dev/null | grep -v 'meatyboys-cron' | grep -v '/api/cron/tick') | crontab - || true
 (crontab -l 2>/dev/null; cat <<CRON
 # meatyboys-cron — the in-app scheduler decides which ingestion jobs run.
 */10 * * * * curl -fsS -m 90 -H "Authorization: Bearer ${CRON_SECRET}" http://127.0.0.1:${APP_PORT}/api/cron/tick >> ${APP_DIR}/cron.log 2>&1
