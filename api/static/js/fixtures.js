@@ -60,17 +60,26 @@ function render() {
   // One container for both views, so a single week's card is laid out on the
   // same grid track as in "All" and keeps its size. Filtering to one round used
   // to swap in a narrower centred wrapper, which visibly shrank the table.
-  const cards = weeks.map(({ week, matches }) => makeWeekCard(week, matches)).join('');
+  const cards = weeks.map(w => makeWeekCard(w.week, w.matches, w)).join('');
   wrap.innerHTML = `<div class="weeks-grid">${cards}</div>`;
 }
 
-function makeWeekCard(week, matches) {
+function makeWeekCard(week, matches, timing) {
   // Show the bye (team vs round average) as the last row of each week.
   matches = matches.slice().sort((a, b) => (a.is_bye ? 1 : 0) - (b.is_bye ? 1 : 0));
-  const hasData     = matches.some(m => m.played);
-  const isUpcoming  = week > maxRound;
-  const statusLabel = hasData ? 'Played' : isUpcoming ? 'Upcoming' : 'No data';
-  const statusCls   = hasData ? 'played' : 'upcoming';
+  // Header, top-right: the round's date, or a live indicator while it's being
+  // played. The old Played/Upcoming badge duplicated what the rows already show
+  // (scores vs "Upcoming") and told you nothing about when the round is.
+  // date_label is formatted server-side in the league's timezone — see
+  // _round_timing in api/index.py. Don't reformat it from the ISO kickoff here:
+  // the browser's zone would shift an evening fixture onto the wrong day.
+  const isLive = !!(timing && timing.is_live);
+  const dateStr = (timing && timing.date_label) || '';
+  const headerRight = isLive
+    ? `<span class="week-live"><span class="live-dot" aria-hidden="true"></span>Live</span>`
+    : dateStr
+      ? `<span class="week-date">${esc(dateStr)}</span>`
+      : '';
 
   const rows = matches.map(m => {
     if (m.is_bye) {
@@ -116,10 +125,10 @@ function makeWeekCard(week, matches) {
     </div>`;
   }).join('');
 
-  return `<div class="week-card">
+  return `<div class="week-card${isLive ? ' is-live' : ''}">
     <div class="week-card-header">
       <span>Week ${week}</span>
-      <span class="week-status ${statusCls}">${statusLabel}</span>
+      ${headerRight}
     </div>
     ${rows}
   </div>`;
