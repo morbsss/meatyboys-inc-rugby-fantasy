@@ -7,7 +7,6 @@
 {% block content %}
 <div class="content">
   <div class="page-title">Player Hub</div>
-  <div class="page-sub" id="comp-sub">—</div>
 
   <div class="mtyby-card pending-card" id="pending-card" hidden>
     <div class="pending-title">Pending trades</div>
@@ -28,16 +27,23 @@
 
   </div>
   <div class="ph-chips-row">
-    <div class="ph-chips" id="pos-chips"></div>
     <span class="metric-toggle">
       <button id="m-total" class="on" data-metric="total">Total</button>
       <button id="m-form" data-metric="form">Form</button>
     </span>
+    <div class="ph-chips" id="pos-chips"></div>
+    <!-- Mobile stand-in for the chips above; CSS shows exactly one of the two.
+         Both drive the same `pos` state, so they can't disagree. -->
+    <select class="ph-pos-select" id="pos-select" aria-label="Filter by position"></select>
   </div>
+
+  <div class="ph-pager" id="pager-top" hidden></div>
 
   <div class="mtyby-card tbl-card">
     <div class="tbl-wrap"><div id="table" class="ph-loading">Loading players…</div></div>
   </div>
+
+  <div class="ph-pager ph-pager--bottom" id="pager-bottom" hidden></div>
 </div>
 
 <div class="mtyby-sheet trade-sheet" id="trade-sheet" role="dialog" aria-label="Trade">

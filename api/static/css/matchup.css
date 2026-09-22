@@ -56,11 +56,72 @@
 .mu-bench-p .pts { color: var(--ink-faint); font-weight: 700; }
 .mu-bench-empty { justify-content: center; color: var(--ink-faint); font-style: italic; }
 
+/* =============================================================================
+ * Mobile: even columns.
+ *
+ * As a flex row, the position chip and points column were content-sized, so the
+ * name started at a different x on every row and the two teams didn't mirror
+ * each other. Fixed grid tracks line every row up down the column and across
+ * the divider, leaving the name a single flexible track that can ellipsis.
+ * ========================================================================== */
+@media (max-width: 768px) {
+  .mu-p {
+    --mu-pos: 36px;
+    --mu-pts: 32px;
+    /* A floor, not a fixed height. Home and away are separate stacks — .mu-grid
+       gives each its own cell — so nothing ties row N on the left to row N on
+       the right, and the away rows were coming out taller. A shared minimum
+       plus strictly single-line content makes every row 32px on both sides.
+       Sized off the tallest thing in a row: the position chip (11px text + 2px
+       padding each side ≈ 17px) inside the row's 6px vertical padding.
+
+       Emphatically NOT `height` + `overflow: hidden`: the away column's .nm is
+       flex-direction: row-reverse, so content that doesn't fit overflows
+       LEFTWARD out of the padding box, and clipping it hid the away player
+       names entirely. Nothing here may clip — the name truncates instead. */
+    --mu-row: 32px;
+    min-height: var(--mu-row);
+    display: grid;
+    grid-template-columns: var(--mu-pos) minmax(0, 1fr) var(--mu-pts);
+    align-items: center;
+  }
+
+  /* Away mirrors home: tracks reversed and children placed explicitly, since
+     grid ignores the flex-direction that used to do the mirroring. */
+  .mu-col.away .mu-p {
+    grid-template-columns: var(--mu-pts) minmax(0, 1fr) var(--mu-pos);
+  }
+  /* grid-row: 1 is essential, not decoration. Auto-placement walks items in
+     source order and never steps backwards: with only a column set, .mtyby-pos
+     (col 3) claims row 1, then .nm (col 2) is behind the cursor so it wraps to
+     row 2, and .pts (col 1) to row 3 — the away rows stacked three lines tall.
+     Pinning the row puts all three back on one line. */
+  .mu-col.away .mu-p > * { grid-row: 1; }
+  .mu-col.away .mu-p > .mtyby-pos { grid-column: 3; }
+  .mu-col.away .mu-p > .nm        { grid-column: 2; }
+  .mu-col.away .mu-p > .pts       { grid-column: 1; }
+
+  /* Every track can shrink, and the chip's own 38px minimum would otherwise
+     overflow the 36px track it now sits in. */
+  .mu-p > * { min-width: 0; }
+  .mu-p .mtyby-pos { width: 100%; }
+  .mu-p .mtyby-pos, .mu-p .pts { white-space: nowrap; }
+
+  /* The name shrinks to its cell and ellipsises there, so it never pushes the
+     points column off-centre or spills out of the row. */
+  .mu-p .nm { flex-wrap: nowrap; }
+  .mu-p .nm b { flex: 0 1 auto; min-width: 0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* Single-cell rows ("No bench") have nothing to align — let them span. */
+  .mu-p.mu-bench-empty { display: flex; justify-content: center; }
+}
+
 /* Very narrow phones (~360px): the head-to-head stays two columns by design, so
    tighten padding/gaps and the points column to keep player names legible. */
 @media (max-width: 480px) {
-  .mu-p { padding: 6px 7px; gap: 5px; font-size: 12px; }
-  .mu-p .pts { min-width: 24px; font-size: 12px; }
+  .mu-p { padding: 6px 7px; gap: 5px; font-size: 12px; --mu-pos: 32px; --mu-pts: 26px; }
+  .mu-p .pts { font-size: 12px; }
   .mu-p .nm { gap: 4px; }
   .mu-team-name { font-size: 15px; }
   .mu-head, .mu-total { gap: 4px; }

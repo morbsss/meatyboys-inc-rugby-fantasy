@@ -11,6 +11,10 @@
 
 <div class="content">
   <div class="page-title">Fixtures</div>
+  <!-- Mobile stand-in for the Wk chips in the bar above; CSS shows exactly one
+       of the two, and both drive setFilter() so they can't disagree. It sits
+       here rather than in the bar so it reads under the page heading. -->
+  <select class="round-select" id="round-select" aria-label="Filter by round"></select>
   <div id="fixtures-wrap"><div class="loading">Loading…</div></div>
 </div>
 {% endblock %}

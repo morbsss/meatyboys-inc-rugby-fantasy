@@ -13,6 +13,15 @@ let likeForLike = false;   // positioned squads (OFDS) trade same-position only
 let pos = 'ALL', q = '', teamFilter = 'ALL', lineupFilter = 'ALL', roundSel = '', metric = 'total';
 let sortKey = 'value', sortDir = -1;
 
+// The table used to render rows.slice(0, 80) and stop — with 260 players in a
+// league, two thirds were simply unreachable and nothing on screen said so.
+const PAGE_SIZE = 80;
+let page = 1;
+
+/** Back to page 1. Any change to the filters or sort re-forms the result set,
+ *  so staying on page 4 of a list that now has one page shows nothing. */
+function resetPage() { page = 1; }
+
 async function init() {
   const params = new URLSearchParams();
   if (roundSel) params.set('round', roundSel);
@@ -23,7 +32,7 @@ async function init() {
     fetch('/api/trades').then(r => r.json()),
   ]);
   // The hub stays closed until this league's draft is complete (see api_players).
-  if (pl.draft_complete === false) { renderClosed(pl); return; }
+  if (pl.draft_complete === false) { renderClosed(); return; }
   ALL = pl.players || [];
   roundsList = pl.rounds || [];
   maxRound = pl.round || 0;
@@ -34,10 +43,6 @@ async function init() {
   likeForLike = Leagues.isOfds(rosterModel);
   myTeam = tr.my_team;
   isLocked = !!tr.is_locked;
-  document.getElementById('comp-sub').textContent =
-    (pl.league ? pl.league.name + ' · ' : '') + ALL.length + ' players'
-    + (metric === 'form' ? ' · form (last 3)' : '')
-    + (isLocked ? ' · trades locked' : '');
   renderFilters();
   renderPending(tr);
   renderChips();
@@ -46,9 +51,7 @@ async function init() {
 
 // Pre-draft state: the hub is closed, so hide the toolbar and point people at
 // the draft board (where last-season stats live for research).
-function renderClosed(pl) {
-  document.getElementById('comp-sub').textContent =
-    (pl.league ? pl.league.name + ' · ' : '') + 'opens after the draft';
+function renderClosed() {
   document.querySelectorAll('.filters, .ph-chips-row').forEach(n => n.hidden = true);
   const pending = document.getElementById('pending-card');
   if (pending) pending.hidden = true;
@@ -117,11 +120,38 @@ async function respond(action, id, btn) {
   if (res.ok) init();
 }
 
+/** Apply a position filter from either control (chips or the mobile select). */
+function setPos(p) {
+  pos = p;
+  resetPage();
+  renderChips();
+  render();
+}
+
+/** Position filter, rendered twice: chips for desktop, a select for mobile.
+ *
+ * Both are always in the DOM and CSS shows exactly one — simpler and steadier
+ * than swapping them on a resize listener, and because both read and write the
+ * same `pos` they can never drift apart. The dropdown uses the full position
+ * names (a select has room for them) where the chips only fit the codes.
+ */
 function renderChips() {
-  document.getElementById('pos-chips').innerHTML = positionChips().map(p =>
+  const opts = positionChips();
+  const label = p => p === 'ALL'
+    ? 'All positions'
+    : ((rosterModel && rosterModel.labels && rosterModel.labels[p]) || p);
+
+  document.getElementById('pos-chips').innerHTML = opts.map(p =>
     `<button class="mtyby-chip ${p === pos ? 'is-active' : ''}" data-pos="${p}">${p}</button>`).join('');
   document.querySelectorAll('#pos-chips .mtyby-chip').forEach(c =>
-    c.addEventListener('click', () => { pos = c.dataset.pos; renderChips(); render(); }));
+    c.addEventListener('click', () => setPos(c.dataset.pos)));
+
+  const sel = document.getElementById('pos-select');
+  if (sel) {
+    sel.innerHTML = opts.map(p =>
+      `<option value="${esc(p)}">${esc(label(p))}</option>`).join('');
+    sel.value = pos;
+  }
 }
 
 function render() {
@@ -140,18 +170,32 @@ function render() {
   });
 
   const el = document.getElementById('table');
-  if (!rows.length) { el.className = 'ph-empty'; el.textContent = 'No players match.'; return; }
+  if (!rows.length) {
+    el.className = 'ph-empty'; el.textContent = 'No players match.';
+    renderPager(0, 1);
+    return;
+  }
   el.className = '';
+
+  // Clamp first: a filter can shrink the list under the current page (e.g.
+  // you're on page 4, then search for one name).
+  const pageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+  if (page > pageCount) page = pageCount;
+  if (page < 1) page = 1;
+  const start = (page - 1) * PAGE_SIZE;
+  const pageRows = rows.slice(start, start + PAGE_SIZE);
+  renderPager(rows.length, pageCount, start);
   const valLabel = metric === 'form' ? 'Form' : (roundSel ? 'Rd Pts' : 'Pts');
   const th = (key, label, cls='') =>
     `<th class="${cls} ${sortKey === key ? 'sorted' : ''}" data-key="${key}">${label}${sortKey === key ? (sortDir < 0 ? ' ▾' : ' ▴') : ''}</th>`;
   el.innerHTML = `<table class="ph"><thead><tr>
       ${th('name','Player','c-name')} ${th('position','Position')} <th class="c-next">Next</th> ${th('fantasy_team','Owner','c-owner')}
       ${th('value', valLabel)} <th class="c-lineup">Line Up</th> <th class="c-act"></th>
-    </tr></thead><tbody>${rows.slice(0,80).map(rowHTML).join('')}</tbody></table>`;
+    </tr></thead><tbody>${pageRows.map(rowHTML).join('')}</tbody></table>`;
   el.querySelectorAll('th[data-key]').forEach(h => h.addEventListener('click', () => {
     const k = h.dataset.key;
     if (sortKey === k) sortDir *= -1; else { sortKey = k; sortDir = (k==='name'||k==='position'||k==='fantasy_team') ? 1 : -1; }
+    resetPage();
     render();
   }));
   el.querySelectorAll('button[data-trade]').forEach(b =>
@@ -166,6 +210,66 @@ function render() {
       if (tr.dataset.fr) mtybyFrCard(tr.dataset.fr);
       else mtybyPlayerCard(+tr.dataset.player);
     }));
+}
+
+/** Page indicator + controls, drawn above and below the table.
+ *
+ * `total` is the filtered row count (not ALL.length) — the numbers have to
+ * describe what you're actually looking at, or they contradict the filters.
+ * Hidden entirely on a single page, so a short result set isn't cluttered with
+ * a pager that can't do anything.
+ */
+function renderPager(total, pageCount, start = 0) {
+  const bars = [document.getElementById('pager-top'),
+                document.getElementById('pager-bottom')];
+  if (pageCount <= 1) {
+    bars.forEach(b => { if (b) { b.hidden = true; b.innerHTML = ''; } });
+    return;
+  }
+
+  const from = start + 1;
+  const to = Math.min(start + PAGE_SIZE, total);
+  const btn = (p, label, disabled, cls = '') =>
+    `<button class="ph-page-btn ${cls}" data-page="${p}"${disabled ? ' disabled' : ''}>${label}</button>`;
+
+  // Numbered buttons, windowed around the current page so a long season's
+  // worth of pages doesn't overflow the bar on a phone.
+  const nums = [];
+  const first = Math.max(1, Math.min(page - 2, pageCount - 4));
+  const last = Math.min(pageCount, Math.max(page + 2, 5));
+  if (first > 1) nums.push(btn(1, '1', false));
+  if (first > 2) nums.push('<span class="ph-page-gap">…</span>');
+  for (let p = first; p <= last; p++) {
+    nums.push(btn(p, String(p), false, p === page ? 'is-current' : ''));
+  }
+  if (last < pageCount - 1) nums.push('<span class="ph-page-gap">…</span>');
+  if (last < pageCount) nums.push(btn(pageCount, String(pageCount), false));
+
+  const html =
+    `<div class="ph-page-info"><b>Page ${page} of ${pageCount}</b>`
+    + `<span class="ph-page-range">${from}–${to} of ${total}</span></div>`
+    + `<div class="ph-page-btns">`
+    + btn(page - 1, '‹ Prev', page === 1)
+    + nums.join('')
+    + btn(page + 1, 'Next ›', page === pageCount)
+    + `</div>`;
+
+  bars.forEach(bar => {
+    if (!bar) return;
+    bar.hidden = false;
+    bar.innerHTML = html;
+    bar.querySelectorAll('button[data-page]').forEach(b =>
+      b.addEventListener('click', () => goToPage(+b.dataset.page)));
+  });
+}
+
+function goToPage(p) {
+  page = p;
+  render();
+  // Jump to the top of the table, not the top of the document: paging from the
+  // bottom pager would otherwise leave you looking at row 80 of the new page.
+  const card = document.querySelector('.tbl-card');
+  if (card) card.scrollIntoView({ block: 'start', behavior: 'smooth' });
 }
 
 function actionCell(r) {
@@ -284,10 +388,13 @@ function closeTradeSheet() {
 window.closeTradeSheet = closeTradeSheet;
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTradeSheet(); });
 
-document.getElementById('search').addEventListener('input', e => { q = e.target.value; render(); });
-document.getElementById('team-filter').addEventListener('change', e => { teamFilter = e.target.value; render(); });
-document.getElementById('lineup-filter').addEventListener('change', e => { lineupFilter = e.target.value; render(); });
+document.getElementById('search').addEventListener('input', e => { q = e.target.value; resetPage(); render(); });
+document.getElementById('team-filter').addEventListener('change', e => { teamFilter = e.target.value; resetPage(); render(); });
+document.getElementById('lineup-filter').addEventListener('change', e => { lineupFilter = e.target.value; resetPage(); render(); });
 document.getElementById('round-filter').addEventListener('change', e => { roundSel = e.target.value; init(); });
+// Bound once, not inside renderChips: the <select> element itself survives each
+// re-render (only its options are replaced), so re-binding would stack handlers.
+document.getElementById('pos-select').addEventListener('change', e => setPos(e.target.value));
 document.querySelectorAll('.metric-toggle button').forEach(b =>
   b.addEventListener('click', () => { metric = b.dataset.metric; init(); }));
 

@@ -96,10 +96,14 @@
 .lt-chev { color: var(--ink-faint); transition: transform var(--motion-fast), color var(--motion-fast); }
 
 /* Clickable rows */
-.lt-row { cursor: pointer; transition: background var(--motion-fast); }
-.lt-row.in-champ { background: rgba(46,125,79,.035); }
-.lt-row.in-sacko { background: rgba(179,58,46,.03); }
-.lt-row.is-leader { background: rgba(232,155,44,.09); }
+/* The zone tint is held in a variable as well as applied, so the sticky cells
+   on mobile can repaint it over their own opaque background — otherwise the
+   pinned columns would lose the champ/sacko/leader shading the rest of the row
+   keeps. */
+.lt-row { cursor: pointer; transition: background var(--motion-fast); --row-tint: transparent; }
+.lt-row.in-champ { --row-tint: rgba(46,125,79,.035); background: var(--row-tint); }
+.lt-row.in-sacko { --row-tint: rgba(179,58,46,.03); background: var(--row-tint); }
+.lt-row.is-leader { --row-tint: rgba(232,155,44,.09); background: var(--row-tint); }
 .lt-row.is-leader .lt-rank::before { content: '★'; color: var(--amber); font-size: 12px; }
 .lt-row:hover { background: var(--surface-2); }
 .lt-row:hover .lt-chev { color: var(--forest); transform: translateX(2px); }
@@ -122,9 +126,12 @@
   text-transform: uppercase;
   padding: 3px 3px;
 }
-.lt-side--champ { background: rgba(46,125,79,.12); color: var(--success); box-shadow: inset 4px 0 0 var(--success); }
-.lt-side--sacko { background: rgba(179,58,46,.10); color: var(--danger);  box-shadow: inset 4px 0 0 var(--danger); }
-.lt-side--none  { background: transparent; }
+/* Band tints held in a variable as well as applied, so the spine can be pinned
+   on mobile: a sticky cell needs an opaque base, and these are translucent —
+   without this the scrolling stats would show through "CHAMPIONSHIP". */
+.lt-side--champ { --side-tint: rgba(46,125,79,.12); background: var(--side-tint); color: var(--success); box-shadow: inset 4px 0 0 var(--success); }
+.lt-side--sacko { --side-tint: rgba(179,58,46,.10); background: var(--side-tint); color: var(--danger);  box-shadow: inset 4px 0 0 var(--danger); }
+.lt-side--none  { --side-tint: transparent; background: transparent; }
 
 .lt-loading, .lt-empty {
   padding: 48px 24px;
@@ -157,20 +164,59 @@
 .lt-legend span { display: inline-flex; gap: 6px; }
 .lt-legend .swatch { width: 12px; height: 12px; border-radius: 3px; }
 
-/* Compact table on mobile: hide secondary columns (BP, PF, PA, PD) and
-   switch to fixed layout so the essentials (#, team, P/W/D/L, Pts) always fit. */
+/* Mobile: scroll the table rather than squeezing it.
+ *
+ * It used to hide BP/PF/PA and force `table-layout: fixed` so everything fit
+ * the viewport — which meant those columns simply didn't exist on a phone, and
+ * what remained was crammed into 4px of padding. Now the full table renders at
+ * its natural width and the wrapper scrolls, so every column is reachable and
+ * readable. The team identity stays pinned so the numbers keep their meaning
+ * once you scroll away from it.
+ */
 @media (max-width: 768px) {
-  .c-hide { display: none; }
-  /* Fixed layout guarantees Pts fits without horizontal scroll; the team
-     column flexes and truncates long names with an ellipsis. */
-  .lt { min-width: 0; width: 100%; table-layout: fixed; }
-  .lt th, .lt td { padding: 10px 4px; }
-  .lt .c-side { width: 26px; }
-  .lt .c-rank { width: 24px; }
+  /* separate (with zero spacing) rather than collapse: position:sticky is
+     unreliable on cells of a collapsed table. The table only ever draws
+     border-bottom, so this renders identically. */
+  .lt { min-width: 600px; width: 100%; table-layout: auto;
+        border-collapse: separate; border-spacing: 0; }
+  .lt th, .lt td { padding: 11px 8px; }
+  /* The pinned columns carry NO horizontal padding and cap their content, so
+     the rendered width equals the declared width. With `table-layout: auto` a
+     width is only a hint — a column whose content plus padding exceeds it just
+     grows, and the sticky offsets below (which are a running total of these
+     widths) would drift out of alignment and overlap. */
+  .lt .c-side { width: 22px; padding-left: 0; padding-right: 0; }
+  .lt .c-rank { width: 28px; padding-left: 0; padding-right: 0; }
+  .lt .c-move { width: 20px; padding-left: 0; padding-right: 0; }
+  .lt .c-team { width: 108px; max-width: 108px; padding-left: 6px; padding-right: 6px; }
   .lt .c-chev { width: 22px; padding-right: 8px; }
-  .lt .c-team { width: 33%; }
-  .lt-team { max-width: 100%; font-size: 15px; }
+  .lt-team { max-width: 96px; font-size: 15px; }
   .lt-side span { letter-spacing: .08em; }
+
+  /* Pin the whole identity block — band spine, rank, movement, team — so the
+     stats scroll beneath it. Offsets are the running total of the widths set
+     just above: 0 -> 22 -> 50 -> 70. `.c-move` has to be pinned too even though
+     it's only an arrow, otherwise scrolled cells would show through the gap
+     between the rank and the team name. */
+  .lt .c-side, .lt .c-rank, .lt .c-move, .lt .c-team {
+    position: sticky; z-index: 2;
+    /* Opaque base so scrolling cells don't show through, with the row's own
+       tint (champ / sacko / leader) painted back on top of it. */
+    background-color: var(--surface);
+    background-image: linear-gradient(var(--row-tint, transparent), var(--row-tint, transparent));
+  }
+  /* The spine carries the band tint rather than the row tint — it spans several
+     rows, so it can't take its colour from any one of them. */
+  .lt .c-side {
+    left: 0;
+    background-image: linear-gradient(var(--side-tint, transparent), var(--side-tint, transparent));
+  }
+  .lt .c-rank { left: 22px; }
+  .lt .c-move { left: 50px; }
+  .lt .c-team { left: 70px; box-shadow: 1px 0 0 var(--border); }
+  .lt thead .c-side, .lt thead .c-rank, .lt thead .c-move, .lt thead .c-team {
+    background-color: var(--surface-2); z-index: 3;
+  }
 }
 
 /* ============================================================

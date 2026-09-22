@@ -24,6 +24,41 @@ window.mtybyToast = function (msg, kind) {
 // The currently signed-in user (from /api/auth/user); null when logged out.
 window.__mtybyUser = null;
 
+// ---- "More" menu (bottom nav) ---------------------------------------------
+
+/** Open/close the overflow menu. The nav button's icon swaps bars <-> X via
+ *  the `is-open` class, so the same control closes what it opened. */
+function toggleMoreMenu() {
+  const menu = document.getElementById('more-menu');
+  if (!menu) return;
+  menu.hidden ? openMoreMenu() : closeMoreMenu();
+}
+
+function openMoreMenu() {
+  const menu = document.getElementById('more-menu');
+  const back = document.getElementById('more-backdrop');
+  const btn = document.getElementById('more-btn');
+  if (!menu) return;
+  menu.hidden = false;
+  if (back) back.hidden = false;
+  if (btn) { btn.classList.add('is-open'); btn.setAttribute('aria-expanded', 'true'); }
+}
+
+function closeMoreMenu() {
+  const menu = document.getElementById('more-menu');
+  const back = document.getElementById('more-backdrop');
+  const btn = document.getElementById('more-btn');
+  if (!menu) return;
+  menu.hidden = true;
+  if (back) back.hidden = true;
+  if (btn) { btn.classList.remove('is-open'); btn.setAttribute('aria-expanded', 'false'); }
+}
+
+// Escape closes it, like the other overlays.
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeMoreMenu();
+});
+
 // ---- Session + profile sheet ----------------------------------------------
 
 /** Fetch the current user and paint the chip + profile sheet, or hide them. */
