@@ -335,6 +335,25 @@ def _round_timing(conn, league_id, round_num) -> dict:
     }
 
 
+def _club_colours(conn, league_id) -> dict:
+    """{club code: hex} for tinting squad jerseys in each player's real colours.
+
+    Comes from the scraped club list, so it's the clubs' own brand colours
+    rather than anything hand-picked here. `colour_dark` is the primary and is
+    what the jersey uses — every one of them clears 11:1 contrast against the
+    near-white jersey number, so the number stays legible on all ten.
+
+    Empty for any competition without a scraped club list (Super Rugby), and the
+    UI falls back to the league's own colour.
+    """
+    slug = _slug_for_league_id(conn, league_id)
+    if (LEAGUES.get(slug) or {}).get('competition') != 'premiership':
+        return {}
+    from . import prem_fixtures
+    return {code: c['colour_dark']
+            for code, c in prem_fixtures.clubs().items() if c.get('colour_dark')}
+
+
 def _real_fixtures(conn, league_id, round_num) -> list:
     """The actual club matches behind a fantasy round.
 
@@ -703,7 +722,17 @@ def get_user():
     can_edit_team = (league_id is not None) and (not _team_edit_locked(conn, league_id))
     # Prefer the live DB team name over the (possibly stale) session copy.
     team_name = ctx['team_name'] if ctx else session.get('team_name')
-    current_round = get_last_round(conn, league_id) if league_id is not None else None
+    # The header badge shows the round you are IN — the one being picked for, or
+    # played. It used to show get_last_round (MAX(weekly_stats.round)), i.e. the
+    # last round SCORED, so with the season open but no results banked it read
+    # "Pre-season" even though round 1 was live and locking that Friday.
+    # 0 still means pre-season, but now only when there is genuinely no calendar.
+    if league_id is None:
+        current_round = None
+    elif _rounds_known(conn, league_id):
+        current_round = get_next_round(conn, league_id)
+    else:
+        current_round = 0
     conn.close()
 
     return jsonify({
@@ -1167,6 +1196,7 @@ def state():
     cutoff  = next_lock_time(conn, next_round, league_id)
     reopen  = reopen_time(conn, next_round, league_id)
     league  = _league_meta(conn, league_id)
+    colours = _club_colours(conn, league_id)   # needs the connection; build it first
     conn.close()
     return jsonify({
         'league':      league,
@@ -1186,6 +1216,9 @@ def state():
         'bench_count':   BENCH_COUNT,
         'starter_slots': STARTER_SLOTS,
         'slot_positions': {k: sorted(v) for k, v in SLOT_POSITIONS.items()},
+        # Real club colours, keyed by the same code as players.team, so the
+        # squad pitch can show each player in his own club's jersey.
+        'club_colours': colours,
     })
 
 
