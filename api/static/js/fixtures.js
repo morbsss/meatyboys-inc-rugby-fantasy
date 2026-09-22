@@ -150,7 +150,33 @@ function makeWeekCard(week, matches, timing) {
       ${headerRight}
     </div>
     ${rows}
+    ${realFixturesHTML(timing && timing.real)}
   </div>`;
+}
+
+/** The actual club matches the fantasy round is scored from.
+ *
+ * Shown under the fantasy head-to-heads so you can see which real games your
+ * players are in, and when. Rendered only when the league has a scraped
+ * fixture list — Super Rugby has none, so the block is simply absent there.
+ */
+function realFixturesHTML(real) {
+  if (!real || !real.length) return '';
+  const rows = real.map(f => {
+    const played = f.home_score !== null && f.home_score !== undefined;
+    const mid = played
+      ? `<span class="rf-score">${esc(String(f.home_score))}–${esc(String(f.away_score))}</span>`
+      : `<span class="rf-when${f.confirmed ? '' : ' is-tbc'}">${esc(f.confirmed ? (f.kickoff || '') : 'Time TBC')}</span>`;
+    return `<div class="rf-row"${f.venue ? ` title="${esc(f.venue)}"` : ''}>
+      <span class="rf-team">${esc(f.home || 'TBC')}</span>
+      ${mid}
+      <span class="rf-team rf-team--away">${esc(f.away || 'TBC')}</span>
+    </div>`;
+  }).join('');
+  return `<details class="rf-block">
+    <summary class="rf-head">Premiership fixtures<span class="rf-count">${real.length}</span></summary>
+    ${rows}
+  </details>`;
 }
 
 function esc(s) {

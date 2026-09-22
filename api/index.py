@@ -335,6 +335,54 @@ def _round_timing(conn, league_id, round_num) -> dict:
     }
 
 
+def _real_fixtures(conn, league_id, round_num) -> list:
+    """The actual club matches behind a fantasy round.
+
+    Premiership reads the scraped feed (data/prem_fixtures_2026_27.json via
+    api/prem_fixtures), which carries kickoff, venue and live scores. Any other
+    competition falls back to the `real_fixtures` table, which the ingest job
+    fills with just the pairings.
+
+    Kickoffs are formatted here, in the league's timezone, for the same reason
+    the round date label is: a Friday 18:45 UTC kickoff is already Saturday in
+    Sydney, and the browser would render an English fixture on the wrong day.
+    """
+    slug = _slug_for_league_id(conn, league_id)
+    competition = (LEAGUES.get(slug) or {}).get('competition')
+    tz_name = _league_tz(conn, league_id)
+
+    if competition == 'premiership':
+        from . import prem_fixtures
+        out = []
+        for f in prem_fixtures.round_fixtures(round_num):
+            ko = f.get('kickoff_utc')
+            when = None
+            if ko:
+                local = scheduler.to_local(datetime.fromisoformat(ko), tz_name)
+                when = f'{local.strftime("%a %d %b")}, {local.strftime("%H:%M")}'
+            out.append({
+                'home': f.get('home_team'), 'away': f.get('away_team'),
+                'home_score': (f.get('home') or {}).get('score'),
+                'away_score': (f.get('away') or {}).get('score'),
+                'venue': f.get('venue'),
+                'kickoff': when,
+                # Rounds the league hasn't timetabled yet all share a placeholder
+                # slot; the UI says "TBC" rather than implying a real kickoff.
+                'confirmed': bool(f.get('time_confirmed')),
+            })
+        return out
+
+    cursor = _get_cursor(conn)
+    cursor.execute(
+        'SELECT home_team, away_team FROM real_fixtures '
+        'WHERE league_id = ? AND round = ? ORDER BY home_team', (league_id, round_num))
+    rows = [dict(r) for r in cursor.fetchall()]
+    cursor.close()
+    return [{'home': r['home_team'], 'away': r['away_team'], 'home_score': None,
+             'away_score': None, 'venue': None, 'kickoff': None, 'confirmed': False}
+            for r in rows]
+
+
 def _round_to_finalize(conn, league_id=None):
     """The round whose rollover has most recently passed, or None.
 
@@ -3178,7 +3226,9 @@ def competition_data():
     # Kickoff dates + live flag per round, for the week-card header. Built before
     # the connection closes.
     results = [
-        {'week': w, 'matches': m, **_round_timing(conn, league_id, w)}
+        {'week': w, 'matches': m,
+         'real': _real_fixtures(conn, league_id, w),
+         **_round_timing(conn, league_id, w)}
         for w, m in sorted(all_weeks.items())
     ]
 
