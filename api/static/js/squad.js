@@ -27,6 +27,16 @@
   let viewName = '';        // the team currently being viewed
   let readOnly = false;     // true when viewing a team that isn't yours
   let TEAMS = [];           // [{name, owner, available}] for the team selector
+  let CLUB_COLOURS = {};    // real_team code -> club brand colour (Premiership only)
+
+  /* Tint a player's jersey with his club's own colour. Returns an inline
+     custom property the shirt's ::after picks up; empty when the club is
+     unknown or the competition has no scraped colours, so the CSS falls back
+     to the league colour. */
+  const jerseyTint = (p) => {
+    const c = p && !p.is_fr && CLUB_COLOURS[p.real_team];
+    return c ? ` style="--jersey-col:${c}"` : '';
+  };
 
   const el = (id) => document.getElementById(id);
 
@@ -39,6 +49,7 @@
     ]);
 
     isLocked = !!st.is_locked;
+    CLUB_COLOURS = st.club_colours || {};
     (st.players || []).forEach((p) => { statusByPid[p.player_id] = p.lineup_status; });
 
     el('lock-pill').classList.toggle('is-locked', isLocked);
@@ -407,7 +418,7 @@
   // badge and a real-match lineup dot.
   function fieldToken(p, slot) {
     return `<div class="fp${p.is_captain ? ' is-cap' : ''}" style="left:${slot.x}%;top:${slot.y}%">
-      <button class="fp-shirt" data-act="info" data-id="${p.player_id}"
+      <button class="fp-shirt" data-act="info" data-id="${p.player_id}"${jerseyTint(p)}
         title="${esc(p.name)} — tap for points & options">
         ${slot.num}${statusDotHtml(p)}${p.is_captain ? '<span class="fp-c">C</span>' : ''}
       </button>
@@ -424,7 +435,7 @@
 
   function benchToken(p, num) {
     return `<div class="bp${p.is_captain ? ' is-cap' : ''}">
-      <button class="bp-shirt" data-act="info" data-id="${p.player_id}"
+      <button class="bp-shirt" data-act="info" data-id="${p.player_id}"${jerseyTint(p)}
         title="${esc(p.name)} — tap for points & options">
         ${num}${statusDotHtml(p)}${p.is_captain ? '<span class="fp-c">C</span>' : ''}
       </button>
@@ -551,7 +562,7 @@
   // A mtyby field token: position code on the shirt (no fixed jersey numbers).
   function flexFieldToken(p, slot) {
     return `<div class="fp" style="left:${slot.x}%;top:${slot.y}%">
-      <button class="fp-shirt fp-shirt--code" data-act="info" data-id="${p.player_id}"
+      <button class="fp-shirt fp-shirt--code" data-act="info" data-id="${p.player_id}"${jerseyTint(p)}
         title="${esc(p.name)} — tap for points & options">
         <span class="fp-code">${p.position}</span>${statusDotHtml(p)}
       </button>
