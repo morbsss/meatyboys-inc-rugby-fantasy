@@ -73,14 +73,23 @@
 /* =============================================================================
  * OFDS pitch view — the starting XV laid out on a rugby-union field.
  * ========================================================================== */
-/* Pitch on the left, replacements column on the right. */
-.field-layout { display: flex; align-items: flex-start; gap: 10px; margin: 4px 0 10px; }
-.pitch-wrap { flex: 1 1 auto; min-width: 0; }
+/* Pitch on the left, replacements column on the right, both the same height.
+   `stretch` makes the row as tall as its tallest item — the bench, whose height
+   comes from 8 replacement chips — and the pitch then fills that. Left at
+   flex-start with a fixed 7:10 aspect ratio, the pitch ended ~100px short of the
+   panel beside it and the two bottom edges didn't line up. */
+.field-layout { display: flex; align-items: stretch; gap: 10px; margin: 4px 0 10px; }
+.pitch-wrap { flex: 1 1 auto; min-width: 0; display: flex; }
 .pitch {
   position: relative;
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
+  /* Fills the stretched row (i.e. matches the replacements panel). The aspect
+     ratio stays as the fallback: if the height can't resolve — nothing to
+     stretch against — `height: 100%` computes to auto and 7:10 takes over,
+     which is also what happens on mobile once the bench moves below. */
+  height: 100%;
   aspect-ratio: 7 / 10;
   border-radius: var(--r-lg, 14px);
   overflow: hidden;
@@ -125,11 +134,28 @@
   background: rgba(255,255,255,.9);
 }
 
+/* Player tokens size against the PITCH, not the viewport.
+   The pitch is one column of a row on desktop but full width on mobile, so a
+   viewport breakpoint would get it wrong in one case or the other. Slots are
+   placed in percentages, and the tightest horizontal pair (the locks, 18% apart)
+   sets the ceiling: a token wider than ~14% of the pitch overlaps its neighbour.
+   At 84px the old fixed width was fine on a 600px pitch and badly overlapping on
+   a phone, where the pitch is barely 200px wide. */
+.pitch { container-type: inline-size; }
+
 /* A player standing on the field. */
 .fp {
   position: absolute; transform: translate(-50%, -50%); z-index: 2;
-  display: flex; flex-direction: column; align-items: center; gap: 3px; width: 84px;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  width: clamp(46px, 14cqw, 84px);
 }
+.fp .fp-shirt {
+  width: clamp(44px, 13.3cqw, 80px);
+  height: clamp(33px, 10cqw, 60px);
+  padding-top: clamp(9px, 2.7cqw, 16px);
+  font-size: clamp(11px, 2.5cqw, 15px);
+}
+.fp .fp-shirt--code { font-size: clamp(9px, 2.2cqw, 13px); }
 /* Player token = a rugby jersey silhouette (shared by field + bench tokens).
    A white "shirt" sits behind a slightly inset coloured jersey so it reads on
    both the green pitch and the light bench panel; the number / position code is
@@ -173,12 +199,16 @@
 .bp-shirt--fr::after { background: var(--amber); }
 .fp--fr .fp-name { font-weight: 800; }
 .fp-name {
-  font-size: 14px; font-weight: 700; color: #fff; text-align: center;
+  font-size: clamp(9px, 2.3cqw, 14px); font-weight: 700; color: #fff; text-align: center;
   line-height: 1.05; width: 100%; text-shadow: 0 1px 2px rgba(0,0,0,.55);
   /* Long surnames (e.g. "Nawaqanitawase,A") wrap inside the token instead of
-     overflowing onto neighbours; capped at two lines, ellipsis past that. */
+     overflowing onto neighbours; capped at two lines, ellipsis past that.
+     `-line-clamp` (the old value here) is not a real property — the correct
+     names are `-webkit-line-clamp` and the newer unprefixed `line-clamp` — so
+     nothing was clamped and long names simply ran on and clipped with no "…". */
   overflow-wrap: anywhere; word-break: anywhere;
-  display: -webkit-box; -line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden;
+  -webkit-line-clamp: 2; line-clamp: 2;
 }
 .fp--empty .fp-name { font-weight: 600; opacity: .9; }
 
@@ -192,12 +222,30 @@
 /* Lineup status, shown as a letter — S (starting), B (bench), O (out) — in a
    small white chip so the coloured letter reads on the jersey. */
 .fp-dot {
-  position: absolute; bottom: 2px; left: 6px; z-index: 1;
+  /* Sits to the LEFT of the jersey, its base level with the hem. It used to sit
+     bottom-left INSIDE the silhouette, crowding the jersey number — worse once
+     tokens scale down on mobile, where the dot was a fixed 15px on a 44px shirt.
+     The jersey path occupies only the middle 80% of the button box, so there is
+     slack at the sides to hang it in; the path ends at y=99 of a 100-unit
+     viewBox, so bottom:1% lines the dot's base up with the hem at any size. */
+  position: absolute; top: auto; bottom: 1%; left: -2px; z-index: 1;
+  transform: translateX(-50%);
   min-width: 15px; height: 15px; padding: 0 1px;
   display: grid; place-items: center; border-radius: 50%;
   background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.25);
   font-family: var(--font-display); font-weight: 800; font-size: 10px; line-height: 1;
   color: var(--border-strong);
+}
+/* On the pitch, tuck it into the jersey's left margin and scale it with the
+   token. `left: 10%` + translate(-100%) lands its right edge exactly on the
+   jersey's left edge (the SVG path starts at x=10 of 100), so it clears the
+   silhouette without hanging so far out that it reaches the next player —
+   pushing it fully outside the button made the fly-half's badge collide with
+   the inside centre. */
+.fp .fp-dot {
+  left: 10%; transform: translateX(-100%);
+  min-width: clamp(11px, 3.0cqw, 15px); height: clamp(11px, 3.0cqw, 15px);
+  font-size: clamp(8px, 2.1cqw, 10px);
 }
 .fp-dot.s { color: var(--success); }
 .fp-dot.b { color: var(--amber); }
@@ -228,10 +276,76 @@
 .bp-name b {
   font-family: var(--font-display); font-weight: 700; font-size: 13px; color: var(--forest);
   overflow-wrap: anywhere; word-break: break-word;
-  display: -webkit-box; -line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden;
+  -webkit-line-clamp: 2; line-clamp: 2;   /* was `-line-clamp`, which does nothing */
 }
 .bp-name small { color: var(--ink-faint); font-size: 11px; }
 .bp--empty .bp-name b { color: var(--ink-faint); }
+
+/* =============================================================================
+ * Mobile: pitch first, replacements underneath.
+ *
+ * Side by side, the fixed 150px bench column takes ~40% of a phone's width and
+ * leaves the pitch around 200px — too narrow for fifteen tokens, so wings at
+ * x=16%/84% were clipped by the pitch edge and the locks overlapped each other.
+ * Stacking gives the pitch the full width and turns the bench into a grid,
+ * which suits 8 replacements better than a very tall column.
+ * ========================================================================== */
+@media (max-width: 768px) {
+  .field-layout { flex-direction: column; gap: 12px; }
+  .pitch-wrap { width: 100%; }
+  /* Stacked, there is no panel beside the pitch to match. Instead of its 7:10
+     shape (~528px on a 390px phone) it fills the screen between the sticky
+     header and the bottom nav, so the whole XV is one screenful.
+     dvh over vh: on mobile browsers vh is the tallest the viewport ever gets,
+     so a vh-sized pitch sits partly under the collapsing address bar. The plain
+     vh line is the fallback for anything without dvh. */
+  .pitch {
+    height: calc(100vh - var(--header-h, 50px) - var(--bottom-nav-h, 56px) - 24px);
+    height: calc(100dvh - var(--header-h, 50px) - var(--bottom-nav-h, 56px) - 24px);
+    /* Never shorter than the old 7:10 shape: on a short viewport (a small phone
+       in landscape) the calc above would squash the XV into each other, so let
+       the page scroll instead. */
+    min-height: calc((100vw - 20px) * 10 / 7);
+  }
+
+  .bench-col {
+    width: 100%; flex: 1 1 auto;
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px 4px; padding: 10px 8px;
+  }
+  .bench-col-head { grid-column: 1 / -1; }
+  .bp-name { max-width: 100%; }
+
+  /* The bench jersey keeps its desktop 80px, which leaves ~1px of slack in an
+     82px grid cell on a 375px phone — not enough for the status badge beside
+     it, which would then spill onto the next replacement. Scale the jersey
+     (same 4:3 proportions) so the badge has somewhere to sit. */
+  .bp-shirt {
+    width: 64px; height: 48px; padding-top: 13px; font-size: 13px;
+  }
+  .bp-shirt--code { font-size: 11px; }
+  .bp-name b { font-size: 12px; }
+
+  /* These two offsets exist only to line the header and legend up with the
+     pitch, which on desktop sits left of centre by the bench column's width.
+     Stacked, there is nothing to the right to compensate for. */
+  .sq-head-right { margin-right: 0; }
+  .legend { padding-right: 0; }
+
+  /* One line on a narrow token: two wrapped lines of a long surname leave the
+     name taller than the jersey above it. Ellipsis rather than mid-word breaks. */
+  .fp-name {
+    -webkit-line-clamp: 1; line-clamp: 1;
+    white-space: nowrap; text-overflow: ellipsis;
+    overflow-wrap: normal; word-break: normal;
+  }
+}
+
+/* Narrow phones: three bench columns rather than four, so a name has room. */
+@media (max-width: 400px) {
+  .bench-col { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
 
 /* Advisory helper chips — what the ideal XV still wants (never blocks a save) */
 .needs-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 14px 4px 2px;

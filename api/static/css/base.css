@@ -571,6 +571,11 @@ a { color: inherit; text-decoration: none; }
   font-weight: 600;
   letter-spacing: .04em;
   text-transform: uppercase;
+  /* align-items centres each child BOX; this centres the text inside it. Only
+     shows on a label that wraps — "MATCH UP" breaks onto two lines on a phone,
+     and without this the second line sits left under the first. */
+  text-align: center;
+  line-height: 1.15;
   transition: color var(--motion-fast);
 }
 .mtyby-bottom-nav-item.is-active { color: var(--forest); }
@@ -589,6 +594,52 @@ a { color: inherit; text-decoration: none; }
   opacity: 0;
 }
 .mtyby-bottom-nav-item.is-active .dot { opacity: 1; }
+
+/* ---- "More" overflow menu ---------------------------------------------- */
+/* The bars and the X are both in the markup, stacked in the same 22px icon
+   slot; `is-open` swaps which one shows, so the button morphs in place instead
+   of the label jumping as the icon changes size. */
+.mtyby-more-btn { background: none; border: 0; cursor: pointer; font: inherit; }
+.mtyby-more-btn .mtyby-bottom-nav-icon { display: grid; place-items: center; }
+.mtyby-more-btn .more-ico { grid-area: 1 / 1; }        /* stack, don't stack up */
+.mtyby-more-btn .more-ico--close { display: none; }
+.mtyby-more-btn.is-open { color: var(--forest); }
+.mtyby-more-btn.is-open .more-ico--bars { display: none; }
+.mtyby-more-btn.is-open .more-ico--close { display: block; }
+
+.mtyby-more-backdrop {
+  position: fixed; inset: 0; z-index: 59;              /* under the nav (60) */
+  background: rgba(11,59,46,.28);
+}
+.mtyby-more-backdrop[hidden] { display: none; }
+
+.mtyby-more-menu {
+  position: fixed; z-index: 61;                        /* above the nav */
+  right: 8px; left: 8px;
+  bottom: calc(var(--bottom-nav-h, 56px) + env(safe-area-inset-bottom) + 8px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg, 14px);
+  box-shadow: 0 -6px 24px rgba(11,59,46,.18);
+  overflow: hidden;
+}
+.mtyby-more-menu[hidden] { display: none; }
+.mtyby-more-menu > a,
+.mtyby-more-menu > button {
+  display: block; width: 100%; text-align: left;
+  padding: 14px 16px; min-height: 48px;
+  background: none; border: 0; border-bottom: 1px solid var(--border);
+  font-family: var(--font-display); font-size: 14px; font-weight: 700;
+  letter-spacing: .03em; text-transform: uppercase;
+  color: var(--ink); text-decoration: none; cursor: pointer;
+}
+.mtyby-more-menu > *:last-child { border-bottom: none; }
+.mtyby-more-menu > .is-active { color: var(--forest); background: var(--surface-2); }
+
+/* Desktop has the full tab strip in the header, so none of this applies. */
+@media (min-width: 769px) {
+  .mtyby-more-menu, .mtyby-more-backdrop { display: none !important; }
+}
 
 /* ============================================================
    BOTTOM SHEET
@@ -666,6 +717,12 @@ a { color: inherit; text-decoration: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .mtyby-skeleton { animation: none; background: var(--surface-2); }
+}
+
+/* Narrow phones (<375px): one step smaller so the longest label, "FIXTURES",
+   still fits its seventh of the row as one word rather than breaking. */
+@media (max-width: 374px) {
+  .mtyby-bottom-nav-item { font-size: 8px; }
 }
 
 /* ============================================================
@@ -749,7 +806,22 @@ a { color: inherit; text-decoration: none; }
     z-index: 95;
     padding: 4px 4px calc(4px + env(safe-area-inset-bottom));
   }
-  .mtyby-bottom-nav-item { min-height: 48px; padding: 4px 4px; font-size: 9px; }
+  /* Seven tabs have to share the width. A flex item defaults to
+     min-width: auto, i.e. it refuses to shrink below its longest unbreakable
+     word — "TRANSFERS" alone claims ~62px — so the row overflowed and the last
+     tabs were pushed off screen. min-width: 0 lets `flex: 1` actually divide the
+     space evenly; the rest is buying that space back for the label. */
+  .mtyby-bottom-nav-item {
+    min-height: 48px; padding: 4px 2px; font-size: 9px;
+    min-width: 0;
+    letter-spacing: 0;            /* .04em over 9 characters is ~3px a tab */
+  }
+  .mtyby-bottom-nav-item > span:not(.mtyby-bottom-nav-icon):not(.dot) {
+    max-width: 100%;
+    /* Break rather than overflow into the neighbouring tab. Labels that contain
+       a space ("Match Up") still wrap at the space in preference. */
+    overflow-wrap: break-word;
+  }
   .mtyby-bottom-nav-icon { width: 20px; height: 20px; }
   .mtyby-user-chip .name { display: none; }
   .mtyby-user-chip { padding: 3px 4px; }

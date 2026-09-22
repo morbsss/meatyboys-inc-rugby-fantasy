@@ -21,6 +21,12 @@ async function init() {
   render();
 }
 
+/* Round filter, built twice: chips for desktop, a select for mobile.
+ *
+ * Both live in the DOM and CSS shows exactly one — no resize listener, and
+ * because both route through setFilter() they can never drift apart. Fifteen
+ * "Wk n" chips wrap to three rows on a phone and push the fixtures off screen;
+ * one dropdown is a single row. */
 function buildChips() {
   const bar = document.getElementById('filter-bar');
   const allChip = bar.querySelector('[data-week="ALL"]');
@@ -35,6 +41,16 @@ function buildChips() {
     btn.addEventListener('click', () => setFilter(week));
     bar.appendChild(btn);
   });
+
+  const sel = document.getElementById('round-select');
+  if (sel) {
+    sel.innerHTML = `<option value="ALL">All rounds</option>`
+      + allResults.map(({ week }) =>
+          `<option value="${week}">Week ${week}${week > maxRound ? ' — upcoming' : ''}</option>`).join('');
+    sel.value = String(activeWeek);
+    sel.addEventListener('change', e =>
+      setFilter(e.target.value === 'ALL' ? 'ALL' : Number(e.target.value)));
+  }
 }
 
 function setFilter(week) {
@@ -42,6 +58,9 @@ function setFilter(week) {
   document.querySelectorAll('.round-chip').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.week === String(week));
   });
+  // Keep the other control in step, so switching orientation keeps the filter.
+  const sel = document.getElementById('round-select');
+  if (sel) sel.value = String(week);
   render();
 }
 
@@ -93,7 +112,7 @@ function makeWeekCard(week, matches, timing) {
           ${m.team_bp ? `<span class="bp-tag">BP</span>` : ``}
         </span>
         <div class="match-score-wrap">
-          <span class="match-score ${tWin ? 'winner' : ''}">${m.team_score.toFixed(1)}</span>
+          <span class="match-score ${tWin ? 'winner' : ''}">${m.team_score.toFixed(1)}</span>${m.team_bp ? `<span class="bp-star" title="Bonus point">*</span>` : ``}
           <span class="match-vsep"> v </span>
           <span class="match-score bye-avg-score">${m.bye_score.toFixed(1)}</span>
         </div>
@@ -114,9 +133,9 @@ function makeWeekCard(week, matches, timing) {
         ${m.home_bp ? `<span class="bp-tag">BP</span>` : ``}
       </span>
       <div class="match-score-wrap">
-        <span class="match-score ${hWin ? 'winner' : ''}">${m.home_score.toFixed(1)}</span>
+        <span class="match-score ${hWin ? 'winner' : ''}">${m.home_score.toFixed(1)}</span>${m.home_bp ? `<span class="bp-star" title="Bonus point">*</span>` : ``}
         <span class="match-vsep"> v </span>
-        <span class="match-score ${aWin ? 'winner' : ''}">${m.away_score.toFixed(1)}</span>
+        <span class="match-score ${aWin ? 'winner' : ''}">${m.away_score.toFixed(1)}</span>${m.away_bp ? `<span class="bp-star" title="Bonus point">*</span>` : ``}
       </div>
       <span class="match-away ${aWin ? 'winner' : ''}">
         ${m.away_bp ? `<span class="bp-tag">BP</span>` : ``}

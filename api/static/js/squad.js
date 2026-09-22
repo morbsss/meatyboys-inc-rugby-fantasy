@@ -310,8 +310,12 @@
     { pos: 'LF',  num: 7,  x: 76, y: 38 },   // open-side flanker
     { pos: 'LF',  num: 8,  x: 50, y: 43 },   // number 8
     { pos: 'SH',  num: 9,  x: 20, y: 55 },   // scrum-half
-    { pos: 'FH',  num: 10, x: 30, y: 65 },   // fly-half
-    { pos: 'MID', num: 12, x: 45, y: 70 },   // inside centre
+    { pos: 'FH',  num: 10, x: 30, y: 66 },   // fly-half (66 not 65: at 65 the
+                                             // scrum-half's two-line name box
+                                             // clipped the top of this jersey)
+    { pos: 'MID', num: 12, x: 46, y: 70 },   // inside centre (46 not 45: leaves
+                                             // room for the status badge now
+                                             // sitting left of the jersey)
     { pos: 'MID', num: 13, x: 65, y: 75 },   // outside centre
     { pos: 'OBK', num: 11, x: 16, y: 80 },   // left wing
     { pos: 'OBK', num: 14, x: 84, y: 80 },   // right wing

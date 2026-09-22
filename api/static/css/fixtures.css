@@ -17,6 +17,27 @@
 .round-chip.played.active { background: var(--forest); border-color: var(--forest); color: var(--cream); }
 .round-chip.upcoming { border-color: var(--border); color: var(--ink-faint); }
 
+/* Round filter: chips on desktop, a dropdown on mobile. Both are in the DOM and
+   exactly one is shown, so there is no resize handling and no chance of the two
+   disagreeing. Fifteen "Wk n" chips wrap to three rows on a phone, which is a
+   lot of the screen gone before a single fixture appears. */
+.round-select { display: none; }
+@media (max-width: 768px) {
+  /* The bar holds only the Wk chips, which the dropdown replaces here — left
+     visible it would be an empty sticky strip above the heading. */
+  .filter-bar { display: none; }
+  .round-select {
+    display: block; width: 100%;
+    /* Sits under the page heading, clear of both it and the first week card. */
+    margin: 2px 0 18px;
+    padding: 8px 11px; border: 1px solid var(--border); border-radius: var(--r-md);
+    font-size: 13px; font-weight: 700; min-height: 42px;
+    background: var(--surface); color: var(--ink);
+  }
+  .round-select:focus { outline: none; border-color: var(--forest);
+    box-shadow: 0 0 0 3px rgba(11,59,46,.12); }
+}
+
 /* Wider than the other pages: a week-card is a fixture table (two team names,
    scores and a bye row per match), so it reads badly when squeezed.
    1650 - 32px padding = a 1618px table, ~50% wider than the previous 1068px. */
@@ -102,6 +123,24 @@
 .bp-tag { flex: 0 0 auto; font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 4px;
   color: var(--amber-deep); border: 1px solid var(--amber-soft); background: rgba(232,155,44,.10); }
 .bp-spacer { display: inline-block; min-width: 22px; }
+
+/* A bonus point is marked twice over, and exactly one is ever shown: the "BP"
+   pill beside the team name on desktop, and a green asterisk against the score
+   itself on mobile. Two elements rather than one restyled element, because they
+   live in different containers — the pill can't be moved into the score wrap
+   without dragging desktop along with it. */
+.bp-star { display: none; }
+@media (max-width: 768px) {
+  .bp-tag { display: none; }
+  .bp-star {
+    display: inline-block;
+    /* The score wrap is a flex row with a 4px gap; pull the star back so it
+       reads as a footnote on the number rather than a separate item. */
+    margin-left: -3px;
+    font-size: 15px; font-weight: 800; line-height: 1;
+    color: var(--success);
+  }
+}
 
 .upcoming-row { color: var(--ink-muted); }
 .upcoming-row .away-name { text-align: right; }

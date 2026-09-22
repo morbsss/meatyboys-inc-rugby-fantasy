@@ -1,11 +1,11 @@
 .content { max-width: 960px; margin: 0 auto; padding: 22px 16px 64px; width: 100%; }
 @media (max-width: 768px) { .content { padding: 14px 10px calc(var(--bottom-nav-h,56px) + 28px); } }
+/* The gap under the title used to come from the subtitle's margin; that line is
+   gone, so the title carries its own spacing now. */
 .page-title { font-family: var(--font-display); font-size: 30px; font-weight: 800;
-  letter-spacing: .02em; text-transform: uppercase; color: var(--forest); line-height: 1; }
+  letter-spacing: .02em; text-transform: uppercase; color: var(--forest); line-height: 1;
+  margin-bottom: 16px; }
 @media (max-width: 768px) { .page-title { font-size: 24px; } }
-.page-sub { margin-top: 6px; font-size: 12px; font-weight: 600; letter-spacing: .04em;
-  text-transform: uppercase; color: var(--ink-muted); margin-bottom: 16px; }
-
 .pending-card { padding: 12px 14px; margin-bottom: 16px; }
 .pending-title { font-family: var(--font-display); font-size: 13px; font-weight: 800; letter-spacing: .05em;
   text-transform: uppercase; color: var(--ink-muted); margin-bottom: 8px; }
@@ -19,15 +19,73 @@
 /* Filters share the row width evenly. */
 .filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
 .filters select, .ph-search { padding: 9px 11px; border: 1px solid var(--border); border-radius: var(--r-md);
-  font-size: 14px; min-height: 40px; background: var(--surface); color: var(--ink);
+  font-size: 10px; min-height: 40px; background: var(--surface); color: var(--ink);
   flex: 1 1 140px; min-width: 0; }
 .ph-search:focus, .filters select:focus { outline: none; border-color: var(--forest); box-shadow: 0 0 0 3px rgba(11,59,46,.12); }
 .metric-toggle { display: inline-flex; border: 1px solid var(--border); border-radius: var(--r-full); overflow: hidden; flex-shrink: 0; }
-.metric-toggle button { padding: 8px 14px; font-size: 12px; font-weight: 700; color: var(--ink-muted); background: var(--surface); min-height: 40px; }
+/* 10px matches .filters — the toggle sits in the same toolbar and reads as part
+   of it, so a larger label made it look like a different control set. */
+.metric-toggle button { padding: 8px 14px; font-size: 10px; font-weight: 700; color: var(--ink-muted); background: var(--surface); min-height: 40px; }
 .metric-toggle button.on { background: var(--forest); color: var(--cream); }
-/* Position chips on the left; metric toggle pushed to the right (above Actions). */
-.ph-chips-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-.ph-chips { display: flex; flex-wrap: wrap; gap: 6px; flex: 1 1 auto; }
+/* Metric toggle on top and right-aligned, position chips beneath it. Stacked
+   rather than side-by-side so the chips get the full width to wrap across —
+   sharing a row with the toggle squeezed them into a narrow, ragged block.
+   align-items: flex-start stops children stretching the full width; the toggle
+   then opts out with align-self to sit against the right edge, over the table's
+   Actions column. DOM order matches visual order, so tab order follows what you
+   see. */
+.ph-chips-row { display: flex; flex-direction: column; align-items: flex-start;
+  gap: 10px; margin-bottom: 12px; }
+.ph-chips-row .metric-toggle { align-self: flex-end; }
+.ph-chips { display: flex; flex-wrap: wrap; gap: 6px; width: 100%; }
+
+/* Position filter: chips on desktop, a dropdown on mobile. Both are in the DOM
+   and exactly one is shown, so there is no resize handling and no chance of the
+   two disagreeing. Nine chips wrap to two or three rows on a phone and eat the
+   space above the table; one select is a single row. */
+.ph-pos-select { display: none; }
+@media (max-width: 768px) {
+  .ph-chips { display: none; }
+  .ph-pos-select {
+    display: block; width: 100%;
+    padding: 9px 11px; border: 1px solid var(--border); border-radius: var(--r-md);
+    font-size: 10px; min-height: 40px; background: var(--surface); color: var(--ink);
+  }
+  .ph-pos-select:focus { outline: none; border-color: var(--forest);
+    box-shadow: 0 0 0 3px rgba(11,59,46,.12); }
+}
+
+/* =============================================================================
+ * Pager. The table shows PAGE_SIZE rows at a time; without these controls the
+ * rest of the league was simply unreachable and nothing said so.
+ * ========================================================================== */
+.ph-pager { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 8px; margin-bottom: 10px; }
+.ph-pager[hidden] { display: none; }            /* author display:flex beats [hidden] */
+.ph-pager--bottom { margin-top: 12px; margin-bottom: 0; }
+
+.ph-page-info { display: flex; align-items: baseline; gap: 8px; font-size: 11px; color: var(--ink-muted); }
+.ph-page-info b { font-family: var(--font-display); font-size: 12px; font-weight: 800;
+  letter-spacing: .04em; text-transform: uppercase; color: var(--forest); }
+.ph-page-range { font-weight: 600; }
+
+.ph-page-btns { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.ph-page-btn { min-width: 34px; min-height: 34px; padding: 0 8px;
+  border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface);
+  font-size: 11px; font-weight: 700; color: var(--ink-muted); cursor: pointer; }
+.ph-page-btn:hover:not(:disabled) { border-color: var(--border-strong); color: var(--ink); }
+.ph-page-btn.is-current { background: var(--forest); border-color: var(--forest); color: var(--cream); }
+.ph-page-btn:disabled { opacity: .4; cursor: default; }
+.ph-page-gap { padding: 0 2px; font-size: 11px; color: var(--ink-faint); }
+
+/* Phones: the numbered buttons are the first thing to go — Prev/Next and the
+   "Page 2 of 4" readout are enough to navigate, and a full number strip wraps
+   into two rows on a narrow screen. */
+@media (max-width: 480px) {
+  .ph-pager { justify-content: center; }
+  .ph-page-btn[data-page]:not(:first-child):not(:last-child) { display: none; }
+  .ph-page-gap { display: none; }
+}
 
 .tbl-card { overflow: hidden; }
 .tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }

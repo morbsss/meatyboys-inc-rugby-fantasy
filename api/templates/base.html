@@ -86,13 +86,6 @@
       <span>League</span>
       <span class="dot"></span>
     </a>
-    <a href="/players" class="mtyby-bottom-nav-item {% if current_page == 'players' %}is-active{% endif %}" data-nav="players">
-      <span class="mtyby-bottom-nav-icon" aria-hidden="true">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 6a3 3 0 0 1 0 6M21 20a6 6 0 0 0-5-5.9"/></svg>
-      </span>
-      <span>Players</span>
-      <span class="dot"></span>
-    </a>
     <a href="/matchup" class="mtyby-bottom-nav-item {% if current_page == 'matchup' %}is-active{% endif %}" data-nav="matchup">
       <span class="mtyby-bottom-nav-icon" aria-hidden="true">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5v14M20 5v14M4 12h6M14 12h6M10 8v8M14 8v8"/></svg>
@@ -100,21 +93,47 @@
       <span>Match Up</span>
       <span class="dot"></span>
     </a>
+    <a href="/players" class="mtyby-bottom-nav-item {% if current_page == 'players' %}is-active{% endif %}" data-nav="players">
+      <span class="mtyby-bottom-nav-icon" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 6a3 3 0 0 1 0 6M21 20a6 6 0 0 0-5-5.9"/></svg>
+      </span>
+      <span>Players</span>
+      <span class="dot"></span>
+    </a>
     <a href="/transfers" class="mtyby-bottom-nav-item {% if current_page == 'transfers' %}is-active{% endif %}" data-nav="transfers">
       <span class="mtyby-bottom-nav-icon" aria-hidden="true">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4 3 8l4 4"/><path d="M3 8h14"/><path d="m17 20 4-4-4-4"/><path d="M21 16H7"/></svg>
       </span>
-      <span>Transfers</span>
+      <!-- "Trades" not "Transfers": nine characters don't fit a seventh of a
+           phone screen, and the rest of the UI already says trades (Trade
+           offers, Pending trades). The desktop tab keeps the full word. -->
+      <span>Trades</span>
       <span class="dot"></span>
     </a>
-    <a href="#profile" class="mtyby-bottom-nav-item" data-nav="profile" onclick="event.preventDefault(); document.getElementById('profile-sheet').classList.add('is-open');">
+    <!-- The bottom bar only has room for six destinations; this opens the rest.
+         A button element, not a link: it toggles a menu rather than navigating. -->
+    <button type="button" class="mtyby-bottom-nav-item mtyby-more-btn" id="more-btn"
+            aria-expanded="false" aria-controls="more-menu" aria-label="More pages"
+            onclick="toggleMoreMenu()">
       <span class="mtyby-bottom-nav-icon" aria-hidden="true">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+        <svg class="more-ico more-ico--bars" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        <svg class="more-ico more-ico--close" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
       </span>
-      <span>Profile</span>
+      <span>More</span>
       <span class="dot"></span>
-    </a>
+    </button>
   </nav>
+
+  <!-- Pages that don't fit the bottom bar. Kept in sync with the desktop tab
+       strip above: anything there but not in the nav belongs here. -->
+  <div class="mtyby-more-backdrop" id="more-backdrop" hidden onclick="closeMoreMenu()"></div>
+  <div class="mtyby-more-menu" id="more-menu" role="menu" aria-labelledby="more-btn" hidden>
+    <a role="menuitem" href="/finals"   class="{% if current_page == 'finals' %}is-active{% endif %}">Finals</a>
+    <a role="menuitem" href="/analysis" class="{% if current_page == 'analysis' %}is-active{% endif %}">Analysis</a>
+    <a role="menuitem" href="/draft"    class="{% if current_page == 'draft' %}is-active{% endif %}">Draft</a>
+    <a role="menuitem" href="/rules"    class="{% if current_page == 'rules' %}is-active{% endif %}">League rules</a>
+    <button role="menuitem" type="button" onclick="closeMoreMenu(); document.getElementById('profile-sheet').classList.add('is-open');">Profile</button>
+  </div>
 
   <div class="mtyby-sheet" id="profile-sheet" role="dialog" aria-label="Profile">
     <div class="mtyby-sheet-backdrop" onclick="dismissProfileSheet();"></div>
