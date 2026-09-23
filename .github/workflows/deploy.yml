@@ -90,7 +90,13 @@ jobs:
                 --exclude='__pycache__' --exclude='*.pyc' \
                 --exclude='*.db' --exclude='*.sqlite' --exclude='*.sqlite3' \
                 -e "$SSH" api tools nginx data "$TARGET/"
-          rsync -az -e "$SSH" requirements.txt deploy.sh "$TARGET/"
+          # requirements-analysis.txt matters: deploy.sh installs the analysis
+          # job's deps only `if [ -f requirements-analysis.txt ]`, so leaving it
+          # out of this list silently skipped the install — the predict job then
+          # launched on schedule and died on `import numpy`, logging "launched"
+          # and never a result.
+          rsync -az -e "$SSH" \
+                requirements.txt requirements-analysis.txt deploy.sh "$TARGET/"
 
       - name: Install .env
         run: |
