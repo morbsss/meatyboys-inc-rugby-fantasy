@@ -83,6 +83,34 @@ def _gamma_percentiles_100(scores):
         return None
 
 
+# Spread to assume for a player with no scores this season, as a coefficient of
+# variation (sd / mean) on his per-round points. Measured across a full season:
+# median 0.48, mean 0.47, IQR 0.38-0.57. Revisit once real rounds are banked.
+PRIOR_CV = 0.5
+
+
+def _prior_curve(mean, cv=PRIOR_CV):
+    """A 100-point percentile curve for a player with no history this season.
+
+    Round 1 has no scores to fit, so the win-probability model would fall back
+    to a flat curve at the player's mean — zero variance, which makes every
+    fixture a 100%/0% certainty. This turns last season's average into an actual
+    Gamma distribution (same family the fitted curves use) so round 1 gets
+    honest probabilities instead of false ones.
+
+    Shape and scale are chosen to give exactly `mean` with spread mean*cv.
+    """
+    if not mean or mean <= 0:
+        return None
+    shape = 1.0 / (cv ** 2)
+    scale = float(mean) / shape
+    try:
+        return np.array([scipy_gamma.ppf(p / 100, shape, loc=0, scale=scale)
+                         for p in range(100)])
+    except Exception:
+        return None
+
+
 def _weibull_p50(scores, delta=0.0):
     if len(scores) < MIN_DIST_ROWS:
         return float(np.mean(scores)) + delta if scores else 0.0
@@ -416,7 +444,9 @@ def compute_league(con, league_id, target=None):
         status = lineup.get((nm, p['team']))
         if status is None and p['team'] in teams_named:
             status = 'O'
-        pct_cache[pid] = _gamma_percentiles_100(ph)
+        # Fitted from this season where possible; otherwise built from last
+        # season's average, so round 1 still gets a real distribution.
+        pct_cache[pid] = _gamma_percentiles_100(ph) if ph else _prior_curve(prior)
         rows.append({
             'league_id': league_id, 'round': target, 'player_id': int(pid), 'is_fr': 0,
             'name': p['name'], 'position': p['position'], 'real_team': p['team'],
@@ -468,9 +498,14 @@ def compute_league(con, league_id, target=None):
     # player's array is flat, so every fixture would come out a 100% draw (or a
     # 100/0 split off the priors) — confidently wrong. Publish nothing instead;
     # the page already says "No matchups available yet."
+    # Publish win probabilities whenever there is something to distribute over —
+    # fitted curves from this season, or prior curves from last. Only a squad
+    # with neither (no history, no previous-season record) is skipped, since
+    # flat curves would report every fixture as a 100%/0% certainty.
+    have_curves = any(v is not None for v in pct_cache.values())
     matchups = (_win_probabilities(con, league_id, target, pct_cache, fr_pct,
                                    hist, fr_series, award_bonus)
-                if not hist.empty else [])
+                if (not hist.empty or have_curves) else [])
     return target, rows, matchups
 
 
