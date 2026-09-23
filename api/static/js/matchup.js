@@ -3,12 +3,20 @@
  * Extracted from templates/matchup.html. Shared helpers: common.js, leagues.js, base.js.
  * ========================================================================== */
 
-let RESULTS = [], weekSel = null, fixtureIdx = 0, IS_MTYBY = false;
+let RESULTS = [], weekSel = null, fixtureIdx = 0, IS_MTYBY = false, MY_TEAM = '';
 
 async function init() {
-  const data = await (await fetch('/api/competition')).json();
+  // The round you're in comes from /api/state (get_next_round), not from
+  // max_round — max_round is the last round SCORED, which is 0 until the first
+  // results land. The team name picks out your own fixture.
+  const [data, state, me] = await Promise.all([
+    fetch('/api/competition').then((r) => r.json()),
+    fetch('/api/state').then((r) => (r.ok ? r.json() : {})),
+    fetch('/api/auth/user').then((r) => (r.ok ? r.json() : {})),
+  ]);
   // meatyboys runs on wins (no bonus points); used to flip the line-up order.
   IS_MTYBY = data.bonus === false;
+  MY_TEAM = me.team_name || '';
   // Only weeks with real fantasy-vs-fantasy fixtures (skip byes-only entries here).
   RESULTS = (data.results || []).map(w => ({
     week: w.week,
@@ -18,17 +26,42 @@ async function init() {
     document.getElementById('mu-card').innerHTML = '<div class="mu-empty">No fixtures yet.</div>';
     return;
   }
-  weekSel = RESULTS[RESULTS.length - 1].week;   // default: latest week with fixtures
+
+  // Open on the active round, and on your own fixture within it. Previously it
+  // opened on the LAST week of the season and whichever fixture happened to be
+  // first — so mid-season you landed on two other teams in a round not yet played.
+  const active = Number(state.round) || 0;
+  weekSel = RESULTS.some(w => w.week === active)
+    ? active
+    : RESULTS[RESULTS.length - 1].week;
+  fixtureIdx = myFixtureIndex(weekSel);
+
   buildWeekFilter();
   buildFixtureFilter();
   renderMatch();
+}
+
+/** Index of the fixture involving the logged-in user's team in `week`, or 0
+ *  when they aren't playing that round (bye) or aren't signed in. */
+function myFixtureIndex(week) {
+  if (!MY_TEAM) return 0;
+  const wk = RESULTS.find(w => w.week === week);
+  if (!wk) return 0;
+  const i = wk.matches.findIndex(m => m.home === MY_TEAM || m.away === MY_TEAM);
+  return i >= 0 ? i : 0;
 }
 
 function buildWeekFilter() {
   const wf = document.getElementById('week-filter');
   wf.innerHTML = RESULTS.map(w => `<option value="${w.week}">Round ${w.week}</option>`).join('');
   wf.value = String(weekSel);
-  wf.onchange = () => { weekSel = +wf.value; fixtureIdx = 0; buildFixtureFilter(); renderMatch(); };
+  // Changing round follows your team into it rather than snapping to fixture 0.
+  wf.onchange = () => {
+    weekSel = +wf.value;
+    fixtureIdx = myFixtureIndex(weekSel);
+    buildFixtureFilter();
+    renderMatch();
+  };
 }
 
 function currentWeek() { return RESULTS.find(w => w.week === weekSel) || RESULTS[0]; }
