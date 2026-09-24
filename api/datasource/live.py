@@ -111,6 +111,10 @@ class LiveAdapter(PlayerSource, FixtureSource, LineupSource, ScoreSource):
                     entries.append(LineupEntry(
                         player_name=format_name(p['name']), real_team=real_team,
                         jersey=p['jersey'], status='B' if p['is_bench'] else 'S',
+                        # ESPN's own spelling, so ingestion can resolve the
+                        # same-club namesakes SuperBru disambiguates with a
+                        # longer initial.
+                        full_name=p['name'],
                     ))
         return entries
 

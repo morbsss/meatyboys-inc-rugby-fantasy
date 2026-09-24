@@ -111,3 +111,58 @@ def test_due_jobs_no_finalize_on_monday():
     """Monday used to trigger it, which could precede a Monday-evening fixture."""
     now = _utc(2026, 7, 13, 11)   # Mon 12:00 BST
     assert 'finalize' not in _due('premiership', now, LON, fin=False)
+
+
+# --- sync_players: the daily roster reconciliation --------------------------
+
+def test_sync_players_runs_when_never_run_before():
+    due = s.due_jobs(
+        'premiership', _utc(2026, 9, 22, 10), LON,
+        {}, live_now=False, finalize_done=True, rounds_known=True)
+
+    assert 'sync_players' in due
+
+
+def test_sync_players_respects_its_daily_floor():
+    """It scrapes eight SuperBru pages, and the cron ticks every ten minutes."""
+    now = _utc(2026, 9, 22, 10)
+    recent = (now - timedelta(hours=3)).isoformat()
+
+    due = s.due_jobs(
+        'premiership', now, LON, {'sync_players': recent},
+        live_now=False, finalize_done=True, rounds_known=True)
+
+    assert 'sync_players' not in due
+
+
+def test_sync_players_runs_again_after_a_day():
+    now = _utc(2026, 9, 22, 10)
+    old = (now - timedelta(hours=25)).isoformat()
+
+    due = s.due_jobs(
+        'premiership', now, LON, {'sync_players': old},
+        live_now=False, finalize_done=True, rounds_known=True)
+
+    assert 'sync_players' in due
+
+
+def test_sync_players_is_ordered_before_lineups():
+    """Resolving a team sheet needs the club rosters to be current — a player who
+    transferred this week is otherwise matched against his old club and dropped.
+    Both fall due together on a Thursday."""
+    due = s.due_jobs(
+        'premiership', _utc(2026, 9, 24, 14), LON,      # Thu, lineup window open
+        {}, live_now=False, finalize_done=True, rounds_known=True)
+
+    assert 'sync_players' in due and 'lineups' in due
+    assert due.index('sync_players') < due.index('lineups')
+
+
+def test_sync_players_is_not_tied_to_the_lineup_window():
+    """Squads change mid-week; a Tuesday transfer must land before Thursday."""
+    due = s.due_jobs(
+        'premiership', _utc(2026, 9, 22, 9), LON,       # Tuesday morning
+        {}, live_now=False, finalize_done=True, rounds_known=True)
+
+    assert 'sync_players' in due
+    assert 'lineups' not in due

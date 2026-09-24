@@ -22,6 +22,12 @@ Job windows (local time, spec §4.3/§4.4):
     live_scoring: every 3 min while any match is live (now within a fixture's
                   game window)
     sync_rounds : refresh the fixture calendar, daily
+    sync_players: reconcile the player list with SuperBru (new signings and
+                  transfers), daily. Separate from live_scoring on purpose:
+                  squads change mid-week, and a transfer announced on a
+                  Tuesday has to be in the table before Thursday's team
+                  sheets arrive or the lineup join misses that player all
+                  weekend.
 """
 
 from datetime import datetime, timedelta, timezone
@@ -30,6 +36,7 @@ from zoneinfo import ZoneInfo
 # Cadence floors (a job won't run again until this long after its last run).
 INTERVALS = {
     'sync_rounds':  timedelta(hours=24),
+    'sync_players': timedelta(hours=24),
     'lineups':      timedelta(hours=2),
     'live_scoring': timedelta(minutes=3),
     # finalize is once-per-round, gated by the job_runs log, not an interval.
@@ -140,6 +147,13 @@ def due_jobs(
     # Keep the fixture calendar fresh (and bootstrap it if missing).
     if not rounds_known or _interval_ok(last_runs.get('sync_rounds'), now_utc, INTERVALS['sync_rounds']):
         due.append('sync_rounds')
+
+    # Roster reconciliation comes BEFORE lineups in this list: on a Thursday both
+    # can fall due in the same tick, and resolving a team sheet needs the club's
+    # roster to be current — a player who transferred this week would otherwise be
+    # matched against his old club and dropped from the sheet.
+    if _interval_ok(last_runs.get('sync_players'), now_utc, INTERVALS['sync_players']):
+        due.append('sync_players')
 
     if in_lineup_window(local, competition) and \
             _interval_ok(last_runs.get('lineups'), now_utc, INTERVALS['lineups']):
