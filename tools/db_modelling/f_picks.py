@@ -47,7 +47,7 @@ def run(con=None):
     ''', con)
 
     if preds.empty:
-        log.warning('No predictions found for current round — run e_predictions.py first')
+        log.warning('No predictions found for current round - run e_predictions.py first')
         if close_after:
             con.close()
         return
@@ -68,7 +68,7 @@ def run(con=None):
         log.info(f'  Eligible pool: {len(eligible)} (starting + no-news)')
     else:
         eligible = preds.copy()
-        log.info(f'  No news yet — using full pool of {len(eligible)}')
+        log.info(f'  No news yet - using full pool of {len(eligible)}')
 
     # Primary sort: gbm_pred, fallback to simple_5g_pred then simple_season_avg
     eligible['pred_score'] = (eligible['gbm_pred']

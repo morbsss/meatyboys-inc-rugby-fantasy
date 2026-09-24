@@ -41,14 +41,14 @@ def test_dst_shifts_the_sunday_cutoff():
 
 
 # ---------------------------------------------------------------------------
-# Finalize (Monday 12:00 local) — DST-aware
+# Finalize (Monday 12:00 local) - DST-aware
 # ---------------------------------------------------------------------------
 
 def test_finalize_only_tuesday_noon_local():
     """Finalize is pinned to the Tuesday-noon rollover, not a fixed Monday."""
     assert s.is_finalize_time(_local(_utc(2026, 7, 14, 11), LON))      # Tue 12:00 BST
     assert not s.is_finalize_time(_local(_utc(2026, 7, 14, 10), LON))  # Tue 11:00 BST
-    assert not s.is_finalize_time(_local(_utc(2026, 7, 13, 11), LON))  # Monday — was the old rule
+    assert not s.is_finalize_time(_local(_utc(2026, 7, 13, 11), LON))  # Monday - was the old rule
     assert not s.is_finalize_time(_local(_utc(2026, 7, 12, 11), LON))  # Sunday
 
 
@@ -102,7 +102,7 @@ def test_due_jobs_bootstraps_sync_rounds_when_unknown():
 
 
 def test_due_jobs_finalize_once_per_gameweek():
-    now = _utc(2026, 7, 14, 11)   # Tue 12:00 BST — the rollover
+    now = _utc(2026, 7, 14, 11)   # Tue 12:00 BST - the rollover
     assert 'finalize' in _due('premiership', now, LON, fin=False)
     assert 'finalize' not in _due('premiership', now, LON, fin=True)
 

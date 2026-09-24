@@ -60,7 +60,7 @@
 .rules-list li::marker { color: var(--amber); }
 .rules-list--tight li { margin-bottom: var(--s-2); font-size: 13px; }
 
-/* A quiet aside — clarifications and edge cases, not headline rules. */
+/* A quiet aside - clarifications and edge cases, not headline rules. */
 .rules-note {
   font-size: 13px; line-height: 1.6; color: var(--ink-muted);
   background: var(--surface-2); border-left: 3px solid var(--border-strong);
@@ -68,7 +68,7 @@
   padding: var(--s-3) var(--s-4); margin-top: var(--s-4);
 }
 
-/* A rule that catches people out — louder than a note. */
+/* A rule that catches people out - louder than a note. */
 .rules-callout {
   background: var(--surface); border: 1px solid var(--border);
   border-left: 3px solid var(--amber); border-radius: 0 var(--r-md) var(--r-md) 0;

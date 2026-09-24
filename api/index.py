@@ -1,5 +1,5 @@
 """
-Fantasy Draft Web App — run with: python -m flask --app api.index run
+Fantasy Draft Web App - run with: python -m flask --app api.index run
 Or on Vercel: automatically deployed as serverless function at /
 
 DEPLOYMENT CONFIGURATION
@@ -56,7 +56,7 @@ from .competition import (
 )
 
 # ===========================================================================
-# MODULE MAP — this file is the Flask app + all HTTP routes. Major sections,
+# MODULE MAP - this file is the Flask app + all HTTP routes. Major sections,
 # in order, each marked with a "# ====== <NAME> ======" banner below:
 #
 #   SETUP & HELPERS    app/session config; league + roster-model resolution
@@ -72,7 +72,7 @@ from .competition import (
 #   COMPETITION        /competition, /fixtures, /finals, /api/competition table.
 #   SCHEDULER & CRON   timezone-aware ingestion jobs (api/scheduler, api/ingest).
 #
-# The two competitions (meatyboys / OFDS) are NOT separate code paths here — a
+# The two competitions (meatyboys / OFDS) are NOT separate code paths here - a
 # per-league ROSTER MODEL (api/leagues.py) drives the differences. Resolve it
 # with `_roster_model(conn, league_id)` and branch on `model['fr_unit']` /
 # `model['positioned_bench']`. League-specific helpers are grouped + labelled.
@@ -81,7 +81,7 @@ from .competition import (
 app = Flask(__name__, template_folder='templates')
 
 # Behind nginx (which terminates TLS), trust its X-Forwarded-* headers so Flask
-# sees the real client IP and knows the request arrived over HTTPS — needed for
+# sees the real client IP and knows the request arrived over HTTPS - needed for
 # request.is_secure and Secure session cookies. gunicorn binds to localhost only,
 # so nginx is the single trusted proxy hop.
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -317,8 +317,8 @@ def _round_timing(conn, league_id, round_num) -> dict:
     so client-side formatting would show a manager abroad the wrong date for an
     English fixture.
 
-    `is_live` spans the whole round — first kickoff until MATCH_WINDOW after the
-    last — so it reads LIVE across a Friday-to-Sunday weekend rather than only
+    `is_live` spans the whole round - first kickoff until MATCH_WINDOW after the
+    last - so it reads LIVE across a Friday-to-Sunday weekend rather than only
     during a single match, and clears once the last game ends (well before the
     Tuesday rollover).
     """
@@ -341,7 +341,7 @@ def _club_colours(conn, league_id) -> dict:
 
     Comes from the scraped club list, so it's the clubs' own brand colours
     rather than anything hand-picked here. `colour_dark` is the primary and is
-    what the jersey uses — every one of them clears 11:1 contrast against the
+    what the jersey uses - every one of them clears 11:1 contrast against the
     near-white jersey number, so the number stays legible on all ten.
 
     Empty for any competition without a scraped club list (Super Rugby), and the
@@ -370,7 +370,7 @@ def _jersey_codes() -> frozenset:
     try:
         return frozenset(f[:-4] for f in os.listdir(JERSEY_DIR) if f.endswith('.svg'))
     except OSError:
-        return frozenset()          # art not generated — UI falls back to a flat tint
+        return frozenset()          # art not generated - UI falls back to a flat tint
 
 
 def _club_jerseys(conn, league_id) -> list:
@@ -436,7 +436,7 @@ def _round_to_finalize(conn, league_id=None):
 
     This is the round that has just been played and gone final. The `finalize`
     job fires AT the Tuesday-noon rollover, by which point get_next_round has
-    already advanced to the next round — so finalising the active round would
+    already advanced to the next round - so finalising the active round would
     write the definitive scrape against a gameweek that hasn't been played yet.
     """
     now = datetime.now(timezone.utc)
@@ -566,7 +566,7 @@ def reopen_time(conn, next_round, league_id=None) -> str:
     """ISO string of the unlock: the Tuesday-noon rollover of next_round.
 
     This is what the squad screen counts down to, so it has to match the moment
-    `get_next_round` actually rolls — not the last kickoff, which is when the
+    `get_next_round` actually rolls - not the last kickoff, which is when the
     fixtures finish but the round is still closed.
     """
     rollover = round_rollover(conn, next_round, league_id)
@@ -593,7 +593,7 @@ def favicon():
     """Serve the icon at the path browsers ask for without being told.
 
     The `rel=icon` tags in base.html cover normal page views, but browsers,
-    crawlers and bookmark services still probe /favicon.ico directly — and that
+    crawlers and bookmark services still probe /favicon.ico directly - and that
     404s on every one of them otherwise, since the file lives under /static.
     """
     return send_from_directory(
@@ -625,7 +625,7 @@ def _slug_for_league_id(conn, league_id):
 
 
 def _roster_model(conn, league_id):
-    """The roster model (squad rules) for a league — drives draft size,
+    """The roster model (squad rules) for a league - drives draft size,
     validation, the squad-builder UI and scoring."""
     return roster_model(_slug_for_league_id(conn, league_id))
 
@@ -772,7 +772,7 @@ def get_user():
     can_edit_team = (league_id is not None) and (not _team_edit_locked(conn, league_id))
     # Prefer the live DB team name over the (possibly stale) session copy.
     team_name = ctx['team_name'] if ctx else session.get('team_name')
-    # The header badge shows the round you are IN — the one being picked for, or
+    # The header badge shows the round you are IN - the one being picked for, or
     # played. It used to show get_last_round (MAX(weekly_stats.round)), i.e. the
     # last round SCORED, so with the season open but no results banked it read
     # "Pre-season" even though round 1 was live and locking that Friday.
@@ -858,7 +858,7 @@ def update_team_name():
         conn.close()
         return jsonify({'error': 'That team name is already taken'}), 409
 
-    # Rename ONLY the team — the username (login) is left untouched.
+    # Rename ONLY the team - the username (login) is left untouched.
     cursor.execute('UPDATE users SET team_name = ? WHERE user_id = ?',
                    (new_name, ctx['user_id']))
     # Rename this season's entry too (the evergreen source of truth for the table).
@@ -890,7 +890,7 @@ def update_team_name():
 @app.route('/api/auth/username', methods=['POST'])
 def update_username():
     """Change the login username. Independent of the team name and NOT season-
-    locked — the username is only an identity/login, referenced by user_id
+    locked - the username is only an identity/login, referenced by user_id
     everywhere else, so it can change any time."""
     user_id = session.get('user_id')
     if not user_id:
@@ -1048,7 +1048,7 @@ def league_members():
     """Commissioner-only: everyone in the commissioner's own league.
 
     Read straight from `users` scoped by league_id. The old picker was built
-    from /api/auth/teams, which lists DISTINCT team_selections.team_name — so a
+    from /api/auth/teams, which lists DISTINCT team_selections.team_name - so a
     member who had signed up but not yet picked a squad never appeared, which is
     exactly the person most likely to need a password reset.
     """
@@ -1182,7 +1182,7 @@ def _state_players(conn, league_id, last_round, next_round):
     """Every player in the league with price, last round's score, current owner
     and real-match lineup status for `next_round`.
 
-    `lineup_status` is 'S' (starting), 'B' (bench), 'O' (named nothing — left out
+    `lineup_status` is 'S' (starting), 'B' (bench), 'O' (named nothing - left out
     of the 23) or None. None and 'O' are different answers and the UI renders
     them differently: None means the club has not announced yet, so there is
     nothing to show.
@@ -1216,7 +1216,7 @@ def _state_players(conn, league_id, last_round, next_round):
             -- collapsed into 'O' (Out): from the Tuesday 12:00 rollover until
             -- Thursday's first lineup scrape, next_round has no rows at all, so
             -- every player in the league read as dropped. Gating per club (not
-            -- per league) also keeps Thursday honest — clubs publish at
+            -- per league) also keeps Thursday honest - clubs publish at
             -- different times, and the ones still to announce show no icon
             -- rather than a false 'Out'. Same granularity as _fr_unit_players
             -- and competition._ofds_fr_score.
@@ -1289,7 +1289,7 @@ def state():
         'quotas':      SQUAD_QUOTAS,
         'starters':    SQUAD_STARTERS,
         'total_squad': TOTAL_SQUAD,
-        # 17-man snake-draft roster shape (spec §6.2) — supersedes the 23-man
+        # 17-man snake-draft roster shape (spec §6.2) - supersedes the 23-man
         # quotas above as the squad UI is rebuilt (milestone 9).
         'roster_size':   ROSTER_SIZE,
         'bench_count':   BENCH_COUNT,
@@ -1379,7 +1379,7 @@ def api_players():
         return round(total, 1)
 
     # Draftable individual players for this league's model (meatyboys excludes
-    # props/hookers — those are the FR unit; OFDS includes every position).
+    # props/hookers - those are the FR unit; OFDS includes every position).
     model = _roster_model(conn, league_id)
     positions = model_individual_positions(model)
     pos_ph = ','.join(['?'] * len(positions))
@@ -1404,7 +1404,7 @@ def api_players():
 
     fr_owner: dict[str, str] = {}
     if model.get('fr_unit'):
-        # Club front-row UNITS — one "<club> FR" entry per club. Owner = the team
+        # Club front-row UNITS - one "<club> FR" entry per club. Owner = the team
         # that drafted that club's front row.
         cursor.execute(
             "SELECT team, player_id FROM players WHERE league_id = ? AND position IN ('PR','HK')",
@@ -1518,7 +1518,7 @@ def matchup_page():
 
 @app.route('/api/my-picks')
 def my_picks():
-    """Load the logged-in user's squad using their session team — no URL team_name matching."""
+    """Load the logged-in user's squad using their session team - no URL team_name matching."""
     team_name = session.get('team_name')
     if not team_name:
         return jsonify({'error': 'Not logged in'}), 401
@@ -1558,7 +1558,7 @@ def my_picks():
 
 
 def _attach_recent_points(conn, league_id, picks, next_round):
-    """Attach `recent_points` ([{round, points}, ...]) to each pick — every
+    """Attach `recent_points` ([{round, points}, ...]) to each pick - every
     completed round (1 .. next_round-1). weekly_stats.total_points is cumulative,
     so a round's own points are its total minus the previous round's."""
     pids = [p['player_id'] for p in picks if isinstance(p.get('player_id'), int)]
@@ -1604,7 +1604,7 @@ def _attach_recent_points(conn, league_id, picks, next_round):
 
 
 def _fr_recent_points(conn, league_id, club, next_round):
-    """Per-round points for a club's front-row UNIT — the sum of its matchday
+    """Per-round points for a club's front-row UNIT - the sum of its matchday
     PR/HK players' point deltas each completed round (mirrors
     competition._front_row_score), plus the club's opponent that round."""
     cursor = _get_cursor(conn)
@@ -1706,7 +1706,7 @@ def _fr_unit_players(conn, league_id, club, round_num):
                           ORDER BY position, name''', (league_id, club))
         out = [{'name': (r['name'] if isinstance(r, dict) else r[0]),
                 'position': (r['position'] if isinstance(r, dict) else r[1]),
-                'status': '—'} for r in cursor.fetchall()]
+                'status': '-'} for r in cursor.fetchall()]
     cursor.close()
     return out
 
@@ -1744,7 +1744,7 @@ def get_team_view():
     if round_param:
         _attach_round_points(conn, league_id, picks, round_param)
     fr = _team_front_row_view(conn, league_id, team_name, next_round)
-    # FR unit's points for the viewed round — computed the same way as the team
+    # FR unit's points for the viewed round - computed the same way as the team
     # total's FR contribution, so the Match Up row matches the total exactly.
     fr_points = (round(_front_row_score(conn, team_name, round_param), 1)
                  if round_param and fr['club'] else None)
@@ -1850,7 +1850,7 @@ def save_picks(team_name):
     # Use user_team from database, ignore URL team_name - this prevents any typo/mismatch issues
     if is_locked(conn, league_id):
         conn.close()
-        return jsonify({'error': 'Deadline has passed — picks are locked until next round.'}), 403
+        return jsonify({'error': 'Deadline has passed - picks are locked until next round.'}), 403
 
     data = request.get_json()
     player_ids = data.get('player_ids', [])
@@ -1928,7 +1928,7 @@ def save_picks(team_name):
         ))
 
     # Persist the front-row unit's bench state. The owned club is the team's
-    # CURRENT front row (team_front_row is the live source of truth — trades
+    # CURRENT front row (team_front_row is the live source of truth - trades
     # update it), not the original draft pick.
     fr_club = _current_fr_club(conn, league_id, user_team, next_round)
     if fr_club:
@@ -2000,7 +2000,7 @@ def _owner_of(conn, league_id, player_id, rnd):
 
 
 def _roster_round(conn, league_id, team, next_round):
-    """The round a team's current squad lives on — MAX(round <= next_round) —
+    """The round a team's current squad lives on - MAX(round <= next_round) -
     matching what /api/my-picks loads, so trades write where the squad is shown."""
     cursor = _get_cursor(conn)
     cursor.execute('SELECT MAX(round) AS r FROM team_selections '
@@ -2013,7 +2013,7 @@ def _roster_round(conn, league_id, team, next_round):
 
 
 def _swap_player(conn, league_id, team, rnd, out_id, in_id):
-    """In-place 1-for-1 swap in a team's squad — the incoming player inherits the
+    """In-place 1-for-1 swap in a team's squad - the incoming player inherits the
     outgoing player's lineup slot (bench/jersey/captain/kicker). Squad stays any
     composition; the starting-XV rules are enforced separately on the Squad page."""
     cursor = _get_cursor(conn)
@@ -2061,7 +2061,7 @@ def _fr_owner_now(conn, league_id, club, next_round):
 
 def _set_fr_club(conn, league_id, team, rnd, club):
     """Set `team`'s current FR ownership to `club` (None clears it). Clears ALL
-    of the team's front-row rows first so a single row is the source of truth —
+    of the team's front-row rows first so a single row is the source of truth -
     otherwise an older round's row would resurface when the current one is
     removed."""
     cur = _get_cursor(conn)
@@ -2184,7 +2184,7 @@ def trade_free_agent():
     league_id, team = st['league_id'], st['team']
     if is_locked(conn, league_id):
         conn.close()
-        return jsonify({'error': 'Trades are locked — a game in this round has kicked off.'}), 403
+        return jsonify({'error': 'Trades are locked - a game in this round has kicked off.'}), 403
 
     data = request.get_json() or {}
     drop_id, add_id = data.get('drop_id'), data.get('add_id')
@@ -2217,14 +2217,14 @@ def trade_free_agent():
         # Like-for-like: a positioned squad (OFDS) must keep its shape (player swaps).
         if model.get('positioned_bench') and drop[0] == 'player':
             if _player_position(conn, drop_id) != add_pos:
-                conn.close(); return jsonify({'error': 'You can only trade like-for-like — drop and add must be the same position.'}), 400
+                conn.close(); return jsonify({'error': 'You can only trade like-for-like - drop and add must be the same position.'}), 400
         if _owner_of(conn, league_id, add_id, rnd) is not None:
             conn.close(); return jsonify({'error': 'That player is not a free agent.'}), 409
         add = ('player', add_id)
 
     # A team holds at most one FR: adding an FR while keeping yours is invalid.
     if add[0] == 'fr' and drop[0] != 'fr' and _current_fr_club(conn, league_id, team, nr):
-        conn.close(); return jsonify({'error': 'You already own a front-row unit — drop it to pick up another.'}), 400
+        conn.close(); return jsonify({'error': 'You already own a front-row unit - drop it to pick up another.'}), 400
 
     _apply_trade_side(conn, league_id, team, rnd, drop, add)
     conn.commit()
@@ -2282,7 +2282,7 @@ def trade_propose():
             conn.close(); return jsonify({'error': 'Props and hookers are part of the club front-row unit, not tradeable individually.'}), 400
         if model.get('positioned_bench') and give[0] == 'player' \
            and _player_position(conn, give_id) != _player_position(conn, receive_id):
-            conn.close(); return jsonify({'error': 'You can only trade like-for-like — both players must be the same position.'}), 400
+            conn.close(); return jsonify({'error': 'You can only trade like-for-like - both players must be the same position.'}), 400
         if _owner_of(conn, league_id, receive_id, their_rnd) != to_team:
             conn.close(); return jsonify({'error': 'The player you want is not on that team.'}), 400
         receive = ('player', receive_id)
@@ -2336,7 +2336,7 @@ def trade_respond():
 
     if is_locked(conn, league_id):
         conn.close()
-        return jsonify({'error': 'Trades are locked — a game in this round has kicked off.'}), 403
+        return jsonify({'error': 'Trades are locked - a game in this round has kicked off.'}), 403
 
     nr = get_next_round(conn, league_id)
     from_team, to_team = t['from_team'], t['to_team']
@@ -2355,9 +2355,9 @@ def trade_respond():
         cursor = _get_cursor(conn)
         cursor.execute('UPDATE trades SET status = ?, resolved_at = ? WHERE id = ?', ('rejected', now, trade_id))
         conn.commit(); cursor.close(); conn.close()
-        return jsonify({'error': 'Assets are no longer available — trade voided.'}), 409
+        return jsonify({'error': 'Assets are no longer available - trade voided.'}), 409
 
-    # from_team: drop `out`, add `in`; to_team: the mirror. (atomic — one commit)
+    # from_team: drop `out`, add `in`; to_team: the mirror. (atomic - one commit)
     _apply_trade_side(conn, league_id, from_team, from_rnd, out, inn)
     _apply_trade_side(conn, league_id, to_team, to_rnd, inn, out)
     cursor = _get_cursor(conn)
@@ -2504,7 +2504,7 @@ def _has_current_entry(conn, user_id, league_id):
 # account. Going forward, rollover records honours by user_id automatically, so
 # this is consulted once per returning name and never again.
 #   { league_slug: { 'Team Name': {'champion': n, 'sacko': m}, ... } }
-# Empty for now — populate to grant real pre-evergreen honours to returning team
+# Empty for now - populate to grant real pre-evergreen honours to returning team
 # names on sign-up. Going forward, rollover records honours by user_id.
 LEGACY_HONOURS: dict = {}
 LEGACY_SEASON_LABEL = 'Legacy'   # bucket season for pre-evergreen honours
@@ -2640,11 +2640,11 @@ def _available_players(conn, league_id):
 
 
 def _fr_club_ranks(conn, league_id):
-    """{club: last-season front-row points} — ranks club FR units for drafts.
+    """{club: last-season front-row points} - ranks club FR units for drafts.
 
     Two data models are supported:
       * Super Rugby (meatyboys): the front row is a single pre-aggregated unit
-        per club, stored as a position 'FR' player — rank by its own total.
+        per club, stored as a position 'FR' player - rank by its own total.
       * Premiership (OFDS, parked): derive the club's front row by summing its
         PR/HK individual players.
     """
@@ -2753,7 +2753,7 @@ def _season_start_dt(conn, league_id):
 
 
 TEAM_LOCK_DAYS = 3       # team names freeze this many days before the season starts
-TEAM_LOCK_ENABLED = False  # locking temporarily OFF — names always editable for now
+TEAM_LOCK_ENABLED = False  # locking temporarily OFF - names always editable for now
 
 
 def _team_edit_locked(conn, league_id) -> bool:
@@ -2817,13 +2817,13 @@ def _finalize_draft(conn, league_id, order):
         starters, bench = draft_engine.choose_starting_xi(roster, model)
         bench = bench[:model_bench_count(model)]
         # A strict squad has a slot per pick, so anything unplaced means the
-        # draft let a position overfill (see _quota_blocked). Say so loudly —
+        # draft let a position overfill (see _quota_blocked). Say so loudly -
         # this used to vanish silently and leave a manager a player short.
         placed = {id(p) for p in starters} | {id(p) for p in bench}
         dropped = [p for p in roster if id(p) not in placed]
         if dropped and not model.get('soft'):
             app.logger.warning(
-                'draft: %s has %d drafted player(s) with no squad slot: %s — '
+                'draft: %s has %d drafted player(s) with no squad slot: %s - '
                 'squad will be short. Check the draft quota validation.',
                 team, len(dropped), ', '.join(str(p.get('player_id')) for p in dropped))
         cursor.execute(
@@ -3019,8 +3019,8 @@ def api_draft_start():
 def _quota_blocked(position, owned_positions, model, has_fr):
     """Why `position` can't be drafted right now, or None if it's fine.
 
-    A strict model (OFDS) drafts exactly one player per squad slot — 23 picks
-    for 23 slots — so taking a position that is already full strands a slot that
+    A strict model (OFDS) drafts exactly one player per squad slot - 23 picks
+    for 23 slots - so taking a position that is already full strands a slot that
     the remaining picks can no longer fill. The squad then cannot be fielded,
     and _finalize_draft silently drops the surplus player, leaving the manager a
     man short with nothing to explain it. Refuse the pick instead.
@@ -3170,7 +3170,7 @@ def rules_page():
     """The rule book for whichever league the session is playing in.
 
     Rendered server-side from api/rules.py, which derives every figure from the
-    engine constants — so the published rules can't drift from the code that
+    engine constants - so the published rules can't drift from the code that
     enforces them. Falls back to the default league if the session has no league
     yet (shouldn't happen behind @login_required, but the page must still open).
     """
@@ -3184,7 +3184,7 @@ def rules_page():
 @app.route('/api/analysis')
 def api_analysis():
     """Read precomputed predictions for the current league's latest round
-    (written offline by api/predict.py). No ML libs needed here — pure reads."""
+    (written offline by api/predict.py). No ML libs needed here - pure reads."""
     conn = get_db()
     ensure_schema(conn)
     league_id = current_league_id(conn)
@@ -3307,7 +3307,7 @@ def competition_data():
                 all_weeks[week].append({'is_bye': False, 'played': False, 'home': home, 'away': away})
 
     # Per-round standings for movement arrows + the historical-position line
-    # chart (spec §7) — computed before the connection is closed.
+    # chart (spec §7) - computed before the connection is closed.
     position_history = standings_progression(regular, conn, min(max_round, REGULAR_ROUNDS), award_bonus)
 
     table_rows = [{
@@ -3393,7 +3393,7 @@ def _launch_predict(league_id, round_number) -> str:
     """Start api.predict for one league in a detached process.
 
     Deliberately NOT run in-process. A full fit takes well over a minute, the
-    app runs a single gunicorn worker, and the cron curl gives up after 90s —
+    app runs a single gunicorn worker, and the cron curl gives up after 90s -
     so an in-process run would stall requests and look like an outage. It also
     keeps numpy/pandas/scipy/sklearn out of the web process entirely.
 
@@ -3510,7 +3510,7 @@ def _run_job(conn, league_id, competition, job, active_round):
 @app.route('/api/cron/tick')
 def cron_tick():
     """Single timezone-aware scheduler service (spec §3). On each call it
-    decides — per league, in that league's local zone — which ingestion jobs
+    decides - per league, in that league's local zone - which ingestion jobs
     are due and runs them. Idempotent; every run is logged to job_runs."""
     if not _cron_auth_ok():
         return jsonify({'error': 'Unauthorized'}), 401
@@ -3535,7 +3535,7 @@ def cron_tick():
         last_runs = {j: _last_run(conn, league_id, j)
                      for j in ('sync_rounds', 'lineups', 'live_scoring')}
         # The once-per-round gate has to ask about the same round _run_job will
-        # settle — the one that just rolled over, not the newly active one.
+        # settle - the one that just rolled over, not the newly active one.
         fin_round = _round_to_finalize(conn, league_id)
         due = scheduler.due_jobs(
             competition, now, cfg['timezone'], last_runs, live_now,
@@ -3543,7 +3543,7 @@ def cron_tick():
                            or _finalize_done(conn, league_id, fin_round)),
             rounds_known=_rounds_known(conn, league_id),
             # Predictions are for the round now being picked, not the one just
-            # settled — so this gate asks about active_round, unlike finalize.
+            # settled - so this gate asks about active_round, unlike finalize.
             predict_done=_predict_done(conn, league_id, active_round),
         )
 

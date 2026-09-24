@@ -4,7 +4,7 @@
 
 $envFile = ".env.production"
 if (-not (Test-Path $envFile)) {
-    Write-Error "Missing $envFile — copy .env.production.example, rename it, and fill in real values."
+    Write-Error "Missing $envFile - copy .env.production.example, rename it, and fill in real values."
     exit 1
 }
 

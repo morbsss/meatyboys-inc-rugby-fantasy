@@ -1,5 +1,5 @@
 """
-Live data-source adapter (spec §3, §8.6 — best-effort).
+Live data-source adapter (spec §3, §8.6 - best-effort).
 
 Wraps the existing ESPN/SuperBru scraping behind the four interfaces. ESPN
 publishes no official rugby API and SuperBru must be scraped, so the live
@@ -77,7 +77,7 @@ class LiveAdapter(PlayerSource, FixtureSource, LineupSource, ScoreSource):
 
     # --- §4.3 lineups (ESPN) ---------------------------------------------
     def fetch_lineups(self, competition: str, round_number: int) -> list[LineupEntry]:
-        """Match-day lineups stay on ESPN — it's the only source that publishes
+        """Match-day lineups stay on ESPN - it's the only source that publishes
         them. Only the round-to-matches mapping and the team naming are taken
         from the fixtures file, so lineups land on the right round under the
         same team codes the rest of the app uses."""
@@ -120,7 +120,7 @@ class LiveAdapter(PlayerSource, FixtureSource, LineupSource, ScoreSource):
         window from the fixtures file.
 
         ESPN publishes no round numbers, so the previous approach split the
-        season on gaps between match dates — which renumbers every later round
+        season on gaps between match dates - which renumbers every later round
         the moment a match is rescheduled. Matching on the official round's date
         window keeps lineups aligned with the fixture list.
         """
@@ -161,7 +161,7 @@ class LiveAdapter(PlayerSource, FixtureSource, LineupSource, ScoreSource):
                     seen.add(ev['id'])
                     events.append(ev)
 
-        # Every request failing is an outage, not an empty round — raise so the
+        # Every request failing is an outage, not an empty round - raise so the
         # scheduler logs an error against the job instead of a clean "0 entries".
         if failures == days and days:
             raise RuntimeError(

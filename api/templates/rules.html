@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block page_title %}Rules — {{ brand }} Fantasy{% endblock %}
+{% block page_title %}Rules - {{ brand }} Fantasy{% endblock %}
 
 {% block extra_styles %}<link rel="stylesheet" href="/static/css/rules.css">{% endblock %}
 
 {#
   Every figure below comes from `rules` (api/rules.py), which reads the engine
-  constants. Don't type numbers into this file — add them to the payload so the
+  constants. Don't type numbers into this file - add them to the payload so the
   rules and the code that enforces them can't drift apart.
 #}
 {% set sq = rules.squad %}
@@ -62,7 +62,7 @@
 
     <ul class="rules-list">
       <li>
-        <strong>Rounds 1–{{ se.regular_rounds }}</strong> are the regular season — a
+        <strong>Rounds 1–{{ se.regular_rounds }}</strong> are the regular season - a
         round-robin where everyone plays everyone, cycling until the rounds are used up.
         Home and away alternate each full cycle so pairings even out.
       </li>
@@ -99,7 +99,7 @@
           You don't draft {{ sq.fr_positions|join(' and ') }} individually. Instead you
           own one club's <strong>entire front row as a single unit</strong>. It fills one
           starting spot and scores the combined points of that club's front-rowers who
-          made the real matchday squad. It's optional — skip it and draft another
+          made the real matchday squad. It's optional - skip it and draft another
           individual instead.
         </p>
       </div>
@@ -140,7 +140,7 @@
           </table>
         {% else %}
           <p class="rules-p rules-p--tight">
-            Any {{ sq.bench_count }} players, any positions. The bench is free —
+            Any {{ sq.bench_count }} players, any positions. The bench is free -
             it's cover, not a shape you have to match.
           </p>
         {% endif %}
@@ -156,7 +156,7 @@
     {% else %}
       <p class="rules-note">
         <strong>Composition is advisory.</strong> Only the squad size and the
-        no-individual-front-rowers rule are enforced — otherwise pick who you like.
+        no-individual-front-rowers rule are enforced - otherwise pick who you like.
       </p>
     {% endif %}
   </section>
@@ -166,7 +166,7 @@
     <h2 class="rules-h">The draft</h2>
     <p class="rules-p">
       Squads are built in a live <strong>snake draft</strong> before the season starts.
-      Every player is owned by exactly one manager — there is no salary cap and no
+      Every player is owned by exactly one manager - there is no salary cap and no
       duplicate ownership.
     </p>
 
@@ -196,7 +196,7 @@
       </li>
       <li>
         <strong>Draft rankings</strong> are last season's total points, matched by player
-        name. Newcomers with no history start at zero — rank is a guide, not a valuation.
+        name. Newcomers with no history start at zero - rank is a guide, not a valuation.
       </li>
     </ul>
 
@@ -214,7 +214,7 @@
       Player points come from the official fantasy stats for
       {{ rules.league.competition }}. Those totals are cumulative across the season, so
       <strong>your score for a round is the player's total after the round minus their
-      total before it</strong> — what they earned that week, and nothing else.
+      total before it</strong> - what they earned that week, and nothing else.
     </p>
 
     <ul class="rules-list">
@@ -224,7 +224,7 @@
       <li>
         <strong>Captain scores double.</strong> Name one captain each round and their
         round points are multiplied by {{ sc.captain_multiplier }}. Pick a captain who
-        is actually starting — see auto-subs below.
+        is actually starting - see auto-subs below.
       </li>
       {% endif %}
 
@@ -241,14 +241,14 @@
     <div class="rules-callout">
       <div class="rules-callout-title">Auto-substitution</div>
       <p>
-        Only your <strong>effective starting {{ sq.starter_count }}</strong> scores — the
+        Only your <strong>effective starting {{ sq.starter_count }}</strong> scores - the
         bench is cover, not extra points.
       </p>
       <p>
         If one of your starters isn't in their club's real starting line-up that round,
         they're automatically replaced by a bench player <strong>in the same
         position</strong> who <em>is</em> starting for real. No same-position cover on
-        your bench? Your starter stays in and scores whatever they got — usually nothing.
+        your bench? Your starter stays in and scores whatever they got - usually nothing.
       </p>
       <p class="rules-callout-foot">
         Before real line-ups are published, your named starters score as picked.
@@ -256,7 +256,7 @@
     </div>
     {% else %}
     <p class="rules-note">
-      Every player you select scores — starters and bench alike. There's no
+      Every player you select scores - starters and bench alike. There's no
       auto-substitution to rescue a player who didn't take the field.
     </p>
     {% endif %}
@@ -269,7 +269,7 @@
     {% if tb.bonus %}
       <p class="rules-p">
         Your round score is compared with your opponent's. Higher score wins the match and
-        earns league points, exactly like real rugby — including bonus points.
+        earns league points, exactly like real rugby - including bonus points.
       </p>
       <table class="rules-table rules-table--wide">
         <thead><tr><th>Result</th><th class="num">League points</th></tr></thead>
@@ -278,23 +278,23 @@
           <tr><td>Draw</td><td class="num">{{ tb.draw }}</td></tr>
           <tr><td>Loss</td><td class="num">{{ tb.loss }}</td></tr>
           <tr>
-            <td>Bonus — win by {{ tb.winner_bp_margin }}+</td>
+            <td>Bonus - win by {{ tb.winner_bp_margin }}+</td>
             <td class="num">+{{ tb.bp }}</td>
           </tr>
           <tr>
-            <td>Bonus — lose by {{ tb.loser_bp_margin }} or fewer</td>
+            <td>Bonus - lose by {{ tb.loser_bp_margin }} or fewer</td>
             <td class="num">+{{ tb.bp }}</td>
           </tr>
         </tbody>
       </table>
       <p class="rules-note">
-        Both bonus points can be awarded in the same match — a big winner and a narrow
+        Both bonus points can be awarded in the same match - a big winner and a narrow
         loser are different teams, so only one side can claim each.
       </p>
     {% else %}
       <p class="rules-p">
         Win your head-to-head and you bank a win. This league keeps it simple:
-        <strong>no league points and no bonus points</strong> — the table is driven by
+        <strong>no league points and no bonus points</strong> - the table is driven by
         wins alone.
       </p>
     {% endif %}
@@ -311,7 +311,7 @@
     <h2 class="rules-h">Deadlines &amp; lockout</h2>
     <p class="rules-p">
       <strong>Your team locks at the first kickoff of the round.</strong> Not a fixed
-      day or time — the actual first whistle of the round's earliest real match.
+      day or time - the actual first whistle of the round's earliest real match.
     </p>
     <ul class="rules-list">
       <li>
@@ -320,7 +320,7 @@
       </li>
       <li>Picks reopen when the round's last match finishes, and you build the next round's team.</li>
       <li>
-        If you don't change anything, your team carries forward — you're never left with
+        If you don't change anything, your team carries forward - you're never left with
         an empty side.
       </li>
       <li>
@@ -343,10 +343,10 @@
     <ul class="rules-list">
       <li>
         Any player no one owns is a free agent. Pick one up by
-        <strong>dropping one of your own players</strong> — always one in, one out, so
+        <strong>dropping one of your own players</strong> - always one in, one out, so
         your squad size never changes.
       </li>
-      <li>Free-agent moves are <strong>immediate</strong>. There's no waiver period and no bidding — first in gets the player.</li>
+      <li>Free-agent moves are <strong>immediate</strong>. There's no waiver period and no bidding - first in gets the player.</li>
       <li>The incoming player inherits the slot of the player they replaced (starter or bench).</li>
     </ul>
 
@@ -357,18 +357,18 @@
       {% if sq.strict %}
       <li>
         <strong>Like-for-like.</strong> Both players must be the
-        <strong>same position</strong> — a lock for a lock. This keeps every squad legal,
+        <strong>same position</strong> - a lock for a lock. This keeps every squad legal,
         since the matchday {{ sq.squad_size }} has no spare slots to absorb a mismatch.
       </li>
       {% endif %}
       {% if sq.fr_unit %}
       <li>
-        <strong>Front-row units are tradeable</strong> as a single asset — for another
+        <strong>Front-row units are tradeable</strong> as a single asset - for another
         club's unit, or for an individual player. You can only ever hold one, so drop
         yours before picking up another.
       </li>
       <li>
-        Individual {{ sq.fr_positions|join(' and ') }} can't be traded — they belong to
+        Individual {{ sq.fr_positions|join(' and ') }} can't be traded - they belong to
         the club unit, not to you.
       </li>
       {% endif %}
@@ -390,7 +390,7 @@
         <ul class="rules-list rules-list--tight">
           <li>The <strong>top 4</strong> qualify.</li>
           <li>Semi-finals are 1 v 4 and 2 v 3.</li>
-          <li>Both legs are added together — highest aggregate advances.</li>
+          <li>Both legs are added together - highest aggregate advances.</li>
           <li>Level on aggregate? The <strong>higher seed</strong> goes through.</li>
           <li>Win the final and you're champion.</li>
         </ul>
@@ -402,7 +402,7 @@
           <li>It's inverted: <strong>losing advances you</strong>. Win and you escape.</li>
           <li>Needs at least {{ se.sacko_min_teams }} teams in the league to run.</li>
           <li>
-            <strong>Lose the final and the wooden spoon is yours</strong> — and it goes on
+            <strong>Lose the final and the wooden spoon is yours</strong> - and it goes on
             your record permanently.
           </li>
         </ul>

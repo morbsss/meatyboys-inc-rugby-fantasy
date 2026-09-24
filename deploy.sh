@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
-# deploy.sh — runs ON the VM (Linux). Uploaded by deploy.ps1 from Windows, or
+# deploy.sh - runs ON the VM (Linux). Uploaded by deploy.ps1 from Windows, or
 # run manually after SSH-ing in:   cd ~/meatyboys && bash deploy.sh
 #
 # Sets up a venv, installs deps, (re)starts gunicorn serving api.index:app,
@@ -31,7 +31,7 @@ fi
 if [ "${CI_DEPLOY:-}" = "1" ]; then
     echo "[deploy] Source: CI"
 else
-    echo "[deploy] Source: MANUAL BREAK-GLASS — push this code through CI afterwards."
+    echo "[deploy] Source: MANUAL BREAK-GLASS - push this code through CI afterwards."
 fi
 
 # ── env ───────────────────────────────────────────────────────────────────────
@@ -70,20 +70,20 @@ pip install -q -r requirements.txt
 # Analysis job deps (numpy/pandas/scipy/sklearn). Separate from the web deps
 # because only the out-of-process predict job imports them. Non-fatal: if the
 # wheels won't build on this box the site still deploys, and only the Analysis
-# page goes stale — the scheduler logs the failure to job_runs.
+# page goes stale - the scheduler logs the failure to job_runs.
 if [ -f requirements-analysis.txt ]; then
     echo "[setup] Installing analysis dependencies (this can take a while)..."
     pip install -q -r requirements-analysis.txt \
-        || echo "[warn] analysis deps failed to install — predictions will not run."
+        || echo "[warn] analysis deps failed to install - predictions will not run."
 fi
 
 # ── database ──────────────────────────────────────────────────────────────────
-# CI never ships a database — the live data stays on the VM and is excluded from
+# CI never ships a database - the live data stays on the VM and is excluded from
 # the deploy sync. If the file is genuinely missing (a fresh box), seed a mock
 # one so the app still boots.
 DB_FILE="${DB_PATH:-fantasy_2025_26.db}"
 if [ "${DB_TYPE:-sqlite}" = "sqlite" ] && [ ! -f "$DB_FILE" ]; then
-    echo "[setup] $DB_FILE missing — seeding a mock DB..."
+    echo "[setup] $DB_FILE missing - seeding a mock DB..."
     DB_PATH="$DB_FILE" python3 -m api.seed_mock
 fi
 
@@ -95,7 +95,7 @@ echo "[setup] Installing cron..."
 # time it was noticed, 6 of them still using a rotated CRON_SECRET → 401s).
 (crontab -l 2>/dev/null | grep -v 'meatyboys-cron' | grep -v '/api/cron/tick') | crontab - || true
 (crontab -l 2>/dev/null; cat <<CRON
-# meatyboys-cron — the in-app scheduler decides which ingestion jobs run.
+# meatyboys-cron - the in-app scheduler decides which ingestion jobs run.
 */10 * * * * curl -fsS -m 90 -H "Authorization: Bearer ${CRON_SECRET}" http://127.0.0.1:${APP_PORT}/api/cron/tick >> ${APP_DIR}/cron.log 2>&1
 CRON
 ) | crontab -
@@ -124,10 +124,10 @@ LOGROTATE
 # No delaycompress: that exists for the rename-and-signal pattern, where a
 # process may still be writing to the rotated file. copytruncate leaves .1 as a
 # finished copy, so compressing it straight away is safe and reclaims the space
-# a cycle sooner (~90% of it — these are highly compressible access logs).
+# a cycle sooner (~90% of it - these are highly compressible access logs).
 # Fail the deploy on a malformed rule rather than discovering it weeks later.
 logrotate -d /etc/logrotate.d/meatyboys >/dev/null 2>&1 \
-    || echo "[warn] logrotate rule failed validation — logs will keep growing."
+    || echo "[warn] logrotate rule failed validation - logs will keep growing."
 
 # ── (re)start gunicorn ────────────────────────────────────────────────────────
 echo "[deploy] Restarting gunicorn on ${APP_HOST}:${APP_PORT}..."
@@ -135,7 +135,7 @@ pkill -f "gunicorn.*api.index:app" 2>/dev/null || true
 sleep 2
 # setsid + closed stdin detaches gunicorn from the invoking session. With a bare
 # `nohup ... &` the new process stays in the SSH session's process group and is
-# killed when the connection closes — which leaves the site down after a remote
+# killed when the connection closes - which leaves the site down after a remote
 # deploy, silently, because the script has already exited 0 by then.
 # 1 worker + threads keeps SQLite writes single-process safe.
 setsid .venv/bin/gunicorn \
@@ -151,7 +151,7 @@ disown 2>/dev/null || true
 echo -n "[deploy] Waiting for the app to respond"
 for _i in $(seq 1 30); do
     if curl -fsS -m 2 -o /dev/null "http://${APP_HOST}:${APP_PORT}/" 2>/dev/null; then
-        echo " — up."
+        echo " - up."
         break
     fi
     if [ "$_i" -eq 30 ]; then
@@ -173,7 +173,7 @@ SERVER_NAME="${DOMAIN:-_}"
 # Once certbot has taken over the config (HTTPS), leave it untouched on redeploys
 # so the TLS server block isn't clobbered. Delete the file + redeploy to reset.
 if grep -q "managed by Certbot" "$NGINX_CONF" 2>/dev/null; then
-    echo "[setup] nginx config is certbot-managed (HTTPS) — leaving it in place."
+    echo "[setup] nginx config is certbot-managed (HTTPS) - leaving it in place."
 else
     sed -e "s/__APP_PORT__/${APP_PORT}/g" -e "s|__SERVER_NAME__|${SERVER_NAME}|g" \
         "$APP_DIR/nginx/meatyboys.conf" > "$NGINX_CONF"
@@ -188,7 +188,7 @@ systemctl reload nginx 2>/dev/null || systemctl start nginx
 command -v ufw >/dev/null 2>&1 && { ufw allow 80/tcp; ufw allow 443/tcp; } >/dev/null 2>&1 || true
 
 # ── HTTPS via Let's Encrypt (first-time setup only) ───────────────────────────
-# Runs once — when a real DOMAIN is set and the config isn't yet certbot-managed.
+# Runs once - when a real DOMAIN is set and the config isn't yet certbot-managed.
 # CERTBOT_EMAIL is OPTIONAL: given → used for renewal-failure alerts; blank →
 # registers without an email (auto-renewal still works via the systemd timer, but
 # you won't be emailed if a renewal ever fails). certbot rewrites nginx for TLS +
@@ -202,10 +202,10 @@ if [ -n "${DOMAIN:-}" ] && [ "${DOMAIN}" != "_" ] \
         EMAIL_ARG="-m ${CERTBOT_EMAIL}"
     else
         EMAIL_ARG="--register-unsafely-without-email"
-        echo "[setup] No CERTBOT_EMAIL set — registering without an email (no renewal-failure alerts)."
+        echo "[setup] No CERTBOT_EMAIL set - registering without an email (no renewal-failure alerts)."
     fi
     certbot --nginx ${CB_ARGS} --non-interactive --agree-tos ${EMAIL_ARG} --redirect \
-        || echo "[warn] certbot failed — site still on HTTP. Check DNS + ports 80/443, then re-run deploy."
+        || echo "[warn] certbot failed - site still on HTTP. Check DNS + ports 80/443, then re-run deploy."
     systemctl reload nginx 2>/dev/null || true
 fi
 

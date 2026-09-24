@@ -1,7 +1,7 @@
 """
 d_opposition_deltas.py
 ----------------------
-Computes how each team defends against each position — the opposition delta.
+Computes how each team defends against each position - the opposition delta.
 
 A positive delta means attacking players typically score ABOVE their season average
 against that opposition (weak defence). Negative = strong defence.

@@ -23,12 +23,12 @@
   flex: 1 1 140px; min-width: 0; }
 .ph-search:focus, .filters select:focus { outline: none; border-color: var(--forest); box-shadow: 0 0 0 3px rgba(11,59,46,.12); }
 .metric-toggle { display: inline-flex; border: 1px solid var(--border); border-radius: var(--r-full); overflow: hidden; flex-shrink: 0; }
-/* 10px matches .filters — the toggle sits in the same toolbar and reads as part
+/* 10px matches .filters - the toggle sits in the same toolbar and reads as part
    of it, so a larger label made it look like a different control set. */
 .metric-toggle button { padding: 8px 14px; font-size: 10px; font-weight: 700; color: var(--ink-muted); background: var(--surface); min-height: 40px; }
 .metric-toggle button.on { background: var(--forest); color: var(--cream); }
 /* Metric toggle on top and right-aligned, position chips beneath it. Stacked
-   rather than side-by-side so the chips get the full width to wrap across —
+   rather than side-by-side so the chips get the full width to wrap across -
    sharing a row with the toggle squeezed them into a narrow, ragged block.
    align-items: flex-start stops children stretching the full width; the toggle
    then opts out with align-self to sit against the right edge, over the table's
@@ -78,7 +78,7 @@
 .ph-page-btn:disabled { opacity: .4; cursor: default; }
 .ph-page-gap { padding: 0 2px; font-size: 11px; color: var(--ink-faint); }
 
-/* Phones: the numbered buttons are the first thing to go — Prev/Next and the
+/* Phones: the numbered buttons are the first thing to go - Prev/Next and the
    "Page 2 of 4" readout are enough to navigate, and a full number strip wraps
    into two rows on a narrow screen. */
 @media (max-width: 480px) {

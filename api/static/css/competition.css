@@ -97,7 +97,7 @@
 
 /* Clickable rows */
 /* The zone tint is held in a variable as well as applied, so the sticky cells
-   on mobile can repaint it over their own opaque background — otherwise the
+   on mobile can repaint it over their own opaque background - otherwise the
    pinned columns would lose the champ/sacko/leader shading the rest of the row
    keeps. */
 .lt-row { cursor: pointer; transition: background var(--motion-fast); --row-tint: transparent; }
@@ -127,7 +127,7 @@
   padding: 3px 3px;
 }
 /* Band tints held in a variable as well as applied, so the spine can be pinned
-   on mobile: a sticky cell needs an opaque base, and these are translucent —
+   on mobile: a sticky cell needs an opaque base, and these are translucent -
    without this the scrolling stats would show through "CHAMPIONSHIP". */
 .lt-side--champ { --side-tint: rgba(46,125,79,.12); background: var(--side-tint); color: var(--success); box-shadow: inset 4px 0 0 var(--success); }
 .lt-side--sacko { --side-tint: rgba(179,58,46,.10); background: var(--side-tint); color: var(--danger);  box-shadow: inset 4px 0 0 var(--danger); }
@@ -167,7 +167,7 @@
 /* Mobile: scroll the table rather than squeezing it.
  *
  * It used to hide BP/PF/PA and force `table-layout: fixed` so everything fit
- * the viewport — which meant those columns simply didn't exist on a phone, and
+ * the viewport - which meant those columns simply didn't exist on a phone, and
  * what remained was crammed into 4px of padding. Now the full table renders at
  * its natural width and the wrapper scrolls, so every column is reachable and
  * readable. The team identity stays pinned so the numbers keep their meaning
@@ -182,7 +182,7 @@
   .lt th, .lt td { padding: 11px 8px; }
   /* The pinned columns carry NO horizontal padding and cap their content, so
      the rendered width equals the declared width. With `table-layout: auto` a
-     width is only a hint — a column whose content plus padding exceeds it just
+     width is only a hint - a column whose content plus padding exceeds it just
      grows, and the sticky offsets below (which are a running total of these
      widths) would drift out of alignment and overlap. */
   .lt .c-side { width: 22px; padding-left: 0; padding-right: 0; }
@@ -193,7 +193,7 @@
   .lt-team { max-width: 96px; font-size: 15px; }
   .lt-side span { letter-spacing: .08em; }
 
-  /* Pin the whole identity block — band spine, rank, movement, team — so the
+  /* Pin the whole identity block - band spine, rank, movement, team - so the
      stats scroll beneath it. Offsets are the running total of the widths set
      just above: 0 -> 22 -> 50 -> 70. `.c-move` has to be pinned too even though
      it's only an arrow, otherwise scrolled cells would show through the gap
@@ -205,7 +205,7 @@
     background-color: var(--surface);
     background-image: linear-gradient(var(--row-tint, transparent), var(--row-tint, transparent));
   }
-  /* The spine carries the band tint rather than the row tint — it spans several
+  /* The spine carries the band tint rather than the row tint - it spans several
      rows, so it can't take its colour from any one of them. */
   .lt .c-side {
     left: 0;
@@ -220,7 +220,7 @@
 }
 
 /* ============================================================
-   TEAM DETAIL SHEET — weekly points chart
+   TEAM DETAIL SHEET - weekly points chart
    ============================================================ */
 .team-sheet .mtyby-sheet-panel { max-width: 540px; margin: 0 auto; }
 .team-sheet-head {
@@ -349,7 +349,7 @@
 .ts-chart-caption .key.avg i { border-top: 3px dashed var(--amber); }
 
 /* ============================================================
-   POSITION-HISTORY CHART (spec §7 — lower line = better rank)
+   POSITION-HISTORY CHART (spec §7 - lower line = better rank)
    ============================================================ */
 .ph-card { margin-top: 18px; padding: 16px 14px 10px; }
 .ph-head { display: flex; align-items: baseline; justify-content: space-between; margin: 0 4px 8px; gap: 8px; flex-wrap: wrap; }

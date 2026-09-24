@@ -45,7 +45,7 @@ def _upsert(con, rows, match_type):
 def apply_fuzzy(con):
     path = REVIEW_DIR / 'player_mapping_fuzzy.csv'
     if not path.exists():
-        print('No fuzzy review file found — skipping')
+        print('No fuzzy review file found - skipping')
         return
 
     df = pd.read_csv(path, dtype=str).fillna('')
@@ -54,7 +54,7 @@ def apply_fuzzy(con):
     pending   = df[~df['confirmed'].str.upper().isin(['Y', 'N'])]
 
     if not pending.empty:
-        print(f'  Warning: {len(pending)} fuzzy rows have no Y/N — skipping them')
+        print(f'  Warning: {len(pending)} fuzzy rows have no Y/N - skipping them')
 
     accept_rows = []
     for _, r in confirmed.iterrows():
@@ -89,7 +89,7 @@ def apply_fuzzy(con):
 def apply_manual(con):
     path = REVIEW_DIR / 'player_mapping_nomatch.csv'
     if not path.exists():
-        print('No nomatch review file found — skipping')
+        print('No nomatch review file found - skipping')
         return
 
     df = pd.read_csv(path, dtype=str).fillna('')
@@ -166,7 +166,7 @@ def build_master_players(con):
         mapped = mapped.merge(pos, left_on='canonical_playerid', right_on='playerid', how='left')
         mapped = mapped.drop(columns=['playerid'], errors='ignore')
 
-    # Unmatched players — deduplicate by normalised name, keep most recent
+    # Unmatched players - deduplicate by normalised name, keep most recent
     unmatched = pd.read_sql('''
         SELECT source_playerid, source_name, source_season_year
         FROM player_id_map

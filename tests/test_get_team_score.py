@@ -42,7 +42,7 @@ def test_team_score_counts_kicking_no_captain_double(conn):
     # doubles. Kicking is always credited (already inside total_points):
     #   player 1: base 25 - 10 = 15
     #   player 2: base 30 - 10 = 20
-    #   player 3: base 20 - 5  = 15  (is_captain ignored — no captain in mtyby)
+    #   player 3: base 20 - 5  = 15  (is_captain ignored - no captain in mtyby)
     assert get_team_score(conn, 'T', 2) == pytest.approx(15 + 20 + 15)
 
 
@@ -70,7 +70,7 @@ def test_front_row_unit_no_captain_double():
     assert get_team_score(c, 'T', 2) == pytest.approx(10)        # base delta 15 - 5
     c.execute("UPDATE team_front_row SET is_captain = 1 WHERE team_name = 'T'")
     c.commit()
-    assert get_team_score(c, 'T', 2) == pytest.approx(10)        # unchanged — no captain in mtyby
+    assert get_team_score(c, 'T', 2) == pytest.approx(10)        # unchanged - no captain in mtyby
 
 
 def test_super_rugby_front_row_scores_from_unit_player():
@@ -93,7 +93,7 @@ def test_super_rugby_front_row_scores_from_unit_player():
     assert get_team_score(c, 'T', 2) == pytest.approx(12)        # 20 - 8
     c.execute("UPDATE team_front_row SET is_captain = 1 WHERE team_name = 'T'")
     c.commit()
-    assert get_team_score(c, 'T', 2) == pytest.approx(12)        # unchanged — no captain in mtyby
+    assert get_team_score(c, 'T', 2) == pytest.approx(12)        # unchanged - no captain in mtyby
 
 
 # ---------------------------------------------------------------------------

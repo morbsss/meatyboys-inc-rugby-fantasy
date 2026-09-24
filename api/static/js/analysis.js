@@ -1,5 +1,5 @@
 /* =============================================================================
- * analysis.js — reads precomputed model predictions from /api/analysis
+ * analysis.js - reads precomputed model predictions from /api/analysis
  * (written offline by api/predict.py) and renders matchup win probabilities
  * plus the player-prediction table. Pure read/render; no compute here.
  * ========================================================================== */
@@ -11,7 +11,7 @@ let matchupFilter = null;      // { i, teams: [home, away] }
 const LU_META = { S: ['Starting', 's'], B: ['Bench', 'b'], O: ['Out', 'o'] };
 
 function num(v) {
-  return (v === null || v === undefined) ? '—' : (+v).toFixed(1);
+  return (v === null || v === undefined) ? '-' : (+v).toFixed(1);
 }
 
 async function initAnalysis() {
@@ -34,7 +34,7 @@ async function initAnalysis() {
     document.getElementById('an-hint').style.display = 'none';
     const t = document.getElementById('an-table');
     t.className = 'an-empty';
-    t.textContent = 'No predictions yet — the analysis job has not run for this league.';
+    t.textContent = 'No predictions yet - the analysis job has not run for this league.';
     return;
   }
 
@@ -137,11 +137,11 @@ function lineupCell(r) {
   const meta = LU_META[r.lineup];
   return meta
     ? `<span class="an-lu an-lu--${meta[1]}">${meta[0]}</span>`
-    : '<span class="an-na">—</span>';
+    : '<span class="an-na">-</span>';
 }
 
 function rowHTML(r) {
-  let vs = '—';
+  let vs = '-';
   if (r.opponent) vs = `${r.home ? 'v' : '@'} ${esc(r.opponent)}`;
   const owner = r.fantasy_team
     ? esc(r.fantasy_team)

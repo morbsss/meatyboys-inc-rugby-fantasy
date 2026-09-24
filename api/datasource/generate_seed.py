@@ -8,7 +8,7 @@ Run once to (re)produce api/datasource/seed/<competition>.json:
 The output is committed and is the contract of record for the mock adapter.
 Generation is fully deterministic (seeded by competition + index, hashed with
 sha1) so re-running yields byte-identical files. Per-round player scores and
-match-day lineups are NOT stored here — the mock adapter derives them
+match-day lineups are NOT stored here - the mock adapter derives them
 deterministically from each player's `rate`/`vol` profile, which keeps the
 files small and human-inspectable.
 """
@@ -38,14 +38,14 @@ REAL_TEAMS = {
     ],
 }
 
-# Which half of those tuples identifies a club in the DB — it has to be whatever
+# Which half of those tuples identifies a club in the DB - it has to be whatever
 # the LIVE adapter writes, or mock and live data don't describe the same team and
 # nothing that joins on a club works under DATA_SOURCE=mock.
 #
 # Premiership: the canonical 3-letter code. LiveAdapter.fetch_rounds resolves
 # every club through prem_fixtures.resolve_team, so production holds 'BAT', and
-# anything keyed on the club — squad jersey art, the real-fixtures strip, lineup
-# joins, auto-substitution — looks up by code.
+# anything keyed on the club - squad jersey art, the real-fixtures strip, lineup
+# joins, auto-substitution - looks up by code.
 #
 # Super Rugby: the display name. It has no scraped club list and no code
 # vocabulary, so the name IS the identifier there.
@@ -57,7 +57,7 @@ def team_ids(competition: str) -> list[str]:
     idx = 1 if TEAM_KEY[competition] == 'abbr' else 0
     return [t[idx] for t in REAL_TEAMS[competition]]
 
-# Mock fantasy teams per league slug (OFDS = 8, meatyboys = 10 — both even, so
+# Mock fantasy teams per league slug (OFDS = 8, meatyboys = 10 - both even, so
 # no rotating byes).
 FANTASY_TEAMS = {
     'ofds': [
@@ -82,7 +82,7 @@ SEASON_START = {
 # 8–10 team draft of 17 players each, with free agents left over).
 SQUAD_SHAPE = {'PR': 4, 'HK': 2, 'LK': 3, 'LF': 5, 'SH': 2, 'FH': 2, 'MID': 3, 'OBK': 5}
 
-# Base scoring rate (points/round) by position — backs out-score forwards a bit.
+# Base scoring rate (points/round) by position - backs out-score forwards a bit.
 BASE_RATE = {'PR': 4.5, 'HK': 5.0, 'LK': 5.5, 'LF': 6.0,
              'SH': 7.0, 'FH': 8.0, 'MID': 6.5, 'OBK': 7.0}
 
@@ -157,7 +157,7 @@ def _make_rounds(competition: str) -> list[dict]:
         else:
             first = week0.replace(hour=7, minute=0)
             last = (week0 + timedelta(days=2)).replace(hour=6, minute=0)
-        # Pair teams up for the round (rotate so pairings vary; purely cosmetic —
+        # Pair teams up for the round (rotate so pairings vary; purely cosmetic -
         # fantasy fixtures are generated independently in competition.py).
         rot = teams[r % len(teams):] + teams[:r % len(teams)]
         matches = []

@@ -1,5 +1,5 @@
 /* =============================================================================
- * fixtures.js — The Fixtures page: the season schedule.
+ * fixtures.js - The Fixtures page: the season schedule.
  * Extracted from templates/fixtures.html. Shared helpers: common.js, leagues.js, base.js.
  * ========================================================================== */
 
@@ -11,7 +11,7 @@ async function init() {
   const res  = await fetch('/api/competition');
   const data = await res.json();
   regularRounds = data.regular_rounds || 15;
-  // Regular season only — playoff (semi/final) fixtures live on the Finals page.
+  // Regular season only - playoff (semi/final) fixtures live on the Finals page.
   allResults = (data.results || []).filter(r => r.week <= regularRounds);
   maxRound   = data.max_round;
 
@@ -23,7 +23,7 @@ async function init() {
 
 /* Round filter, built twice: chips for desktop, a select for mobile.
  *
- * Both live in the DOM and CSS shows exactly one — no resize listener, and
+ * Both live in the DOM and CSS shows exactly one - no resize listener, and
  * because both route through setFilter() they can never drift apart. Fifteen
  * "Wk n" chips wrap to three rows on a phone and push the fixtures off screen;
  * one dropdown is a single row. */
@@ -46,7 +46,7 @@ function buildChips() {
   if (sel) {
     sel.innerHTML = `<option value="ALL">All rounds</option>`
       + allResults.map(({ week }) =>
-          `<option value="${week}">Week ${week}${week > maxRound ? ' — upcoming' : ''}</option>`).join('');
+          `<option value="${week}">Week ${week}${week > maxRound ? ' - upcoming' : ''}</option>`).join('');
     sel.value = String(activeWeek);
     sel.addEventListener('change', e =>
       setFilter(e.target.value === 'ALL' ? 'ALL' : Number(e.target.value)));
@@ -89,7 +89,7 @@ function makeWeekCard(week, matches, timing) {
   // Header, top-right: the round's date, or a live indicator while it's being
   // played. The old Played/Upcoming badge duplicated what the rows already show
   // (scores vs "Upcoming") and told you nothing about when the round is.
-  // date_label is formatted server-side in the league's timezone — see
+  // date_label is formatted server-side in the league's timezone - see
   // _round_timing in api/index.py. Don't reformat it from the ISO kickoff here:
   // the browser's zone would shift an evening fixture onto the wrong day.
   const isLive = !!(timing && timing.is_live);
@@ -103,7 +103,7 @@ function makeWeekCard(week, matches, timing) {
   const rows = matches.map(m => {
     if (m.is_bye) {
       if (!m.played) {
-        return `<div class="bye-row">${esc(m.team)} — BYE</div>`;
+        return `<div class="bye-row">${esc(m.team)} - BYE</div>`;
       }
       const tWin = m.wins, tLose = m.loses;
       return `<div class="match-row">
@@ -158,7 +158,7 @@ function makeWeekCard(week, matches, timing) {
  *
  * Shown under the fantasy head-to-heads so you can see which real games your
  * players are in, and when. Rendered only when the league has a scraped
- * fixture list — Super Rugby has none, so the block is simply absent there.
+ * fixture list - Super Rugby has none, so the block is simply absent there.
  */
 function realFixturesHTML(real) {
   if (!real || !real.length) return '';

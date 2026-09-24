@@ -60,11 +60,11 @@ def _team_score_distribution(manager: str, starting_pids: list, scores_df: pd.Da
     for pid in starting_pids:
         player_scores = scores_df[scores_df['playerid'] == pid]['total'].dropna().tolist()
         if not player_scores:
-            # Player with no history — use 0 contribution
+            # Player with no history - use 0 contribution
             continue
         pcts = _fit_gamma_percentiles(player_scores)
         if pcts is None:
-            # Too few games — use mean as a flat estimate
+            # Too few games - use mean as a flat estimate
             team_dist += np.full(100, np.mean(player_scores))
         else:
             team_dist += pcts
@@ -95,7 +95,7 @@ def run(con=None):
     ''', con)
 
     if matchups.empty:
-        log.warning(f'No matchups found for round {round_num} — run save_matchups.py?')
+        log.warning(f'No matchups found for round {round_num} - run save_matchups.py?')
         if close_after:
             con.close()
         return
@@ -106,7 +106,7 @@ def run(con=None):
     )
 
     if all_lineups.empty:
-        log.warning('manager_team is empty — run b2_fetch_lineups.py first')
+        log.warning('manager_team is empty - run b2_fetch_lineups.py first')
         if close_after:
             con.close()
         return
@@ -126,7 +126,7 @@ def run(con=None):
             if dist is not None:
                 team_dists[manager] = dist
         else:
-            log.warning(f'  {manager}: no starters set — using zero score distribution')
+            log.warning(f'  {manager}: no starters set - using zero score distribution')
             team_dists[manager] = np.zeros(100)
 
     # ── 3. Calculate win probabilities for each matchup ───────────────────

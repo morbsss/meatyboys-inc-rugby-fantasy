@@ -2,7 +2,7 @@
 ESPN season-schedule reader.
 
 DEPRECATED as the app's fixture source. Rounds and fixtures now come from the
-official Premiership feed captured in data/prem_fixtures_2026_27.json — see
+official Premiership feed captured in data/prem_fixtures_2026_27.json - see
 api/prem_fixtures.py and api/datasource/live.py. ESPN is retained only for
 match-day LINEUPS (api/real_lineups.py), which it alone publishes.
 
@@ -32,7 +32,7 @@ ROUND_GAP_DAYS = 4
 
 
 def fetch_json(url):
-    # No User-Agent header on purpose — ESPN 403s a spoofed browser UA. See the
+    # No User-Agent header on purpose - ESPN 403s a spoofed browser UA. See the
     # measurements in api/real_lineups.fetch_json.
     req = Request(url, headers={'Accept': 'application/json'})
     with urlopen(req, timeout=15) as resp:
@@ -164,7 +164,7 @@ def main():
         upsert_rounds(db_path, rounds)
         print(f'Written {len(rounds)} rounds to {db_path}')
     else:
-        print('(dry-run — nothing written)')
+        print('(dry-run - nothing written)')
 
 
 if __name__ == '__main__':

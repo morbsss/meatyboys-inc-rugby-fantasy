@@ -2,7 +2,7 @@
 Data-source abstraction (spec §3).
 
 Business logic must never call SuperBru/ESPN directly. Instead it depends on
-these four small interfaces — one per data type from §4 — and the concrete
+these four small interfaces - one per data type from §4 - and the concrete
 adapter is selected at runtime via the DATA_SOURCE env var (see __init__.py):
 
   PlayerSource   §4.1  full player pool per competition (SuperBru)
@@ -20,7 +20,7 @@ from dataclasses import dataclass, field
 
 
 # ---------------------------------------------------------------------------
-# Record types — the shape every adapter returns
+# Record types - the shape every adapter returns
 # ---------------------------------------------------------------------------
 
 @dataclass

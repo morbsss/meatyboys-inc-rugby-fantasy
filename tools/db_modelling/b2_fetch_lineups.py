@@ -128,7 +128,7 @@ def run(con=None):
             log.info(f'  {manager}: {len(players)} players')
             all_players.extend(players)
         except Exception as e:
-            log.error(f'  {manager}: failed — {e}')
+            log.error(f'  {manager}: failed - {e}')
 
     if not all_players:
         log.warning('No lineup data fetched')

@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
-{% block page_title %}Squad — {{ brand }} Fantasy{% endblock %}
+{% block page_title %}Squad - {{ brand }} Fantasy{% endblock %}
 
 {% block extra_styles %}<link rel="stylesheet" href="/static/css/squad.css">{% endblock %}
 
 {% block header_controls %}
-  <span class="mtyby-lock-pill" id="lock-pill"><span id="lock-text">—</span></span>
+  <span class="mtyby-lock-pill" id="lock-pill"><span id="lock-text">-</span></span>
 {% endblock %}
 
 {% block content %}
@@ -22,7 +22,7 @@
 
   <div class="legend" id="legend" hidden>
     {# The S/B/O key is hidden while no club has published a team sheet for the
-       round — between the Tuesday rollover and Thursday's first scrape there are
+       round - between the Tuesday rollover and Thursday's first scrape there are
        no badges on the page for it to explain. #}
     <span class="lg-lineup" id="lg-lineup" hidden>
       <span><b class="lg-stat" style="color:var(--success)">S</b> Starting (real match)</span>

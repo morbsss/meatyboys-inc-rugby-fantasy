@@ -2,7 +2,7 @@
 One-time migration: reads detailed_scores, player_summary, ref_players, and
 ref_fixtures from each historical fant22–fant26.db and loads them into analytics.db.
 
-Safe to re-run — existing rows for each season_year are replaced before inserting.
+Safe to re-run - existing rows for each season_year are replaced before inserting.
 
 Usage:
     cd db_modelling
@@ -168,7 +168,7 @@ def main():
     for year, fname in SOURCE_DBS.items():
         src_path = REF_DATA_DIR / fname
         if not src_path.exists():
-            print(f'\nSkipping {fname} — not found')
+            print(f'\nSkipping {fname} - not found')
             continue
 
         print(f'\n--- Migrating {fname} (season {year}) ---')

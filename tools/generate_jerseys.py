@@ -10,7 +10,7 @@ Outputs
 api/static/img/jerseys/<CODE>.svg   the art the app serves, one per club
 data/rugby-jerseys/index.html       a contact sheet for eyeballing all ten
 
-Files are named by the club's canonical code (BAT, BRI, ...) — the same value
+Files are named by the club's canonical code (BAT, BRI, ...) - the same value
 carried in `players.team` and `real_fixtures`, so the squad page builds the URL
 straight from a player's club with no lookup table to keep in sync.
 
@@ -23,13 +23,13 @@ used to fill it: the S/B/O status dot hangs off the jersey's left edge at
 slot coordinates assume that footprint.
 
 The jersey art is drawn on a 100x110 canvas with the shirt occupying x 6..94,
-y 16..100 — content that is nearly square, so dropping it into a 4:3 box would
+y 16..100 - content that is nearly square, so dropping it into a 4:3 box would
 either distort it (a squashed, elliptical club badge) or letterbox it somewhere
 the dot no longer lines up with.
 
 Cropping the canvas to the shirt and padding it back out to 4:3 solves both:
 112x84 is exactly 4:3, so the art scales UNIFORMLY into the token (80/112 ==
-60/84 == 0.714 — no distortion, the badge stays circular), and it lands where
+60/84 == 0.714 - no distortion, the badge stays circular), and it lands where
 the old silhouette was:
 
     jersey x 6..94  -> 10.7%..89.3% of the box   (old mask: 10%..90%)
@@ -79,7 +79,7 @@ def leicester_fill():
     return "\n    ".join(out)
 
 
-# Keyed by canonical club code — the filename and the join key to players.team.
+# Keyed by canonical club code - the filename and the join key to players.team.
 TEAMS = {}
 TEAMS["SAR"] = dict(name="Saracens", slug="saracens", accent="#E4002B",
     fill=('<rect x="0" y="8" width="100" height="96" fill="#E4002B"/>'

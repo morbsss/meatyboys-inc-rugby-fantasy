@@ -1,5 +1,5 @@
 """
-predict.py — offline analysis/prediction job (ported from tools/db_modelling).
+predict.py - offline analysis/prediction job (ported from tools/db_modelling).
 
 Computes, per league and per target round, a projection for every player (and
 each meatyboys club front-row UNIT) plus head-to-head win probabilities for the
@@ -7,14 +7,14 @@ round's fantasy matchups, and writes them to `player_predictions` /
 `matchup_predictions`. The Analysis page only READS those tables, so the web
 app needs no ML libraries at request time.
 
-Models (all from our own weekly_stats deltas — points are cumulative, so a
+Models (all from our own weekly_stats deltas - points are cumulative, so a
 round's points = its total minus the previous round's):
-  • ssn_avg / avg3      — season + last-3-game means
-  • opposition delta     — how a position scores vs an opponent
-  • gamma_p50 / weibull_p50 — distribution medians (Weibull is delta-adjusted)
-  • gbm                  — HistGradientBoosting on rolling form + opp strength
-  • proj                 — gbm, else gamma_p50, else season average
-  • win %                — Gamma percentile distribution per starter, summed per
+  • ssn_avg / avg3      - season + last-3-game means
+  • opposition delta     - how a position scores vs an opponent
+  • gamma_p50 / weibull_p50 - distribution medians (Weibull is delta-adjusted)
+  • gbm                  - HistGradientBoosting on rolling form + opp strength
+  • proj                 - gbm, else gamma_p50, else season average
+  • win %                - Gamma percentile distribution per starter, summed per
                            team, cross-joined 100×100 (per f_win_predictions)
 
 Usage:
@@ -45,13 +45,13 @@ POSITION_PLAYER_COUNTS = {'OBK': 3, 'LF': 2, 'MID': 2}
 MIN_DIST_ROWS = 5
 # Monte Carlo draws per team when computing win probabilities. Each fixture
 # compares every home draw with every away draw, so this is 4000^2 = 16M pairs
-# per fixture — done by sorting and binary search, not materialised. The
+# per fixture - done by sorting and binary search, not materialised. The
 # sampling error on a probability near 50% is ~0.4pp at 4000 draws, comfortably
 # finer than the 0.1pp the figure is published to.
 SIM_DRAWS = 4000
 # NOTE: `opp_pos_strength` is deliberately NOT a feature. It is derived from the
 # points a team actually conceded *in the round being predicted* (see _engineer),
-# so during training it is contemporaneous with the label — a near-oracle signal.
+# so during training it is contemporaneous with the label - a near-oracle signal.
 # At prediction time that value cannot exist, and _prediction_features
 # substitutes the opponent's most recent PAST round instead. The model therefore
 # learned to lean on a feature that means something different when served.
@@ -93,7 +93,7 @@ def _prior_curve(mean, cv=PRIOR_CV):
     """A 100-point percentile curve for a player with no history this season.
 
     Round 1 has no scores to fit, so the win-probability model would fall back
-    to a flat curve at the player's mean — zero variance, which makes every
+    to a flat curve at the player's mean - zero variance, which makes every
     fixture a 100%/0% certainty. This turns last season's average into an actual
     Gamma distribution (same family the fitted curves use) so round 1 gets
     honest probabilities instead of false ones.
@@ -129,12 +129,12 @@ def _weibull_p50(scores, delta=0.0):
 # ── Data loading (cumulative weekly_stats → per-round deltas) ────────────────
 
 def _previous_season_prior(con, league_id, rounds=None):
-    """{player_id: per-round points last season} — the cold-start prior.
+    """{player_id: per-round points last season} - the cold-start prior.
 
     Without this every projection is 0.0 until several rounds are banked: a
     player with no weekly_stats rows has no mean, no distribution and no GBM
     features, so the Analysis page is useless for the opening weeks of a season
-    — the weeks when managers most need help ranking players they can't yet
+    - the weeks when managers most need help ranking players they can't yet
     judge on form.
 
     `previous_season` stores a season TOTAL (points_per_game is often null), so
@@ -255,7 +255,7 @@ def _lineup_map(con, league_id, rnd):
 
 
 def _opp_deltas(scores_df):
-    """{(opposition, position): delta} — how a position scores vs an opponent
+    """{(opposition, position): delta} - how a position scores vs an opponent
     relative to that team's per-position season average."""
     df = scores_df.dropna(subset=['opposition'])
     game = (df.groupby(['round_num', 'team', 'opposition', 'position'])['total']
@@ -319,7 +319,7 @@ def _league_model(con, league_id):
 
 
 def _award_bonus(con, league_id):
-    """True when standings award bonus points (OFDS) — mirrors the app so the
+    """True when standings award bonus points (OFDS) - mirrors the app so the
     playoff bracket we seed matches the live competition table."""
     return bool(_league_model(con, league_id).get('bonus', True))
 
@@ -334,12 +334,12 @@ def _target_round(con, league_id, scores):
     """The round to project: the one managers are currently picking for.
 
     That is `get_next_round`, which holds the current round until the Tuesday
-    rollover — so during a fixture weekend it is the live round (projections
+    rollover - so during a fixture weekend it is the live round (projections
     sit next to actual scores), and from Tuesday noon it is the upcoming one.
 
     It used to be MAX(weekly_stats.round), i.e. the last round *scored*. That is
     the same round for most of the week, but wrong for the entire Tue->Fri
-    window when squads are open — exactly when projections are needed, the page
+    window when squads are open - exactly when projections are needed, the page
     was showing the round that had already finished.
 
     Imported lazily: api.index owns the rollover arithmetic and importing it at
@@ -424,7 +424,7 @@ def compute_league(con, league_id, target=None):
         #   12+     1560       3.032     2.927
         #
         # The mean wins wherever the gamma is actually fitted, and the gap does
-        # NOT close with more history — so this is a biased 3-parameter fit on a
+        # NOT close with more history - so this is a biased 3-parameter fit on a
         # short series, not small-sample noise that a higher MIN_DIST_ROWS would
         # cure. gamma_p50 is still published as a column, and its percentile
         # array still drives the win probabilities, where distribution SHAPE is
@@ -496,9 +496,9 @@ def compute_league(con, league_id, target=None):
 
     # Win probabilities need real distributions. With no rounds played every
     # player's array is flat, so every fixture would come out a 100% draw (or a
-    # 100/0 split off the priors) — confidently wrong. Publish nothing instead;
+    # 100/0 split off the priors) - confidently wrong. Publish nothing instead;
     # the page already says "No matchups available yet."
-    # Publish win probabilities whenever there is something to distribute over —
+    # Publish win probabilities whenever there is something to distribute over -
     # fitted curves from this season, or prior curves from last. Only a squad
     # with neither (no history, no previous-season record) is skipped, since
     # flat curves would report every fixture as a 100%/0% certainty.
@@ -535,7 +535,7 @@ def simulate_totals(curves, rng, draws=SIM_DRAWS):
 
     `curves` is (n_players x 100) of percentile values. The previous model
     summed those curves elementwise, which asserts every player in a team lands
-    on the same percentile at once — a team's p99 was all fifteen players having
+    on the same percentile at once - a team's p99 was all fifteen players having
     their best game simultaneously. Treating within-team scores as perfectly
     correlated massively overstates the spread of the total, and the spread is
     exactly what a win probability is made of: totals were so wide that every
@@ -547,7 +547,7 @@ def simulate_totals(curves, rng, draws=SIM_DRAWS):
     to be refitted.
 
     Returns totals rounded to one decimal, matching how fantasy points are
-    recorded — without that, exact ties are impossible and draw_prob is always 0.
+    recorded - without that, exact ties are impossible and draw_prob is always 0.
     """
     idx = rng.integers(0, curves.shape[1], size=(curves.shape[0], draws))
     return np.round(np.take_along_axis(curves, idx, axis=1).sum(axis=0), 1)
@@ -558,7 +558,7 @@ def win_draw_pct(home_totals, away_totals):
 
     Compares all len(h) * len(a) pairs without materialising the cross-join:
     sort one side, then binary-search. Independent samples per team, which is
-    the right assumption — two fantasy teams' scores are only linked through
+    the right assumption - two fantasy teams' scores are only linked through
     shared real-world fixtures, not through each other.
     """
     a_sorted = np.sort(away_totals)
@@ -573,7 +573,7 @@ def _win_probabilities(con, league_id, target, pct_cache, fr_pct, hist, fr_serie
     100×100 → win %. Starters = team_selections (is_bench=0) at round <= target.
 
     Regular rounds (<= REGULAR_ROUNDS) use the generated schedule; playoff rounds
-    derive their fixtures from the bracket seeded off the standings — matching how
+    derive their fixtures from the bracket seeded off the standings - matching how
     the competition endpoint builds the live fixtures list."""
     teams = get_league_teams(con, league_id)
     regular = generate_regular_fixtures(teams)
@@ -586,9 +586,9 @@ def _win_probabilities(con, league_id, target, pct_cache, fr_pct, hist, fr_serie
                 if wk == target and h != 'Bye' and a != 'Bye']
 
     # Mirror the scorer's rules, per league (api/competition.get_team_score):
-    #   auto_sub — a fantasy starter missing from the real XV is covered by a
+    #   auto_sub - a fantasy starter missing from the real XV is covered by a
     #              same-position bench player who IS starting (OFDS).
-    #   captain  — the captain's points double (OFDS; meatyboys has no captain).
+    #   captain  - the captain's points double (OFDS; meatyboys has no captain).
     # Without these the model fielded a different XV than the one that scores,
     # and ignored the single biggest lever a manager has.
     model = _league_model(con, league_id)
@@ -625,7 +625,7 @@ def _win_probabilities(con, league_id, target, pct_cache, fr_pct, hist, fr_serie
             else:
                 ph = hist[hist['playerid'] == p['pid']]['total'].tolist()
                 if ph:
-                    # No fitted distribution — a flat curve, i.e. no variance.
+                    # No fitted distribution - a flat curve, i.e. no variance.
                     curves.append(np.full(100, float(np.mean(ph)) * mult))
         # add the team's FR unit if it owns one and it's a starter
         club = con.execute('SELECT club FROM team_front_row WHERE league_id=? AND team_name=? AND is_bench=0 '
@@ -641,7 +641,7 @@ def _win_probabilities(con, league_id, target, pct_cache, fr_pct, hist, fr_serie
         if ch is None or ca is None:
             continue
         # Seeded per fixture so the same inputs always yield the same published
-        # probability — otherwise the number would jitter on every re-run.
+        # probability - otherwise the number would jitter on every re-run.
         # hashlib, not hash(): Python randomises string hashing per process, so
         # hash() would reseed differently on every invocation.
         digest = hashlib.md5(f'{league_id}|{target}|{home}|{away}'.encode()).hexdigest()
@@ -717,14 +717,14 @@ def main(argv=None):
             _log_run(con, lid, args.round, 'error', str(e))
             continue
         if target is None:
-            print(f'league {lid}: no scores and no calendar — skipped')
+            print(f'league {lid}: no scores and no calendar - skipped')
             _log_run(con, lid, None, 'ok', 'skipped (no data)')
             continue
         if not prows:
             # No real_fixtures for the target round: every player is skipped for
             # want of an opponent. Happens once the calendar runs out at the end
             # of a season. Don't overwrite the last good round with an empty one.
-            print(f'league {lid}: round {target} has no fixtures — nothing written')
+            print(f'league {lid}: round {target} has no fixtures - nothing written')
             _log_run(con, lid, target, 'ok', 'skipped (no fixtures for round)')
             continue
         _write(con, lid, target, prows, mrows)

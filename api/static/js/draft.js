@@ -1,5 +1,5 @@
 /* =============================================================================
- * draft.js — The Draft page: commissioner setup, snake-draft board, pick pool.
+ * draft.js - The Draft page: commissioner setup, snake-draft board, pick pool.
  * Extracted from templates/draft.html. Shared helpers: common.js, leagues.js, base.js.
  * ========================================================================== */
 
@@ -56,7 +56,7 @@ function renderStatus() {
   if (state.status === 'pending') {
     mid = `<span class="muted">Draft not started${state.draft_at ? ' · scheduled ' + new Date(state.draft_at).toLocaleString() : ''}.</span>`;
   } else if (state.status === 'live') {
-    mid = `<span class="on-clock">On the clock: <span class="accent">${state.on_clock || '—'}</span></span>
+    mid = `<span class="on-clock">On the clock: <span class="accent">${state.on_clock || '-'}</span></span>
            <span class="muted">Pick ${state.current_pick} / ${state.total_picks} · Round ${state.round}</span>`;
   } else if (state.status === 'complete') {
     mid = `<span class="on-clock">Draft complete 🎉</span>`;
@@ -75,7 +75,7 @@ function renderCommish(force = false) {
     commishBuilt = false;
     wrap.innerHTML = `<div class="mtyby-card commish">
       <div class="section-title">Commissioner</div>
-      <div class="muted">Each pick has a 60-second clock — when it runs out the team on the
+      <div class="muted">Each pick has a 60-second clock - when it runs out the team on the
         clock is auto-drafted a valid player. You can also force the current pick now.</div>
       <div class="row-actions">
         <button class="mtyby-btn mtyby-btn--secondary mtyby-btn--sm" onclick="autopickNow()">Auto-pick current</button>
@@ -96,7 +96,7 @@ function renderCommish(force = false) {
       <button class="mtyby-btn mtyby-btn--ghost mtyby-btn--sm" onclick="moveTeam(${i},1)" ${i===orderDraft.length-1?'disabled':''}>↓</button>
     </div>`).join('');
   wrap.innerHTML = `<div class="mtyby-card commish">
-    <div class="section-title">Commissioner — set up the draft</div>
+    <div class="section-title">Commissioner - set up the draft</div>
     <div style="margin-bottom:10px;">
       <label class="muted">Draft date &amp; time (must be before the season starts)</label><br>
       <input type="datetime-local" id="draft-at" value="${dateVal}">
@@ -154,7 +154,7 @@ function renderPool() {
   const list = document.getElementById('pool-list');
   const canPick = state.status === 'live' && state.is_on_clock;
 
-  // Club front-row units (mtyby only) — listed inline in the pool as
+  // Club front-row units (mtyby only) - listed inline in the pool as
   // ordinary, OPTIONAL picks (max one per team). Hidden once you own one.
   let frHtml = '';
   if (Leagues.isMtyby(state) && !state.your_fr && (posFilter === 'ALL' || posFilter === 'FR')) {
@@ -232,7 +232,7 @@ function renderBoard() {
   b.innerHTML = rows.length
     ? rows.map(p => `<div class="board-row"><span class="pk">#${p.pick_number}</span>
         <span class="tm">${p.team_name}</span>
-        <span>${p.name || '—'} <span class="mtyby-pos">${p.position||''}</span></span>
+        <span>${p.name || '-'} <span class="mtyby-pos">${p.position||''}</span></span>
         ${p.is_auto ? '<span class="auto">auto</span>' : ''}</div>`).join('')
     : '<div class="muted">No picks yet.</div>';
 }

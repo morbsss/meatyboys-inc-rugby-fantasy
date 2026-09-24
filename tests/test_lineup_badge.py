@@ -1,7 +1,7 @@
 """The S/B/O lineup badge: "not announced yet" is not the same as "Out".
 
 `lineup_status` drives a small letter badge on the squad page. It used to be
-'S', 'B' or NULL, and the frontend rendered NULL as 'O' (Out) — so from the
+'S', 'B' or NULL, and the frontend rendered NULL as 'O' (Out) - so from the
 Tuesday 12:00 rollover, when the round advances and `match_lineups` holds
 nothing for the new round, until Thursday's first ESPN scrape, every player in
 every squad displayed a grey 'O'. Managers looked dropped wholesale for two and
@@ -92,7 +92,7 @@ def test_previous_rounds_lineups_do_not_leak_into_the_new_round(conn):
     """The specific Tuesday bug: round 1's sheets must not badge round 2.
 
     The rollover advances the round, so the club gate has to be evaluated for
-    the new round — a gate on 'club has ever published' would keep last week's
+    the new round - a gate on 'club has ever published' would keep last week's
     badges on screen all week.
     """
     _announce(conn, 'BAT', starters=['Obano,B', 'Dunn,T'], round_num=NEXT_ROUND - 1)
@@ -125,7 +125,7 @@ def test_a_club_yet_to_announce_is_not_marked_out(conn):
 
 
 def test_out_is_reported_once_the_players_own_club_announces(conn):
-    """'O' must still be reachable — it's the real signal a manager needs."""
+    """'O' must still be reachable - it's the real signal a manager needs."""
     _announce(conn, 'BAT', starters=['Obano,B', 'Dunn,T'])
 
     assert _status(conn)['du Toit,T'] == 'O'

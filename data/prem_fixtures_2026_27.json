@@ -9,9 +9,9 @@
     "timezone": "All kickoff times are UTC.",
     "notes": [
       "Rounds 1-18 are the regular season; round 19 = play-offs ('PO'), round 20 = final ('F').",
-      "time_confirmed=false means the league has not fixed that kickoff yet — the feed carries a placeholder 15:00 UTC slot. Currently true for rounds 1-9 and 20 only; rounds 10-19 are unconfirmed.",
+      "time_confirmed=false means the league has not fixed that kickoff yet - the feed carries a placeholder 15:00 UTC slot. Currently true for rounds 1-9 and 20 only; rounds 10-19 are unconfirmed.",
       "Play-off team names are 'TBC' until the regular season finishes.",
-      "Score fields (score, half_time_score, eighty_min_score, match_winner, attendance) are null pre-season and fill in as matches are played — re-run this script to refresh them.",
+      "Score fields (score, half_time_score, eighty_min_score, match_winner, attendance) are null pre-season and fill in as matches are played - re-run this script to refresh them.",
       "home.id / away.id are provider team ids that join to clubs[].team_id."
     ]
   },

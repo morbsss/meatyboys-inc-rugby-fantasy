@@ -11,9 +11,9 @@ What it does:
   - Auto-applies exact name matches directly into player_id_map
   - Adds identity mappings for current-season players (they map to themselves)
   - Writes review files to db_modelling/review/ for everything it can't auto-apply:
-      player_mapping_fuzzy.csv   — high-similarity matches needing Y/N confirmation
-      player_mapping_nomatch.csv — no match found; fill in canonical_playerid if known
-      player_2026_reference.csv  — full 2026 player list to help with manual lookup
+      player_mapping_fuzzy.csv   - high-similarity matches needing Y/N confirmation
+      player_mapping_nomatch.csv - no match found; fill in canonical_playerid if known
+      player_2026_reference.csv  - full 2026 player list to help with manual lookup
 
 After reviewing, run:
     python c_apply_mappings.py
@@ -32,7 +32,7 @@ REVIEW_DIR = Path(__file__).parent / 'review'
 
 
 def _normalise(name: str) -> str:
-    """Strip to lowercase a-z only — ignores punctuation, spacing, accents."""
+    """Strip to lowercase a-z only - ignores punctuation, spacing, accents."""
     return re.sub(r'[^a-z]', '', str(name).lower())
 
 
@@ -142,7 +142,7 @@ def main():
     canonical_players = _get_players(con, canonical_year)
     print(f'Canonical season: {canonical_year} ({len(canonical_players)} players)\n')
 
-    # Identity mappings — current-season players map to themselves
+    # Identity mappings - current-season players map to themselves
     already_canonical = _already_mapped(con, canonical_year)
     identity_rows = []
     for _, row in canonical_players.iterrows():

@@ -1,16 +1,16 @@
 """
-Full analytics pipeline — run by cron.
+Full analytics pipeline - run by cron.
 
 Order:
-  1. db_init             — ensure schema exists (safe to run repeatedly)
-  2. a_fetch_players     — player hub + reference update + team news snapshot
-  3. b_fetch_scores      — game-by-game scores for all players
-  4. b2_fetch_lineups    — manager team selections from FRD
-  5. d_opposition_deltas — opposition defensive strength deltas
-  6. d_player_summary    — current season player stats snapshot
-  7. e_predictions       — 9-method ensemble predictions for current round
-  8. f_picks             — best picks per position → round_picks table
-  9. f_win_predictions   — head-to-head win probabilities → win_predictions table
+  1. db_init             - ensure schema exists (safe to run repeatedly)
+  2. a_fetch_players     - player hub + reference update + team news snapshot
+  3. b_fetch_scores      - game-by-game scores for all players
+  4. b2_fetch_lineups    - manager team selections from FRD
+  5. d_opposition_deltas - opposition defensive strength deltas
+  6. d_player_summary    - current season player stats snapshot
+  7. e_predictions       - 9-method ensemble predictions for current round
+  8. f_picks             - best picks per position → round_picks table
+  9. f_win_predictions   - head-to-head win probabilities → win_predictions table
 
 One-time setup (run manually before first cron run):
   python save_fixtures.py          # loads fixtures_{CURRENT_SEASON}.csv into DB
@@ -33,7 +33,7 @@ import params
 
 def main():
     start = dt.datetime.now(dt.timezone.utc)
-    print(f'=== Analytics Pipeline — {start.strftime("%Y-%m-%d %H:%M:%S")} ===\n')
+    print(f'=== Analytics Pipeline - {start.strftime("%Y-%m-%d %H:%M:%S")} ===\n')
 
     print('--- Step 0: Initialise database')
     db_init.init_db()

@@ -1,5 +1,5 @@
 /* =============================================================================
- * auth.js — The sign-in / create-account screen (pre-login; no shared chrome).
+ * auth.js - The sign-in / create-account screen (pre-login; no shared chrome).
  * Extracted from templates/auth.html. Shared helpers: common.js, leagues.js, base.js.
  * ========================================================================== */
 

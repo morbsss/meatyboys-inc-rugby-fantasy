@@ -287,7 +287,7 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_pred_round    ON all_predictions (round_num, season_year);
     ''')
 
-    # CREATE TABLE IF NOT EXISTS won't add columns to a pre-existing table —
+    # CREATE TABLE IF NOT EXISTS won't add columns to a pre-existing table -
     # add new columns idempotently here.
     ref_cols = {r[1] for r in con.execute("PRAGMA table_info(ref_fixtures)")}
     if 'kickoff' not in ref_cols:

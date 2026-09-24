@@ -4,7 +4,7 @@ Fantasy Rugby Competition Table.
 Reads fixtures from fixtures.csv and calculates weekly team scores
 from team_selections + weekly_stats in fantasy_2025_26.db.
 
-Scoring (the constants below are the source of truth — see also api/rules.py,
+Scoring (the constants below are the source of truth - see also api/rules.py,
 which publishes them on the Rules page):
   Win  = WIN_PTS league pts
   Draw = DRAW_PTS league pts each
@@ -81,7 +81,7 @@ class Team:
 def parse_fixtures(path: str) -> list[tuple[int, str, bool, str, bool]]:
     """
     Returns list of (week, home_team, home_bp, away_team, away_bp).
-    'Bye' is kept as a team name — handled separately in scoring.
+    'Bye' is kept as a team name - handled separately in scoring.
     """
     fixtures = []
     current_week = None
@@ -204,9 +204,9 @@ def _front_row_score(conn, team_name: str, round_num: int) -> float:
     club = fr['club'] if isinstance(fr, dict) else fr[0]
     league_id = fr['league_id'] if isinstance(fr, dict) else fr[1]
     # mtyby (the only league with a front-row unit) has no captain, so the unit
-    # never doubles — score its plain points delta.
+    # never doubles - score its plain points delta.
 
-    # Super Rugby: the club front row is one pre-aggregated 'FR' player —
+    # Super Rugby: the club front row is one pre-aggregated 'FR' player -
     # score its own points delta directly (no matchday PR/HK derivation).
     cur.execute(f"SELECT player_id FROM players "
                 f"WHERE league_id = {ph} AND team = {ph} AND position = 'FR' LIMIT 1",
@@ -260,7 +260,7 @@ def effective_lineup(conn, team_name: str, round_num: int) -> list[dict]:
     same-position fantasy bench player who IS starting for real (rule 4); if no
     such cover exists the starter stays (and scores whatever they got, ~0 if they
     didn't play). Before any real line-up is published the named starters stand
-    as picked — which is the normal case when projecting a round that hasn't been
+    as picked - which is the normal case when projecting a round that hasn't been
     played yet, since lineups aren't scraped until the Thursday.
 
     Returned dicts carry `cap`, so the caller can apply captain doubling.
@@ -314,7 +314,7 @@ def effective_lineup(conn, team_name: str, round_num: int) -> list[dict]:
             used.add(id(sub))
             effective.append(sub)
         else:
-            effective.append(s)   # no cover — keep the starter
+            effective.append(s)   # no cover - keep the starter
     return effective
 
 
@@ -352,7 +352,7 @@ def calculate_table(
 ) -> list[Team]:
     """Standings table. With `award_bonus` (OFDS) teams earn league points +
     bonus points and rank by league points then points-for. Without it (mtyby)
-    there are no bonus/league points — ranking is purely wins, then points-for."""
+    there are no bonus/league points - ranking is purely wins, then points-for."""
     teams: dict[str, Team] = {}
 
     # Group fixtures by week for two-pass bye processing
@@ -504,7 +504,7 @@ def generate_regular_fixtures(
     - Odd team counts get a rotating 'Bye' each round.
     - Home/away alternates each full cycle so pairings even out.
     - Returns the same tuple shape as parse_fixtures:
-      (week, home, home_bp, away, away_bp) — bp flags are always False
+      (week, home, home_bp, away, away_bp) - bp flags are always False
       (bonus points are computed from margins in calculate_table).
     """
     ts = sorted(teams)
@@ -547,7 +547,7 @@ def _semi(conn, home: str, away: str, max_round: int, mode: str) -> dict:
     Two-legged aggregate semi-final (legs in SEMI_LEG1 / SEMI_LEG2).
 
     `mode='champ'`: the WINNER advances to the final.
-    `mode='sacko'`: the LOSER advances (it's a race to the wooden spoon —
+    `mode='sacko'`: the LOSER advances (it's a race to the wooden spoon -
                     winning lets you escape). `winner` here = who advances.
     The higher seed (home) is protected on a tie.
     """
@@ -664,7 +664,7 @@ def playoff_fixtures(playoffs: dict) -> list[tuple[int, str, bool, str, bool]]:
 
 def display_table(table: list[Team]) -> None:
     print(f'\n{"=" * 82}')
-    print(f'  FANTASY RUGBY — COMPETITION TABLE')
+    print(f'  FANTASY RUGBY - COMPETITION TABLE')
     print(f'{"=" * 82}')
     print(f'  {"#":>2}  {"Team":<35} {"P":>3} {"W":>3} {"D":>3} {"L":>3}'
           f' {"PF":>7} {"PA":>7} {"PD":>7} {"Pts":>4}')
@@ -691,15 +691,15 @@ def display_results(
             current_week = week
             print(f'\n  --- Week {week} ---')
         if away == 'Bye':
-            print(f'  {home} — BYE')
+            print(f'  {home} - BYE')
             continue
         if home == 'Bye':
-            print(f'  {away} — BYE')
+            print(f'  {away} - BYE')
             continue
         hs = get_team_score(conn, home, week)
         as_ = get_team_score(conn, away, week)
         if hs == 0 and as_ == 0:
-            print(f'  {home} vs {away} — no data')
+            print(f'  {home} vs {away} - no data')
         else:
             margin = abs(hs - as_)
             winner = home if hs > as_ else (away if as_ > hs else None)

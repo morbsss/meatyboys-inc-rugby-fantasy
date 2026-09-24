@@ -80,9 +80,9 @@ def fetch_player_list(session, con):
     headers = ['position', 'playerid', 'playername', 'team', 'owner', 'opposition', 'score', 'news', 'page']
     df = pd.DataFrame(rows, columns=headers)
     if df.empty:
-        # Transient FRD/empty response — do NOT replace the table or we'd wipe
+        # Transient FRD/empty response - do NOT replace the table or we'd wipe
         # good data and break downstream steps. Keep what we already have.
-        print('WARNING: FRD returned 0 players — keeping existing player_list')
+        print('WARNING: FRD returned 0 players - keeping existing player_list')
         return df
     df['fetched_at'] = dt.datetime.now().isoformat()
     before = len(df)

@@ -2,8 +2,8 @@
 
 A round stays current from its first kickoff until the following Tuesday at
 12:00 in the league's own timezone. That single boundary decides three things
-at once — when the round rolls, when its table goes final, and when squads and
-transfers reopen — so these tests walk a real OFDS week hour by hour.
+at once - when the round rolls, when its table goes final, and when squads and
+transfers reopen - so these tests walk a real OFDS week hour by hour.
 
 The regression they exist to catch: the round used to roll over at its *last*
 kickoff, which reopened squads on Sunday afternoon (before Monday's finalize
@@ -76,7 +76,7 @@ def _at(monkeypatch, moment):
 
 
 # ---------------------------------------------------------------------------
-# _rollover_at — the pure Tuesday-noon arithmetic
+# _rollover_at - the pure Tuesday-noon arithmetic
 # ---------------------------------------------------------------------------
 
 def test_rollover_is_the_tuesday_after_a_sunday_finish():
@@ -139,9 +139,9 @@ def test_sunday_evening_does_not_reopen_the_squad(conn, monkeypatch):
 def test_rollover_lands_on_local_noon_across_dst(conn, monkeypatch):
     # Round 4 finishes Sun 25 Oct, the day the clocks go back.
     _at(monkeypatch, _utc(2026, 10, 27, 11, 59))
-    assert idx.get_next_round(conn, 2) == 4        # 11:59 GMT — still round 4
+    assert idx.get_next_round(conn, 2) == 4        # 11:59 GMT - still round 4
     _at(monkeypatch, _utc(2026, 10, 27, 12, 1))
-    assert idx.get_next_round(conn, 2) == 5        # 12:01 GMT — rolled over
+    assert idx.get_next_round(conn, 2) == 5        # 12:01 GMT - rolled over
 
 
 # ---------------------------------------------------------------------------
@@ -197,7 +197,7 @@ def test_exhausted_calendar_locks_the_league_shut(conn, monkeypatch):
     This is how OFDS ended up frozen on production: the rounds table held the
     mock seed's 2026 Feb-Jun dates, so no round had a future rollover, the
     MAX(weekly_stats.round) + 1 fallback returned round 1, and round 1's kickoff
-    was long past. Documented here so the failure mode is recognisable — the fix
+    was long past. Documented here so the failure mode is recognisable - the fix
     is a correct calendar (DATA_SOURCE=live), not a change to this logic.
     """
     _at(monkeypatch, _utc(2027, 8, 1, 12))        # long after every round
@@ -242,7 +242,7 @@ def test_finalize_settles_the_finished_round_not_the_active_one(conn, monkeypatc
         return 42
 
     monkeypatch.setattr(idx.ingest, 'ingest_player_scores', _fake)
-    _at(monkeypatch, _utc(2026, 9, 29, 11, 1))    # Tue 12:01 BST — at the rollover
+    _at(monkeypatch, _utc(2026, 9, 29, 11, 1))    # Tue 12:01 BST - at the rollover
     active = idx.get_next_round(conn, 2)
     assert active == 2, 'the round has rolled by the time finalize runs'
 
@@ -258,7 +258,7 @@ def test_finalize_never_precedes_a_monday_evening_fixture(conn, monkeypatch):
                  ('2026-12-26T15:00:00+00:00', '2026-12-28T17:00:00+00:00'))
     conn.commit()
 
-    # Monday noon — the old finalize moment, still mid-round.
+    # Monday noon - the old finalize moment, still mid-round.
     _at(monkeypatch, _utc(2026, 12, 28, 12))
     assert idx._round_to_finalize(conn, 2) != 8, 'round 8 is not finished yet'
 

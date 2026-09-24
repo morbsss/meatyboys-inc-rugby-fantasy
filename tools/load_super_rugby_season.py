@@ -4,7 +4,7 @@ Source : tools/db_modelling/super_rugby_2026.db  (modelling schema)
 Target : an app DB (default fantasy_2025_26.db), league 'meatyboys'
 
 Unlike seed_super_rugby.py (which only seeds the draft pool), this builds a
-scored season the app can render — standings, fixtures, match-ups:
+scored season the app can render - standings, fixtures, match-ups:
 
   players        ← distinct 2026 players from detailed_scores (incl. FR units)
   weekly_stats   ← per-round CUMULATIVE points (the app stores cumulative totals)
@@ -130,7 +130,7 @@ def load(app_db, source_db, league_slug, season_year):
     # No `rounds` rows: this is a completed past season, and the legacy app DB
     # keeps a sole round_number PK on `rounds` (shared with the Premiership side),
     # so per-league round numbers would collide. With no rows, get_next_round
-    # falls back to MAX(weekly_stats.round) + 1 — exactly what a finished season
+    # falls back to MAX(weekly_stats.round) + 1 - exactly what a finished season
     # wants (nothing is "upcoming", nothing locks).
 
     # ---- rosters → team_selections + team_front_row ---------------------

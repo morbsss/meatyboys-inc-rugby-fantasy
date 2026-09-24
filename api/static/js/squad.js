@@ -1,12 +1,12 @@
 /* =============================================================================
- * squad.js — the Squad page: set your starting line-up + bench, pick a captain.
+ * squad.js - the Squad page: set your starting line-up + bench, pick a captain.
  *
  * One page serves both competitions (see leagues.js); the server supplies the
  * model via /api/my-picks and we branch on it:
  *
- *   OFDS (positioned)  — a strict rugby XV: exact positions, like-for-like
+ *   OFDS (positioned)  - a strict rugby XV: exact positions, like-for-like
  *                        bench swaps, exactly one captain.
- *   mtyby (flex)       — an optional club FRONT-ROW UNIT + flexible individual
+ *   mtyby (flex)       - an optional club FRONT-ROW UNIT + flexible individual
  *                        starters + an any-position bench.
  *
  * Layout of this file:  state → load → render dispatch → shared helpers →
@@ -22,7 +22,7 @@
   let frClub = null;        // mtyby only: the owned club front-row unit
   // player_id -> 'S' | 'B' | 'O' | null. null means the player's club has not
   // published its team sheet for this round yet, which is NOT the same as 'O'
-  // (named a squad, left out) — see lineupBadge.
+  // (named a squad, left out) - see lineupBadge.
   let statusByPid = {};
   let isLocked = false;
   let original = '';        // snapshot of the saved line-up, for change detection
@@ -43,7 +43,7 @@
    *   2. the flat silhouette tinted with the club's brand colour.
    *
    * Tier 2 still covers Super Rugby (no art), club front-row units, and any
-   * club whose SVG hasn't been generated — hence CLUB_JERSEYS rather than
+   * club whose SVG hasn't been generated - hence CLUB_JERSEYS rather than
    * assuming a file exists: a token pointing at a missing SVG draws an empty
    * box, which is worse than the flat colour it replaced.
    *
@@ -100,7 +100,7 @@
   }
 
   // Load a team into the page. Your own team is editable (fresh /api/my-picks);
-  // anyone else's is read-only (/api/team-view — view, never save).
+  // anyone else's is read-only (/api/team-view - view, never save).
   async function loadTeam(name) {
     if (name === myTeam) {
       const mp = await fetch('/api/my-picks').then((r) => (r.ok ? r.json() : null));
@@ -126,7 +126,7 @@
       ? ''
       : (t && t.owner ? `Managed by ${t.owner} · view only` : 'View only');
 
-    // mtyby has no captain (rule 1) — drop any captain flag the data carries.
+    // mtyby has no captain (rule 1) - drop any captain flag the data carries.
     const hasCaptain = Leagues.isOfds(MODEL);
     picks = ((data && data.picks) || []).map((p) => ({
       ...p, is_bench: !!p.is_bench, is_captain: hasCaptain && !!p.is_captain,
@@ -147,7 +147,7 @@
     if (!picks.length) { renderEmpty(body); return; }
     el('legend').hidden = false;
     // Show the S/B/O key only while at least one badge is on the page, and say
-    // so otherwise — an unexplained empty column is worse than a one-line note.
+    // so otherwise - an unexplained empty column is worse than a one-line note.
     const anyBadge = picks.some((p) => lineupBadge(p.player_id));
     el('lg-lineup').hidden = !anyBadge;
     el('lg-pending').hidden = anyBadge;
@@ -218,7 +218,7 @@
     const p = picks.find((x) => String(x.player_id) === String(id));
     if (!p) return;
     if (kind === 'info') { openPlayerCard(p); return; }   // pitch/bench tap → card
-    if (readOnly) return;                                 // viewing only — no edits
+    if (readOnly) return;                                 // viewing only - no edits
     if (kind === 'cap') setCaptain(p);
     else if (kind === 'bench') toggleBench(p);
     render();
@@ -238,7 +238,7 @@
       : `<div class="pc-none">No points from previous rounds yet.</div>`;
     const onField = !p.is_bench;
     const disabled = isLocked ? 'disabled' : '';
-    const hasCaptain = Leagues.isOfds(MODEL);   // OFDS only — mtyby has no captain
+    const hasCaptain = Leagues.isOfds(MODEL);   // OFDS only - mtyby has no captain
     const capBadge = (hasCaptain && p.is_captain) ? ' <span class="pc-cap">C</span>' : '';
     const capBtn = (hasCaptain && !readOnly)
       ? `<button class="mtyby-btn mtyby-btn--secondary mtyby-btn--sm" data-pc="cap" ${disabled}>`
@@ -300,7 +300,7 @@
     if (Leagues.isOfds(MODEL) && swapSamePosition(p)) return;
     
     // mtyby: each starting position has a fixed number of slots (FR + the
-    // MODEL.starters counts). Slots may be left empty, but never over-filled —
+    // MODEL.starters counts). Slots may be left empty, but never over-filled -
     // so a bench player can only start if its position has a free slot.
     if (Leagues.isMtyby(MODEL) && p.is_bench) {
       const cap = p.is_fr ? 1 : (MODEL.starters[p.position] || 0);
@@ -308,7 +308,7 @@
         && (p.is_fr ? x.is_fr : (!x.is_fr && x.position === p.position))).length;
       if (filled >= cap) {
         const label = p.is_fr ? 'front row' : (MODEL.labels[p.position] || p.position);
-        window.mtybyToast(`No free ${label} slot in the starting team — bench one first`, 'err');
+        window.mtybyToast(`No free ${label} slot in the starting team - bench one first`, 'err');
         return;
       }
     }
@@ -354,7 +354,7 @@
   }
 
   // =========================================================================
-  // OFDS — strict full rugby XV, laid out on a rugby-union pitch
+  // OFDS - strict full rugby XV, laid out on a rugby-union pitch
   // =========================================================================
 
   // The starting XV in 1–15 jersey order, each placed where it stands on the
@@ -382,7 +382,7 @@
     { pos: 'OBK', num: 15, x: 50, y: 85 },   // full-back
   ];
 
-  // Horizontal field lines (% from top) — try lines + posts, 22s, dashed 10s,
+  // Horizontal field lines (% from top) - try lines + posts, 22s, dashed 10s,
   // and the halfway line, mirroring a real rugby-union pitch.
   const PITCH_LINES = [
     { y: 7,  dash: false, posts: true },
@@ -427,14 +427,14 @@
       +   `</aside>`
       + `</div>`;
 
-    // Surplus / wrong-position players (an in-progress XV) — flagged full width.
+    // Surplus / wrong-position players (an in-progress XV) - flagged full width.
     html += overLimitCard(starters.filter((p) => !usedS.has(p.player_id)));
     html += overLimitCard(benchExtra);
     return html;
   }
 
   // Replacement jersey order: the hooker covers the front row first (16), then
-  // the props (17/18), then the rest forward-to-back — as on a real bench.
+  // the props (17/18), then the rest forward-to-back - as on a real bench.
   const BENCH_ORDER = ['HK', 'PR', 'LK', 'LF', 'SH', 'FH', 'MID', 'OBK'];
 
   // Replacements 16–23, in bench order, as a vertical bench column; any player
@@ -469,7 +469,7 @@
     const art = shirtArt(p);
     return `<div class="fp${p.is_captain ? ' is-cap' : ''}" style="left:${slot.x}%;top:${slot.y}%">
       <button class="fp-shirt${art.cls}" data-act="info" data-id="${p.player_id}"${art.style}
-        title="${esc(p.name)} — tap for points & options">
+        title="${esc(p.name)} - tap for points & options">
         ${slot.num}${statusDotHtml(p)}${p.is_captain ? '<span class="fp-c">C</span>' : ''}
       </button>
       <div class="fp-name">${esc(p.name)}</div>
@@ -487,7 +487,7 @@
     const art = shirtArt(p);
     return `<div class="bp${p.is_captain ? ' is-cap' : ''}">
       <button class="bp-shirt${art.cls}" data-act="info" data-id="${p.player_id}"${art.style}
-        title="${esc(p.name)} — tap for points & options">
+        title="${esc(p.name)} - tap for points & options">
         ${num}${statusDotHtml(p)}${p.is_captain ? '<span class="fp-c">C</span>' : ''}
       </button>
       <div class="bp-name"><b>${esc(p.name)}</b><small>${esc(p.real_team || '')}</small></div>
@@ -497,13 +497,13 @@
   function emptyBenchToken(num, pos) {
     return `<div class="bp bp--empty">
       <div class="bp-shirt bp-shirt--empty">${num}</div>
-      <div class="bp-name"><b>${MODEL.labels[pos] || pos}</b><small>—</small></div>
+      <div class="bp-name"><b>${MODEL.labels[pos] || pos}</b><small>-</small></div>
     </div>`;
   }
 
   // Real-match lineup status, shown as a small dot on the shirt (shared by the
   // field tokens and bench chips); mirrors the legend on the page. Omitted
-  // entirely before the club names its squad — the dot is absolutely positioned
+  // entirely before the club names its squad - the dot is absolutely positioned
   // outside the jersey, so leaving it out costs no layout.
   function statusDotHtml(p) {
     const badge = lineupBadge(p.player_id);
@@ -513,8 +513,8 @@
 
   // Swap the clicked player with the same-position player on the opposite side
   // (starter <-> bench). It's a true like-for-like: the two also trade places in
-  // `picks`, so the player coming on inherits the exact field slot — and jersey
-  // number — of the one going off (and vice-versa). Returns true if swapped.
+  // `picks`, so the player coming on inherits the exact field slot - and jersey
+  // number - of the one going off (and vice-versa). Returns true if swapped.
   function swapSamePosition(p) {
     const i = picks.findIndex((x) => x === p);
     const j = picks.findIndex((x) =>
@@ -548,7 +548,7 @@
   }
 
   // =========================================================================
-  // mtyby — optional club FRONT-ROW UNIT + flexible individuals
+  // mtyby - optional club FRONT-ROW UNIT + flexible individuals
   // =========================================================================
 
   // The front-row unit is shown as a synthetic, captainable/benchable pick.
@@ -615,7 +615,7 @@
     const art = shirtArt(p);
     return `<div class="fp" style="left:${slot.x}%;top:${slot.y}%">
       <button class="fp-shirt fp-shirt--code${art.cls}" data-act="info" data-id="${p.player_id}"${art.style}
-        title="${esc(p.name)} — tap for points & options">
+        title="${esc(p.name)} - tap for points & options">
         <span class="fp-code">${p.position}</span>${statusDotHtml(p)}
       </button>
       <div class="fp-name">${esc(p.name)}</div>
@@ -629,11 +629,11 @@
     </div>`;
   }
 
-  // The club front-row UNIT — a single distinct (amber) token atop the pitch.
+  // The club front-row UNIT - a single distinct (amber) token atop the pitch.
   function frFieldToken(p) {
     return `<div class="fp fp--fr" style="left:50%;top:13%">
       <button class="fp-shirt fp-shirt--fr" data-act="info" data-id="${p.player_id}"
-        title="${esc(p.real_team || '')} front row — tap for options">
+        title="${esc(p.real_team || '')} front row - tap for options">
         <span class="fp-code">FR</span>${statusDotHtml(p)}
       </button>
       <div class="fp-name">${esc(p.name)}</div>
@@ -661,7 +661,7 @@
     const code = p.is_fr ? 'FR' : p.position;
     return `<div class="bp">
       <button class="bp-shirt bp-shirt--code" data-act="info" data-id="${p.player_id}"
-        title="${esc(p.name)} — tap for points & options">
+        title="${esc(p.name)} - tap for points & options">
         <span class="fp-code">${code}</span>${statusDotHtml(p)}
       </button>
       <div class="bp-name"><b>${esc(p.name)}</b><small>${esc(p.is_fr ? '' : (p.real_team || ''))}</small></div>
@@ -690,7 +690,7 @@
       ? positionedValidity(starters, bench, captains)
       : flexibleValidity();
 
-    if (isLocked) status.innerHTML = '<span class="bad">Squad locked — a game has kicked off.</span>';
+    if (isLocked) status.innerHTML = '<span class="bad">Squad locked - a game has kicked off.</span>';
     else if (msg) status.innerHTML = `<span class="bad">${esc(msg)}</span>`;
     else status.textContent = changed ? 'Unsaved changes' : 'Squad up to date';
 

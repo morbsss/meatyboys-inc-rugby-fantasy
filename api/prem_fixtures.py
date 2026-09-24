@@ -2,13 +2,13 @@
 
 That file is the record for FIXTURES and TEAM information (produced by
 tools/scrape_prem_fixtures.py from premiershiprugby.com's own feed). ESPN
-remains the source for match-day LINEUPS only — see api/real_lineups.py.
+remains the source for match-day LINEUPS only - see api/real_lineups.py.
 
 Why the official feed rather than ESPN for this:
   * ESPN's club names are out of date (it still says "Bristol Rugby" and
     "Newcastle Falcons"; the clubs are now Bristol Bears and Newcastle Red Bulls).
   * ESPN publishes no round numbers, so the old code inferred them from gaps
-    between match dates — fragile, and it silently renumbers the whole season if
+    between match dates - fragile, and it silently renumbers the whole season if
     a match is postponed. The official feed carries an explicit round per match.
   * ESPN rate-limits aggressively (HTTP 403), which made the fixture calendar an
     unreliable dependency. The JSON is on disk, so rounds always resolve.
@@ -52,7 +52,7 @@ EXTRA_ALIASES = {
     'newcastle red bulls': 'NEW',
     'quins':              'HAR',
     # Short forms. The club list carries these two only as 'Bath Rugby' and
-    # 'Gloucester Rugby', so the everyday name resolved to None — no other
+    # 'Gloucester Rugby', so the everyday name resolved to None - no other
     # Premiership club shares either word, so they are unambiguous.
     'bath':               'BAT',
     'gloucester':         'GLO',
@@ -65,7 +65,7 @@ def _norm(name: str) -> str:
 
 @lru_cache(maxsize=1)
 def load() -> dict:
-    """The parsed fixtures file. Cached — call `reload()` after regenerating it."""
+    """The parsed fixtures file. Cached - call `reload()` after regenerating it."""
     try:
         with open(FIXTURES_FILE, encoding='utf-8') as fh:
             return json.load(fh)
@@ -100,7 +100,7 @@ def _clubs_by_code() -> dict:
 
 
 def clubs() -> dict:
-    """{code: club dict} — name, stadium, colours, crest URLs, socials, team_id."""
+    """{code: club dict} - name, stadium, colours, crest URLs, socials, team_id."""
     return _clubs_by_code()
 
 
