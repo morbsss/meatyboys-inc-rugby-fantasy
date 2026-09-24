@@ -21,9 +21,15 @@
   <div id="squad-body"><div class="empty"><p>Loading your squad…</p></div></div>
 
   <div class="legend" id="legend" hidden>
-    <span><b class="lg-stat" style="color:var(--success)">S</b> Starting (real match)</span>
-    <span><b class="lg-stat" style="color:var(--amber)">B</b> Bench (real match)</span>
-    <span><b class="lg-stat" style="color:var(--border-strong)">O</b> Out / not named</span>
+    {# The S/B/O key is hidden while no club has published a team sheet for the
+       round — between the Tuesday rollover and Thursday's first scrape there are
+       no badges on the page for it to explain. #}
+    <span class="lg-lineup" id="lg-lineup" hidden>
+      <span><b class="lg-stat" style="color:var(--success)">S</b> Starting (real match)</span>
+      <span><b class="lg-stat" style="color:var(--amber)">B</b> Bench (real match)</span>
+      <span><b class="lg-stat" style="color:var(--border-strong)">O</b> Out / not named</span>
+    </span>
+    <span class="lg-pending" id="lg-pending" hidden>Real-match line-ups are announced from Thursday</span>
     {% if brand == 'OFDS' %}
     <span>C = captain (x2)</span>
     {% endif %}

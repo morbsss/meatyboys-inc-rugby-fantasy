@@ -1128,15 +1128,15 @@ def squad_page():
     return render_template('squad.html', current_page='squad')
 
 
-@app.route('/api/state')
-def state():
-    conn = get_db()
-    ensure_schema(conn)
+def _state_players(conn, league_id, last_round, next_round):
+    """Every player in the league with price, last round's score, current owner
+    and real-match lineup status for `next_round`.
 
-    league_id  = current_league_id(conn)
-    last_round = get_last_round(conn, league_id)
-    next_round = get_next_round(conn, league_id)
-
+    `lineup_status` is 'S' (starting), 'B' (bench), 'O' (named nothing — left out
+    of the 23) or None. None and 'O' are different answers and the UI renders
+    them differently: None means the club has not announced yet, so there is
+    nothing to show.
+    """
     cursor = _get_cursor(conn)
     cursor.execute("""
         WITH team_latest AS (
@@ -1161,10 +1161,24 @@ def state():
             ws.price,
             ws.total_points - COALESCE(ws_prev.total_points, 0) AS last_round_score,
             cp.team_name AS fantasy_team,
+            -- S/B/O is only meaningful once the player's CLUB has published its
+            -- team sheet for this round. Without the club gate, 'no row yet'
+            -- collapsed into 'O' (Out): from the Tuesday 12:00 rollover until
+            -- Thursday's first lineup scrape, next_round has no rows at all, so
+            -- every player in the league read as dropped. Gating per club (not
+            -- per league) also keeps Thursday honest — clubs publish at
+            -- different times, and the ones still to announce show no icon
+            -- rather than a false 'Out'. Same granularity as _fr_unit_players
+            -- and competition._ofds_fr_score.
             CASE
+                WHEN NOT EXISTS (
+                    SELECT 1 FROM match_lineups mlc
+                    WHERE mlc.round = ? AND mlc.league_id = p.league_id
+                      AND mlc.real_team = p.team
+                ) THEN NULL
                 WHEN ml.player_name IS NOT NULL AND ml.is_bench = 0 THEN 'S'
                 WHEN ml.player_name IS NOT NULL AND ml.is_bench = 1 THEN 'B'
-                ELSE NULL
+                ELSE 'O'
             END AS lineup_status
         FROM players p
         JOIN weekly_stats ws
@@ -1177,12 +1191,26 @@ def state():
             AND ml.round = ? AND ml.league_id = p.league_id
         WHERE p.league_id = ?
         ORDER BY p.position, ws.total_points DESC
-    """, (league_id, league_id, last_round, last_round - 1, next_round, league_id))
+    """, (league_id, league_id, next_round, last_round, last_round - 1, next_round,
+          league_id))
     players = [dict(r) for r in cursor.fetchall()]
     for p in players:
         if p.get('last_round_score') is not None:
             p['last_round_score'] = round(p['last_round_score'], 1)
     cursor.close()
+    return players
+
+
+@app.route('/api/state')
+def state():
+    conn = get_db()
+    ensure_schema(conn)
+
+    league_id  = current_league_id(conn)
+    last_round = get_last_round(conn, league_id)
+    next_round = get_next_round(conn, league_id)
+
+    players = _state_players(conn, league_id, last_round, next_round)
 
     cursor = _get_cursor(conn)
     cursor.execute(
