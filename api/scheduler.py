@@ -150,7 +150,7 @@ def due_jobs(
 
     # Roster reconciliation comes BEFORE lineups in this list: on a Thursday both
     # can fall due in the same tick, and resolving a team sheet needs the club's
-    # roster to be current — a player who transferred this week would otherwise be
+    # roster to be current - a player who transferred this week would otherwise be
     # matched against his old club and dropped from the sheet.
     if _interval_ok(last_runs.get('sync_players'), now_utc, INTERVALS['sync_players']):
         due.append('sync_players')

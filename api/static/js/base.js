@@ -132,6 +132,14 @@ function renderProfile(user) {
   cancelUsernameChange();
   cancelPwChange();
 
+  // Maintainer-only nav (Observability). Markup ships hidden and is revealed
+  // here; the route and its API 404 for anyone else, so this only decides whether
+  // the link is advertised. Hidden for every other account, including the
+  // commissioner - it is operator information, not a league role.
+  document.querySelectorAll('[data-maintainer-only]').forEach((n) => {
+    n.hidden = !user.is_maintainer;
+  });
+
   // Commissioner toggle: ON = you hold the role; disabled when someone else does.
   const toggle = document.getElementById('profile-commish-toggle');
   const statusEl = document.getElementById('profile-commish-status');

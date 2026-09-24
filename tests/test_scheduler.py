@@ -147,7 +147,7 @@ def test_sync_players_runs_again_after_a_day():
 
 
 def test_sync_players_is_ordered_before_lineups():
-    """Resolving a team sheet needs the club rosters to be current — a player who
+    """Resolving a team sheet needs the club rosters to be current - a player who
     transferred this week is otherwise matched against his old club and dropped.
     Both fall due together on a Thursday."""
     due = s.due_jobs(

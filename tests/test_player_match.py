@@ -2,7 +2,7 @@
 
 SuperBru is the source of truth for identity, and it lengthens the initial to
 separate players who would collide at one club. ESPN doesn't, so the formatted
-names disagree for exactly the players most likely to matter — the ones with a
+names disagree for exactly the players most likely to matter - the ones with a
 namesake in the same squad:
 
     ESPN 'Arthur Griffin' -> Griffin,A   SuperBru: Griffin,Ar  (and Griffin,Al)
@@ -13,7 +13,7 @@ All three collisions below are real rows from the production player list. The
 Griffin case is the one that broke live: BOTH Bath Griffins are props, so
 position cannot separate them and only the forename can.
 
-The rule that matters most is the last one — when nothing distinguishes two
+The rule that matters most is the last one - when nothing distinguishes two
 namesakes, resolve returns None. A wrong match silently scores the wrong player,
 which is worse than a logged miss.
 """
@@ -59,12 +59,12 @@ def test_forename_prefix_resolves_the_bath_griffins():
 
 
 def test_position_cannot_resolve_the_griffins():
-    """Both are props — proof the forename is doing the work, not the jersey."""
+    """Both are props - proof the forename is doing the work, not the jersey."""
     assert {c['position'] for c in BATH if c['name'].startswith('Griffin,A')} == {'PR'}
 
 
 def test_first_letter_resolves_multi_initial_spellings():
-    """'Curry,TM' is initials, not a prefix of 'Tom' — no prefix rule can match
+    """'Curry,TM' is initials, not a prefix of 'Tom' - no prefix rule can match
     it, so the first letter has to, and only because 'Curry,B' rules itself out."""
     row, rule = pm.resolve('Curry,T', 'Tom Curry', SALE)
 
@@ -146,7 +146,7 @@ def test_starting_shirt_numbers_give_a_position(jersey, pos):
 
 @pytest.mark.parametrize('jersey', [16, 17, 18, 20, 23, 0, 99, None, '', 'x'])
 def test_bench_and_junk_numbers_give_no_position(jersey):
-    """16-23 are convention, not law, and replacements cover two positions — a
+    """16-23 are convention, not law, and replacements cover two positions - a
     guess here would be used as a tiebreaker and could pick the wrong player."""
     assert pm.position_for_jersey(jersey) is None
 

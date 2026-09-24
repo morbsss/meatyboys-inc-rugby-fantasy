@@ -166,7 +166,7 @@ def test_every_player_is_returned_regardless_of_badge(conn):
 def test_badges_work_before_any_scoring_data_exists(conn):
     """Pre-season: weekly_stats is completely empty and last_round is 0.
 
-    This is the state the league is in the week before round 1 — and the week the
+    This is the state the league is in the week before round 1 - and the week the
     first team sheets are published, so it is precisely when the badges need to
     work. `weekly_stats` was INNER JOINed on last_round, so an empty table
     eliminated every player, /api/state returned no players at all, and the squad
@@ -188,7 +188,7 @@ def test_badges_work_before_any_scoring_data_exists(conn):
 
 
 def test_missing_scores_leave_price_and_score_null_not_zero(conn):
-    """A player with no weekly_stats row has an UNKNOWN price, not a free one —
+    """A player with no weekly_stats row has an UNKNOWN price, not a free one -
     the LEFT JOIN must not invent numbers the UI could display."""
     conn.execute('DELETE FROM weekly_stats')
     conn.commit()

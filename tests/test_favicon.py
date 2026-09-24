@@ -2,7 +2,7 @@
 
 These are generated assets (tools/generate_favicon.py) that are committed rather
 than built at deploy time, so the failure mode is a missing or stale file that
-nothing notices — a favicon 404 doesn't break a page, it just quietly shows the
+nothing notices - a favicon 404 doesn't break a page, it just quietly shows the
 browser's blank document icon.
 
 The source artwork is a 200x200, 61-frame GIF. That is deliberately NOT the file
@@ -43,7 +43,7 @@ def _path(name):
 @pytest.mark.parametrize('name', sorted(ICONS) + ['favicon.ico', 'animal.gif'])
 def test_icon_file_exists(name):
     assert os.path.exists(_path(name)), \
-        f'{name} missing — run python tools/generate_favicon.py'
+        f'{name} missing - run python tools/generate_favicon.py'
 
 
 @pytest.mark.parametrize('name,size', sorted(ICONS.items()))
@@ -58,7 +58,7 @@ def test_favicon_gif_is_still_animated():
     One frame fewer than the source is expected, not a bug: animal.gif ends with
     a duplicate of its first frame to close the loop, and rotating the loop onto
     its clearest frame (see _best_frame) makes that pair adjacent, so the encoder
-    collapses it — which is what you want, since a repeated frame mid-loop reads
+    collapses it - which is what you want, since a repeated frame mid-loop reads
     as a stutter.
     """
     im = Image.open(_path('favicon.gif'))
@@ -70,7 +70,7 @@ def test_favicon_gif_is_still_animated():
 
 def test_favicon_gif_leads_on_a_clear_frame():
     """Chrome, Edge and Safari draw frame 0 and never animate, so frame 0 has to
-    be a recognisable picture — not the sliver the source happens to start on.
+    be a recognisable picture - not the sliver the source happens to start on.
 
     Before the loop was rotated this was 11x25 of the 32px box, 16% opaque.
     """
@@ -139,7 +139,7 @@ def test_page_head_declares_the_icons(client):
 
 
 def test_the_page_never_links_the_full_size_artwork(client):
-    """182 KB for a 32 px icon — the regression this whole tool exists to avoid."""
+    """182 KB for a 32 px icon - the regression this whole tool exists to avoid."""
     head = client.get('/auth').get_data(as_text=True).split('</head>')[0]
 
     assert 'animal.gif' not in head
@@ -163,7 +163,7 @@ def _meta():
 def test_sprite_and_metadata_exist():
     for name in (SPRITE, SPRITE_META):
         assert os.path.exists(_path(name)), \
-            f'{name} missing — run python tools/generate_favicon.py'
+            f'{name} missing - run python tools/generate_favicon.py'
 
 
 def test_metadata_describes_a_usable_animation():
@@ -225,7 +225,7 @@ def test_sprite_frame_zero_matches_the_static_icon():
 
 
 def test_sprite_is_paletted_and_small():
-    """RGBA cost 52 KB — more than the entire animated GIF — because PNG can't
+    """RGBA cost 52 KB - more than the entire animated GIF - because PNG can't
     dedupe across frames. Paletted it is under 10 KB."""
     assert os.path.getsize(_path(SPRITE)) < 16 * 1024
 

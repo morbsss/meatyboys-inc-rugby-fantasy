@@ -65,6 +65,9 @@
     {# Secondary screens #}
     <a href="/draft" class="mtyby-tab {% if current_page == 'draft' %}is-active{% endif %}">Draft</a>
     <a href="/rules" class="mtyby-tab {% if current_page == 'rules' %}is-active{% endif %}">Rules</a>
+    {# Maintainer only - revealed by base.js (see the More menu note). #}
+    <a href="/observability" data-maintainer-only hidden
+       class="mtyby-tab {% if current_page == 'observability' %}is-active{% endif %}">Observability</a>
 
   </nav>
   {% endif %}
@@ -142,6 +145,11 @@
     <a role="menuitem" href="/analysis" class="{% if current_page == 'analysis' %}is-active{% endif %}">Analysis</a>
     <a role="menuitem" href="/draft"    class="{% if current_page == 'draft' %}is-active{% endif %}">Draft</a>
     <a role="menuitem" href="/rules"    class="{% if current_page == 'rules' %}is-active{% endif %}">League rules</a>
+    {# Maintainer only (OBSERVABILITY_USERS). Ships hidden and is revealed by
+       base.js from /api/auth/user; the route and its API 404 for anyone else, so
+       this only decides whether the entry is advertised. #}
+    <a role="menuitem" href="/observability" data-maintainer-only hidden
+       class="{% if current_page == 'observability' %}is-active{% endif %}">Observability</a>
     <button role="menuitem" type="button" onclick="closeMoreMenu(); document.getElementById('profile-sheet').classList.add('is-open');">Profile</button>
   </div>
 
