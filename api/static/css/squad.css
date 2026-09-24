@@ -60,6 +60,14 @@
      content centre by the bench column + its gap. */
   padding-right: 150px; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
+/* The S/B/O key is a wrapper so it can be toggled as a unit, but it must not
+   become a flex item itself or the three entries would stop wrapping with the
+   rest of the legend. `display: contents` passes them through to .legend's flex
+   layout — which also overrides the `hidden` attribute, hence the explicit
+   none. */
+.legend .lg-lineup { display: contents; }
+.legend .lg-lineup[hidden], .legend .lg-pending[hidden] { display: none; }
+.legend .lg-pending { color: var(--ink-faint); }
 .legend .lg-stat { font-family: var(--font-display); font-weight: 800; font-size: 13px; line-height: 1; }
 
 .save-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 70; background: var(--surface);

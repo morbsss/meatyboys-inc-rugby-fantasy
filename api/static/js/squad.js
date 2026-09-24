@@ -20,7 +20,10 @@
                 bench_count: 0, starter_count: 0, labels: {}, order: [] };
   let picks = [];           // [{player_id, name, position, real_team, is_bench, is_captain, is_fr?}]
   let frClub = null;        // mtyby only: the owned club front-row unit
-  let statusByPid = {};     // player_id -> 'S' | 'B' | null  (real-match lineup status)
+  // player_id -> 'S' | 'B' | 'O' | null. null means the player's club has not
+  // published its team sheet for this round yet, which is NOT the same as 'O'
+  // (named a squad, left out) — see lineupBadge.
+  let statusByPid = {};
   let isLocked = false;
   let original = '';        // snapshot of the saved line-up, for change detection
   let myTeam = '';          // the logged-in user's own team name
@@ -123,6 +126,11 @@
     const body = el('squad-body');
     if (!picks.length) { renderEmpty(body); return; }
     el('legend').hidden = false;
+    // Show the S/B/O key only while at least one badge is on the page, and say
+    // so otherwise — an unexplained empty column is worse than a one-line note.
+    const anyBadge = picks.some((p) => lineupBadge(p.player_id));
+    el('lg-lineup').hidden = !anyBadge;
+    el('lg-pending').hidden = anyBadge;
     el('save-bar').hidden = readOnly;   // no save controls for other teams
 
     const starters = picks.filter((p) => !p.is_bench);
@@ -146,11 +154,32 @@
   }
 
   // ---- Shared rendering helpers -----------------------------------------
+
+  /** The S/B/O badge for a player, or null when there is nothing to say yet.
+   *
+   *  The backend sends null until the player's real club publishes its team
+   *  sheet for the round. That window is the whole point: at the Tuesday 12:00
+   *  rollover the round advances and no club has announced anything, so the
+   *  badge must disappear entirely and come back as Thursday's first lineup
+   *  scrape lands. Previously a missing status fell through to 'O' (Out), so for
+   *  two and a half days every squad looked like it had been dropped wholesale.
+   */
+  function lineupBadge(playerId) {
+    const stat = statusByPid[playerId];
+    if (stat === 'S') return { cls: 's', letter: 'S', title: 'Starting' };
+    if (stat === 'B') return { cls: 'b', letter: 'B', title: 'On bench' };
+    if (stat === 'O') return { cls: 'o', letter: 'O', title: 'Out' };
+    return null;                       // club hasn't named its squad yet
+  }
+
   function playerRow(p) {
-    const stat = statusByPid[p.player_id];
-    const dot = stat === 'S' ? 's' : (stat === 'B' ? 'b' : 'o');
-    const dotLetter = stat === 'S' ? 'S' : (stat === 'B' ? 'B' : 'O');
-    const dotTitle = stat === 'S' ? 'Starting' : (stat === 'B' ? 'On bench' : 'Out');
+    // Keep the 14px column even with no badge: clubs announce at different
+    // times, so a row with no badge sits next to rows that have one, and
+    // dropping the element would step the names out of alignment.
+    const badge = lineupBadge(p.player_id);
+    const dot = badge ? badge.cls : '';
+    const dotLetter = badge ? badge.letter : '';
+    const dotTitle = badge ? badge.title : 'Line-up not announced yet';
     const disabled = isLocked ? 'disabled' : '';
     const marks = readOnly ? '' : `<span class="marks">
         <button class="ck-btn cap ${p.is_captain ? 'on' : ''}" data-act="cap" data-id="${p.player_id}" ${disabled} title="Captain">C</button>
@@ -451,13 +480,13 @@
   }
 
   // Real-match lineup status, shown as a small dot on the shirt (shared by the
-  // field tokens and bench chips); mirrors the legend on the page.
+  // field tokens and bench chips); mirrors the legend on the page. Omitted
+  // entirely before the club names its squad — the dot is absolutely positioned
+  // outside the jersey, so leaving it out costs no layout.
   function statusDotHtml(p) {
-    const stat = statusByPid[p.player_id];
-    const cls = stat === 'S' ? 's' : (stat === 'B' ? 'b' : 'o');
-    const letter = stat === 'S' ? 'S' : (stat === 'B' ? 'B' : 'O');
-    const title = stat === 'S' ? 'Starting' : (stat === 'B' ? 'On bench' : 'Out');
-    return `<span class="fp-dot ${cls}" title="${title}">${letter}</span>`;
+    const badge = lineupBadge(p.player_id);
+    if (!badge) return '';
+    return `<span class="fp-dot ${badge.cls}" title="${badge.title}">${badge.letter}</span>`;
   }
 
   // Swap the clicked player with the same-position player on the opposite side
