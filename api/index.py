@@ -43,7 +43,7 @@ from .leagues import (
     POSITION_LABELS, POSITION_ORDER,
 )
 from . import draft as draft_engine
-from . import scheduler, ingest, rules
+from . import scheduler, ingest, observability, rules
 from .auth import (
     create_user, authenticate_user, get_available_teams,
     hash_password, verify_password,
@@ -791,6 +791,10 @@ def get_user():
         'team_name': team_name,
         'current_round': current_round,
         'is_commissioner': bool(ctx and ctx['is_commissioner']),
+        # Whether to advertise the observability page at all. The route and its
+        # API 404 for everyone else regardless - this only decides whether the
+        # nav entry is rendered.
+        'is_maintainer': _is_maintainer(),
         # Signed in on a commissioner-issued temporary password: base.js pins the
         # profile open until they set their own.
         'must_change_password': bool(ctx and ctx['must_change_password']),
@@ -1232,7 +1236,7 @@ def _state_players(conn, league_id, last_round, next_round):
             END AS lineup_status
         FROM players p
         -- LEFT, not INNER. weekly_stats only gets rows once live_scoring has run,
-        -- so before a league's first match it is EMPTY and last_round is 0 — an
+        -- so before a league's first match it is EMPTY and last_round is 0 - an
         -- inner join then eliminated every player and this endpoint returned an
         -- empty list. The squad page reads lineup_status from that list, so the
         -- S/B/O badges could never appear in the pre-season week, which is
@@ -3171,6 +3175,101 @@ def analysis_page():
     return render_template('analysis.html', current_page='analysis')
 
 
+# Accounts allowed to see the observability page. Operator information - job
+# internals, failure messages, row counts - so it is restricted to the person
+# maintaining the pipeline rather than to a league role: a commissioner is a
+# manager who volunteered, not necessarily whoever is on call.
+#
+# Comma-separated and matched case-insensitively. Overridable so a second
+# maintainer doesn't need a code change.
+OBSERVABILITY_USERS = {
+    u.strip().lower()
+    for u in os.getenv('OBSERVABILITY_USERS', 'morbsss').split(',')
+    if u.strip()
+}
+
+
+def _is_maintainer() -> bool:
+    return (session.get('username') or '').strip().lower() in OBSERVABILITY_USERS
+
+
+@app.route('/observability')
+@login_required
+def observability_page():
+    """Ingestion health, for the pipeline's maintainer only.
+
+    404 rather than 403 or a redirect: the page is meant to be invisible to
+    everyone else, and a 403 confirms it exists.
+    """
+    if not _is_maintainer():
+        return 'Not found', 404
+    return render_template('observability.html', current_page='observability')
+
+
+@app.route('/api/observability')
+@login_required
+def api_observability():
+    """Per-league pipeline health for the observability page.
+
+    Covers every league, not just the caller's: one cron tick serves both, so a
+    stopped tick or a shared outage shows up in both and the maintainer needs to
+    see which.
+    """
+    if not _is_maintainer():
+        return jsonify({'error': 'Not found'}), 404
+    conn = get_db()
+    ensure_schema(conn)
+
+    now = datetime.now(timezone.utc)
+    leagues = []
+    for slug, cfg in LEAGUES.items():
+        league_id = _league_id_by_slug(conn, slug)
+        if league_id is None:
+            continue
+        active_round = get_next_round(conn, league_id)
+        try:
+            kickoffs = ingest.round_kickoffs(cfg['competition'], active_round)
+        except Exception:
+            kickoffs = []
+        leagues.append(observability.league_health(
+            conn, league_id, slug, active_round,
+            scheduler.match_is_live(now, kickoffs), now=now))
+
+    # The tick is shared, so its liveness is reported once at the top rather than
+    # repeated per league.
+    tick_warnings = observability._tick_check(conn, now)
+    tick_at, tick_exact = observability.last_tick(conn)
+    recent = _recent_runs(conn, limit=120)
+    conn.close()
+
+    return jsonify({
+        'now': now.isoformat(),
+        'last_tick': tick_at,
+        # False means the timestamp is the last job RUN, not a true heartbeat -
+        # the page must not call a quiet period an outage on that basis.
+        'tick_exact': tick_exact,
+        'tick_age_seconds': observability._age(tick_at, now),
+        'tick_interval_seconds': observability.TICK_INTERVAL.total_seconds(),
+        'tick_warnings': tick_warnings,
+        'leagues': leagues,
+        'recent': recent,
+    })
+
+
+def _recent_runs(conn, limit=120):
+    """The raw run log, newest first - the thing you actually read when something
+    broke and you want to see the sequence rather than a summary."""
+    cursor = _get_cursor(conn)
+    cursor.execute(
+        'SELECT j.league_id, l.slug, j.job, j.round_number, j.status, j.detail, '
+        '       j.run_at '
+        'FROM job_runs j LEFT JOIN leagues l ON l.league_id = j.league_id '
+        'ORDER BY j.run_at DESC LIMIT ?', (limit,))
+    rows = [dict(r) if not isinstance(r, dict) else r for r in cursor.fetchall()]
+    cursor.close()
+    return rows
+
+
 @app.route('/rules')
 @login_required
 def rules_page():
@@ -3513,7 +3612,7 @@ def _run_job(conn, league_id, competition, job, active_round):
         n = ingest.ingest_lineups(conn, league_id, competition, active_round)
         detail = f'{n} entries'
         # An entry we couldn't match to a player row is a row that joins to
-        # nothing — invisible on every page unless the count is surfaced here.
+        # nothing - invisible on every page unless the count is surfaced here.
         if ingest.LAST_LINEUP_UNRESOLVED:
             miss = ingest.LAST_LINEUP_UNRESOLVED
             detail += f' ({len(miss)} unresolved: ' + ', '.join(miss[:5]) + ')'
@@ -3565,7 +3664,7 @@ def cron_tick():
 
         # Every job whose cadence is an interval must be listed here: a job the
         # log isn't queried for looks like it has never run, so its interval floor
-        # always passes and it fires on every tick — for sync_players that would
+        # always passes and it fires on every tick - for sync_players that would
         # be an 8-page SuperBru scrape every 10 minutes.
         last_runs = {j: _last_run(conn, league_id, j)
                      for j in ('sync_rounds', 'sync_players', 'lineups',
@@ -3598,8 +3697,28 @@ def cron_tick():
             'live': live_now, 'due': due, 'ran': ran,
         })
 
+    # Heartbeat: record that the tick ARRIVED, whether or not it had anything to
+    # do. Without this, a quiet weekday - nothing due, so nothing logged - looks
+    # exactly like a cron that has stopped, and the pipeline page cannot tell the
+    # difference between "idle" and "dead".
+    _log_tick(conn, sum(len(s['due']) for s in summary))
+
     conn.close()
     return jsonify({'now': now.isoformat(), 'leagues': summary})
+
+
+def _log_tick(conn, due_count):
+    """Upsert the single heartbeat row (id = 1)."""
+    cursor = _get_cursor(conn)
+    detail = f'{due_count} job(s) due'
+    cursor.execute(
+        'INSERT INTO pipeline_heartbeat (id, last_tick, due_count, detail) '
+        'VALUES (1, ?, ?, ?) '
+        'ON CONFLICT (id) DO UPDATE SET last_tick = excluded.last_tick, '
+        '  due_count = excluded.due_count, detail = excluded.detail',
+        (datetime.now(timezone.utc).isoformat(), due_count, detail))
+    conn.commit()
+    cursor.close()
 
 
 # Backward-compatible per-job endpoints (single league = default/OFDS), now

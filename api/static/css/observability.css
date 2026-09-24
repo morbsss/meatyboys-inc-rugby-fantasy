@@ -1,0 +1,153 @@
+/* =============================================================================
+ * observability.css - commissioner-only ingestion health.
+ *
+ * An operator page, so it reads denser than the rest of the app: tabular
+ * numbers, compact rows, and colour used only to mean something. Red and amber
+ * are reserved for actual checks - a job row is never coloured just for being
+ * idle, because a page that is always partly red stops being read.
+ * ========================================================================== */
+
+.content { max-width: 1100px; margin: 0 auto; padding: 20px 16px 96px; width: 100%; }
+@media (max-width: 768px) {
+  .content { padding: 14px 10px calc(var(--bottom-nav-h, 56px) + 96px); }
+}
+
+.ob-page { font-variant-numeric: tabular-nums; }
+.page-title { font-family: var(--font-display); font-size: 30px; font-weight: 800;
+  letter-spacing: .02em; text-transform: uppercase; color: var(--forest); line-height: 1; }
+@media (max-width: 768px) { .page-title { font-size: 24px; } }
+.page-sub { font-size: 12px; font-weight: 600; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--ink-muted); margin: 4px 0 16px; }
+
+/* ---- liveness banner ---------------------------------------------------- */
+.ob-tick {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-left: 4px solid var(--border-strong);
+  border-radius: var(--r-md); padding: 12px 14px; margin-bottom: 14px;
+  box-shadow: var(--shadow-1);
+}
+.ob-tick.is-ok      { border-left-color: var(--success); }
+.ob-tick.is-bad     { border-left-color: var(--danger); }
+.ob-tick.is-unknown { border-left-color: var(--warning); }
+.ob-tick-dot { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto;
+  background: var(--border-strong); }
+.ob-tick.is-ok .ob-tick-dot {
+  background: var(--success);
+  /* A slow pulse: this is the one element on the page that means "still alive". */
+  animation: ob-pulse 2.4s ease-in-out infinite;
+}
+.ob-tick.is-bad .ob-tick-dot { background: var(--danger); }
+.ob-tick.is-unknown .ob-tick-dot { background: var(--warning); }
+@keyframes ob-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+/* Someone watching a pipeline for hours does not need a blinking dot. */
+@media (prefers-reduced-motion: reduce) {
+  .ob-tick.is-ok .ob-tick-dot { animation: none; }
+}
+.ob-tick-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.ob-tick-text b { font-size: 14px; color: var(--forest); }
+.ob-tick-text small { font-size: 12px; color: var(--ink-muted); }
+
+/* ---- checks ------------------------------------------------------------- */
+.ob-alert {
+  display: grid; gap: 2px; padding: 10px 12px; margin-bottom: 8px;
+  border: 1px solid var(--border); border-left: 4px solid var(--border-strong);
+  border-radius: var(--r-md); background: var(--surface);
+}
+.ob-alert b { font-size: 13px; color: var(--ink); }
+.ob-alert small { font-size: 12px; color: var(--ink-muted); line-height: 1.45; }
+.ob-alert code { font-size: 10px; color: var(--ink-faint); letter-spacing: .03em; }
+.ob-alert.is-error { border-left-color: var(--danger);  background: #FDF4F2; }
+.ob-alert.is-warn  { border-left-color: var(--warning); background: #FDF8F0; }
+.ob-alert.is-info  { border-left-color: var(--border-strong); }
+.ob-alert.is-ok    { border-left-color: var(--success); }
+
+/* ---- cards -------------------------------------------------------------- */
+.ob-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 14px; margin: 14px 0;
+  box-shadow: var(--shadow-1);
+}
+.ob-card-head { display: flex; align-items: baseline; justify-content: space-between;
+  gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.ob-card-head h2 { font-family: var(--font-display); font-size: 16px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .04em; color: var(--forest); }
+.ob-slug { font-size: 11px; font-weight: 600; color: var(--ink-faint);
+  text-transform: none; letter-spacing: 0; }
+.ob-meta { font-size: 12px; color: var(--ink-muted); display: flex; gap: 8px;
+  align-items: center; flex-wrap: wrap; }
+.ob-badge { font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .04em; padding: 2px 7px; border-radius: var(--r-full);
+  background: var(--surface-2); color: var(--ink-muted); }
+.ob-badge.is-live { background: var(--danger); color: #fff; }
+.ob-sub { font-family: var(--font-display); font-size: 12px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .06em; color: var(--ink-muted);
+  margin: 16px 0 2px; }
+.ob-note { font-size: 11px; color: var(--ink-faint); margin-bottom: 10px; line-height: 1.4; }
+
+/* ---- tables ------------------------------------------------------------- */
+/* Both tables scroll inside their own container: an operator table has more
+   columns than a phone has width, and the page body must never scroll sideways. */
+.ob-log-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ob-jobs, .ob-log { width: 100%; min-width: 620px; border-collapse: collapse; font-size: 12px; }
+.ob-jobs th, .ob-log th {
+  text-align: left; font-size: 10px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--ink-faint); padding: 6px 8px;
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+.ob-jobs td, .ob-log td { padding: 8px; border-bottom: 1px solid var(--border);
+  vertical-align: top; }
+.ob-jobs tr:last-child td, .ob-log tr:last-child td { border-bottom: none; }
+
+.ob-j-name { display: flex; gap: 8px; align-items: flex-start; }
+.ob-j-name b { font-size: 12px; color: var(--forest); display: block; }
+.ob-j-name small, .ob-j-cad small, .ob-j-when small {
+  display: block; font-size: 10px; color: var(--ink-faint); margin-top: 1px;
+}
+.ob-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex: 0 0 auto;
+  background: var(--border-strong); }
+.ob-j.is-ok    .ob-dot { background: var(--success); }
+.ob-j.is-warn  .ob-dot { background: var(--warning); }
+.ob-j.is-error .ob-dot { background: var(--danger); }
+.ob-j.is-idle  .ob-dot { background: var(--border-strong); }
+.ob-j.is-error { background: #FDF4F2; }
+.ob-j-detail { color: var(--ink-muted); max-width: 320px; overflow-wrap: anywhere; }
+.ob-jf { margin-top: 4px; font-size: 11px; color: var(--danger); }
+.ob-jf span { color: var(--ink-muted); }
+.ob-j-24 .bad { color: var(--danger); }
+
+/* ---- output freshness --------------------------------------------------- */
+.ob-outs { display: grid; gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); }
+.ob-out { display: flex; gap: 10px; align-items: center; padding: 10px;
+  border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface-2); }
+/* Zero rows is the signal the whole section exists for, so it is marked - but
+   amber, not red: an empty table is expected before a round starts. */
+.ob-out.is-empty { background: #FDF8F0; border-color: var(--amber-soft); }
+.ob-out-n { font-family: var(--font-display); font-size: 22px; font-weight: 800;
+  color: var(--forest); line-height: 1; min-width: 44px; text-align: right; }
+.ob-out.is-empty .ob-out-n { color: var(--warning); }
+.ob-out-b { min-width: 0; }
+.ob-out-b b { font-size: 12px; color: var(--ink); display: block; }
+.ob-out-b small { display: block; font-size: 10px; color: var(--ink-faint); line-height: 1.35; }
+.ob-out-x { margin-top: 1px; }
+
+/* ---- run log ------------------------------------------------------------ */
+.ob-filters { display: flex; gap: 6px; flex-wrap: wrap; }
+.ob-filters select {
+  appearance: none; -webkit-appearance: none;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm);
+  color: var(--ink); font-size: 11px; font-weight: 700; padding: 5px 24px 5px 8px;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235C6063' stroke-width='3'><path d='M6 9l6 6 6-6'/></svg>");
+  background-repeat: no-repeat; background-position: right 7px center;
+}
+.ob-log .ob-w { white-space: nowrap; color: var(--ink-muted); }
+.ob-log .ob-d { color: var(--ink-muted); max-width: 420px; overflow-wrap: anywhere; }
+.ob-log tr.is-error { background: #FDF4F2; }
+.ob-st { font-size: 10px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .04em; padding: 2px 6px; border-radius: var(--r-full); }
+.ob-st.is-ok    { background: rgba(46,125,79,.14);  color: var(--success); }
+.ob-st.is-error { background: rgba(179,58,46,.14);  color: var(--danger); }
+.ob-empty { text-align: center; color: var(--ink-faint); padding: 18px; }
+.ob-log-foot { font-size: 11px; color: var(--ink-faint); margin-top: 8px; }

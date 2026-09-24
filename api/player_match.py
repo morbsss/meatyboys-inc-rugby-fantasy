@@ -2,7 +2,7 @@
 
 SuperBru is the source of truth for player identity: `players.name` holds its
 "Surname,Initial" spelling, and `match_lineups.player_name` has to agree or the
-lineup join finds nothing — no S/B/O badge, no auto-substitution, no score.
+lineup join finds nothing - no S/B/O badge, no auto-substitution, no score.
 
 The two feeds disagree in one specific way. SuperBru lengthens the initial to
 tell apart players who would otherwise collide at the same club:
@@ -11,7 +11,7 @@ tell apart players who would otherwise collide at the same club:
     ESPN "Oscar Williams"  -> Williams,O   SuperBru: Williams,Os  (also Williams,N/J)
     ESPN "Tom Curry"       -> Curry,T      SuperBru: Curry,TM     (also Curry,B)
 
-So a plain equality check drops exactly the players most likely to matter — the
+So a plain equality check drops exactly the players most likely to matter - the
 ones with a namesake in the same squad. Worse, Griffin,Al and Griffin,Ar are BOTH
 props at Bath, so position can't separate them either; only the forename can,
 which is why this works from ESPN's full name rather than the formatted one.
@@ -27,8 +27,8 @@ SOLE_SURNAME = 'sole-surname'
 
 
 # Shirt numbers 1-15 are fixed by the laws of the game, so a starter's number
-# gives their position for free. Bench numbers are only convention — 16-23 vary by
-# club and a replacement often covers two positions — so they return None rather
+# gives their position for free. Bench numbers are only convention - 16-23 vary by
+# club and a replacement often covers two positions - so they return None rather
 # than a guess. This is only ever a tiebreaker (see `resolve`), and a wrong
 # tiebreaker picks the wrong player, which is worse than picking nobody.
 _STARTER_POSITIONS = {
@@ -55,7 +55,7 @@ def split_formatted(formatted: str) -> tuple[str, str]:
 
 
 def forename_of(full_name: str) -> str:
-    """ESPN's forename — the first word. Mirrors real_lineups.format_name, which
+    """ESPN's forename - the first word. Mirrors real_lineups.format_name, which
     treats everything after it as the surname so particles ('van', 'du') stay
     with the surname."""
     parts = (full_name or '').strip().split()
@@ -76,12 +76,12 @@ def resolve(formatted: str, full_name: str, candidates: list[dict],
 
     Ordered widest-evidence-first, and each step must be unique to win:
 
-      1. exact          — the formatted names already agree (the common case)
-      2. sole-surname   — only one player of that surname at the club, so the
+      1. exact          - the formatted names already agree (the common case)
+      2. sole-surname   - only one player of that surname at the club, so the
                           initial can't be telling us anything more
-      3. forename-prefix— SuperBru's initials are a prefix of ESPN's forename
+      3. forename-prefix- SuperBru's initials are a prefix of ESPN's forename
                           ('Ar' of 'Arthur'), which is how it disambiguates
-      4. first-letter   — initials start with the forename's first letter; picks
+      4. first-letter   - initials start with the forename's first letter; picks
                           up SuperBru's OTHER style, multiple initials
                           ('Curry,TM' for 'Tom'), where no prefix can match
 

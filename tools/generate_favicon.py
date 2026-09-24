@@ -3,19 +3,19 @@
 
     python tools/generate_favicon.py
 
-Source is a 200x200, 61-frame animated GIF (~186 KB) — fine as artwork, wrong as
+Source is a 200x200, 61-frame animated GIF (~186 KB) - fine as artwork, wrong as
 a favicon, which browsers draw at 16-32 px. Downscaling keeps the animation and
 cuts the bytes by well over an order of magnitude, which matters on a 1 vCPU VM
 with a ~0.83 GB/month bandwidth allowance.
 
 Outputs, all beside the source in api/static/img/:
 
-    favicon.gif           32x32 animated — the one modern browsers use
-    favicon.png           32x32 static, first frame — PNG-preferring clients
-    favicon.ico           16+32+48 px static — the /favicon.ico browsers probe
+    favicon.gif           32x32 animated - the one modern browsers use
+    favicon.png           32x32 static, first frame - PNG-preferring clients
+    favicon.ico           16+32+48 px static - the /favicon.ico browsers probe
                           for on their own, and what crawlers and bookmark
                           services expect
-    apple-touch-icon.png  180x180 static — iOS home screen, which ignores
+    apple-touch-icon.png  180x180 static - iOS home screen, which ignores
                           `rel=icon` and screenshots the page without this
     favicon-sprite.png    every animation frame on one paletted sheet
     favicon-sprite.json   its grid and timing, read by favicon.js
@@ -23,14 +23,14 @@ Outputs, all beside the source in api/static/img/:
 Making it MOVE everywhere
 -------------------------
 Only Firefox animates a GIF favicon. Chrome, Edge and Safari draw its first
-frame and stop, and no markup changes that — so api/static/js/favicon.js
+frame and stop, and no markup changes that - so api/static/js/favicon.js
 repaints the icon itself, slicing the sprite sheet onto a canvas and swapping the
 <link rel=icon> href frame by frame.
 
 That is why the sheet exists alongside the GIF, and why the loop is rotated onto
 its clearest frame (see _best_frame): that frame is what Firefox's GIF shows
 first, what the stills export, and what every visitor sees before the script
-runs or if it never does — reduced-motion, no JS, a blocked request. All four
+runs or if it never does - reduced-motion, no JS, a blocked request. All four
 paths therefore show the same picture, and the only difference is whether it
 moves.
 """
@@ -49,7 +49,7 @@ PNG_SIZE = (32, 32)
 ICO_SIZES = [(16, 16), (32, 32), (48, 48)]
 APPLE_SIZE = (180, 180)
 # iOS composites a transparent touch icon onto black, so give it the site's own
-# background instead — the same colour as base.html's <meta name="theme-color">.
+# background instead - the same colour as base.html's <meta name="theme-color">.
 APPLE_BG = (11, 59, 46)
 
 # Sprite sheet for the JS-driven animation (api/static/js/favicon.js), which is
@@ -82,7 +82,7 @@ def _best_frame(frames):
     """Index of the frame that best represents the animation as a still.
 
     This matters more than it sounds. Chrome, Edge and Safari don't animate a GIF
-    favicon — they draw its FIRST frame — and in this source frame 0 catches the
+    favicon - they draw its FIRST frame - and in this source frame 0 catches the
     animal at one extreme of its motion, a narrow sliver off to one side. So the
     loop is rotated to start here instead.
 
@@ -112,7 +112,7 @@ def _content_box(frames, canvas):
     """The square crop that holds the artwork across EVERY frame.
 
     The source animal occupies a centred ~110x110 of its 200x200 canvas, so
-    resizing the full canvas to 32 px drew it at about 17 px — a speck in a mostly
+    resizing the full canvas to 32 px drew it at about 17 px - a speck in a mostly
     empty icon. Cropping to the content first spends the whole 32 px on the
     animal.
 
@@ -165,8 +165,8 @@ def _write_sprite(small):
         sheet.paste(frame, ((i % cols) * cell, (i // cols) * cell))
 
     # Quantise to a 255-colour palette + one transparent index. PNG can't dedupe
-    # across frames the way GIF does, so RGBA cost 52 KB for this sheet — more
-    # than the whole animated GIF — against 6.7 KB paletted. Quantising the sheet
+    # across frames the way GIF does, so RGBA cost 52 KB for this sheet - more
+    # than the whole animated GIF - against 6.7 KB paletted. Quantising the sheet
     # as ONE image rather than per frame also gives every frame the same palette,
     # so the colours don't shift as the animation plays.
     sheet_p = sheet.convert('P', palette=Image.ADAPTIVE, colors=255)
@@ -210,7 +210,7 @@ def main():
     uncropped = [f for f, _ in frames]      # kept for the apple touch icon
     frames = [(f.crop(box), d) for f, d in frames]
 
-    # Rotate the loop so the clearest frame leads — it is what every browser that
+    # Rotate the loop so the clearest frame leads - it is what every browser that
     # refuses to animate a GIF favicon will show, and what the stills export.
     lead = _best_frame(frames)
     print(f'lead:   frame {lead} of {len(frames)} '
@@ -244,7 +244,7 @@ def main():
 
     # The touch icon comes off the UNCROPPED frame: at 180 px the 118 px crop
     # would be upscaled and soft, whereas the full 200 px canvas downscales
-    # sharply — and its padding is what a home-screen icon wants anyway, since
+    # sharply - and its padding is what a home-screen icon wants anyway, since
     # iOS rounds the corners and draws it large.
     apple_src = uncropped[lead]          # same frame the stills use, uncropped
     apple = Image.new('RGB', APPLE_SIZE, APPLE_BG)

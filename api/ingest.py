@@ -19,7 +19,7 @@ from .datasource import (get_fixture_source, get_lineup_source, get_player_sourc
 
 
 # Names from the last ingest_lineups run that couldn't be matched to a player
-# row. Diagnostics only — read by the cron tick to put the count in job_runs, so
+# row. Diagnostics only - read by the cron tick to put the count in job_runs, so
 # a provider renaming someone shows up in the log instead of silently producing
 # rows that join to nothing.
 LAST_LINEUP_UNRESOLVED: list[str] = []
@@ -95,7 +95,7 @@ def ingest_lineups(conn, league_id: int, competition: str, round_number: int) ->
     The provider's formatted name is resolved against the club's roster before
     writing (see api/player_match): SuperBru lengthens the initial to separate
     namesakes at one club, so ESPN's 'Griffin,A' matches neither 'Griffin,Ar' nor
-    'Griffin,Al' and the row would land unjoinable — present in match_lineups,
+    'Griffin,Al' and the row would land unjoinable - present in match_lineups,
     invisible to every query that needs it.
 
     Resolving here rather than at read time means the stored name is the canonical
@@ -157,11 +157,11 @@ def _player_row(conn, name: str, position: str, league_id: int):
 def _player_id(conn, name: str, team: str, position: str, league_id: int) -> int:
     """player_id for a SuperBru row, following transfers rather than duplicating.
 
-    Identity is (league, name, position) — NOT the club. The old version upserted
+    Identity is (league, name, position) - NOT the club. The old version upserted
     `ON CONFLICT (name, team, position)`, which has the club IN the key, so a
     transfer never matched and inserted a SECOND row: the transferred player then
     existed twice, the original stopped receiving scores, and any squad holding
-    them was frozen at their old club — which also broke the lineup join, since
+    them was frozen at their old club - which also broke the lineup join, since
     that matches on `players.team`.
 
     A club change on an existing (name, position) is therefore treated as a
@@ -200,7 +200,7 @@ def ingest_players(conn, league_id: int, competition: str) -> dict:
     """Reconcile `players` with SuperBru, the source of truth for who is where.
 
     Runs on its own daily cadence rather than riding on live_scoring, because
-    squads change mid-week — a transfer or a new signing announced on Tuesday has
+    squads change mid-week - a transfer or a new signing announced on Tuesday has
     to be in the table before Thursday's team sheets arrive, or the lineup join
     misses that player all weekend.
 
@@ -216,7 +216,7 @@ def ingest_players(conn, league_id: int, competition: str) -> dict:
                   and returned so it shows up in the job log.
 
     `ambiguous` counts rows where two players share surname, initial and position
-    across clubs — real people do (Wilson,T plays for both Bristol and Sale), so
+    across clubs - real people do (Wilson,T plays for both Bristol and Sale), so
     guessing a transfer there would move the wrong one. Reported, not resolved.
     """
     players = get_player_source().fetch_players(competition)
@@ -269,7 +269,7 @@ def ingest_players(conn, league_id: int, competition: str) -> dict:
     counts['moves'] = moves
     # Named, not just counted: an addition paired with a departure at the same
     # club and position is a RENAME upstream, not a signing. SuperBru currently
-    # lists Northampton's Walker,H as 'WalkerNOPE,H' — their typo, which this job
+    # lists Northampton's Walker,H as 'WalkerNOPE,H' - their typo, which this job
     # would otherwise import as a brand-new player with no trace of why.
     counts['new'] = new
     counts['gone'] = gone

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block page_title %}Observability - {{ brand }} Fantasy{% endblock %}
+
+{% block extra_styles %}<link rel="stylesheet" href="/static/css/observability.css">{% endblock %}
+
+{#
+  Operator-only ingestion health, restricted to the named maintainer accounts
+  (OBSERVABILITY_USERS, default 'morbsss'). The route 404s anyone else and
+  /api/observability 404s too, so nothing on this page needs to hide itself.
+
+  The page is built around one lesson: status='ok' is not health. Every outage
+  this pipeline has had logged a success - lineups wrote "ok / 0 entries" for
+  weeks behind an ESPN 403, and predict wrote "ok / launched" while producing no
+  rows. So checks come first, output row counts second, and the raw run log last.
+#}
+
+{% block content %}
+<div class="content ob-page">
+
+  <div class="page-head">
+    <div class="page-title">Observability</div>
+    <div class="page-sub">Ingestion health · maintainer only</div>
+  </div>
+
+  <!-- Liveness. Nothing below means anything if the tick has stopped. -->
+  <section class="ob-tick" id="ob-tick" aria-live="polite">
+    <div class="ob-tick-dot" id="ob-tick-dot"></div>
+    <div class="ob-tick-text">
+      <b id="ob-tick-title">Checking the cron…</b>
+      <small id="ob-tick-sub"></small>
+    </div>
+    <button class="mtyby-btn mtyby-btn--ghost mtyby-btn--sm" id="ob-refresh">Refresh</button>
+  </section>
+
+  <div id="ob-alerts"></div>
+  <div id="ob-leagues"></div>
+
+  <section class="ob-card">
+    <div class="ob-card-head">
+      <h2>Run log</h2>
+      <div class="ob-filters">
+        <select id="ob-f-league" aria-label="Filter by league"></select>
+        <select id="ob-f-job" aria-label="Filter by job"></select>
+        <select id="ob-f-status" aria-label="Filter by status">
+          <option value="ALL">All outcomes</option>
+          <option value="error">Failures only</option>
+          <option value="ok">Successes only</option>
+        </select>
+      </div>
+    </div>
+    <div class="ob-log-wrap">
+      <table class="ob-log">
+        <thead>
+          <tr><th>When</th><th>League</th><th>Job</th><th>Rd</th><th>Status</th><th>Detail</th></tr>
+        </thead>
+        <tbody id="ob-log-body"></tbody>
+      </table>
+    </div>
+    <div class="ob-log-foot" id="ob-log-foot"></div>
+  </section>
+
+</div>
+{% endblock %}
+
+{% block scripts %}<script src="/static/js/observability.js"></script>{% endblock %}

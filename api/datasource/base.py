@@ -55,7 +55,7 @@ class LineupEntry:
     # The provider's own spelling ('Arthur Griffin'), kept so ingestion can tell
     # apart namesakes at one club: SuperBru lengthens the initial for those
     # (Griffin,Ar vs Griffin,Al) and only the forename distinguishes them. None
-    # for sources that don't publish full names — matching then falls back to the
+    # for sources that don't publish full names - matching then falls back to the
     # formatted name alone (see api/player_match).
     full_name: str | None = None
 

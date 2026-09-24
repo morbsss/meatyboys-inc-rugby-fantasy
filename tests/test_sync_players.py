@@ -1,7 +1,7 @@
 """The daily roster sync: new signings and transfers, with SuperBru as truth.
 
 Why it exists. `players.team` is what the lineup join matches on, so a player
-listed at the wrong club is invisible on a team sheet — no S/B/O badge, no
+listed at the wrong club is invisible on a team sheet - no S/B/O badge, no
 auto-substitution, no score. Dun,J sat at Bristol in production while ESPN had
 him starting at lock for Harlequins, so his sheet entry joined to nothing.
 
@@ -9,7 +9,7 @@ Why it is its own job rather than part of live_scoring: squads change mid-week,
 and live_scoring only runs inside match windows. A Tuesday transfer has to be in
 the table before Thursday's sheets arrive.
 
-The bug it replaces: `_player_id` upserted `ON CONFLICT (name, team, position)` —
+The bug it replaces: `_player_id` upserted `ON CONFLICT (name, team, position)` -
 the club IS in that key, so a transfer never conflicted and inserted a SECOND
 row. The player then existed twice, the original stopped receiving scores, and
 any squad holding them was frozen at the old club.
@@ -162,7 +162,7 @@ def test_a_player_no_longer_listed_is_counted_but_kept(conn, monkeypatch):
 
 
 def test_an_upstream_rename_shows_as_a_named_add_and_departure(conn, monkeypatch):
-    """SuperBru currently lists Northampton's Walker,H as 'WalkerNOPE,H' — their
+    """SuperBru currently lists Northampton's Walker,H as 'WalkerNOPE,H' - their
     typo. Identity is the name, so this can only arrive as one addition plus one
     departure; naming both in the log is what makes it recognisable as a rename
     rather than a signing."""
@@ -210,7 +210,7 @@ def test_is_idempotent(conn, monkeypatch):
 
 
 def test_moves_are_named_for_the_job_log(conn, monkeypatch):
-    """A transfer silently changes who a drafted player is — the log should say
+    """A transfer silently changes who a drafted player is - the log should say
     which, not just how many."""
     _feed(monkeypatch, [('Dun,J', 'HAR', 'LK')])
 

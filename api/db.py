@@ -487,6 +487,22 @@ def _ensure_league_schema(conn, cursor) -> None:
         )
     ''')
 
+    # Liveness of the cron tick itself, separate from job_runs.
+    #
+    # job_runs only gets a row when a job actually FIRES, so a quiet period - most
+    # of a weekday, when nothing is due - is indistinguishable from a dead cron.
+    # One row, updated on every tick, makes "is the scheduler arriving?" a
+    # different question from "did any job run?", which is the first thing you
+    # need to know when the pipeline looks wrong.
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS pipeline_heartbeat (
+            id INTEGER PRIMARY KEY,
+            last_tick TEXT NOT NULL,
+            due_count INTEGER NOT NULL DEFAULT 0,
+            detail TEXT
+        )
+    ''')
+
     conn.commit()
 
     # Seed the two leagues (idempotent upsert on slug).

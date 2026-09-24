@@ -1,5 +1,5 @@
 /* =============================================================================
- * favicon.js — animate the favicon in browsers that refuse to.
+ * favicon.js - animate the favicon in browsers that refuse to.
  *
  * Firefox plays an animated GIF favicon. Chrome, Edge and Safari draw its first
  * frame and stop, and no markup changes that. The workaround is to repaint the
@@ -9,7 +9,7 @@
  * Costs are real, so they're all paid once or not at all:
  *
  *   - every frame is rendered to a data URL ONCE at startup, so the loop does
- *     nothing per tick but assign a string — no canvas work, no encoding;
+ *     nothing per tick but assign a string - no canvas work, no encoding;
  *   - the sheet is a single 6.7 KB request, not one per frame;
  *   - it runs at 12.5 fps (the sheet is every 2nd source frame), which is plenty
  *     for something drawn at 16 px;
@@ -37,7 +37,7 @@
   let timer = null;
   let i = 0;
 
-  /** The <link> we drive. Appended last so it wins over the static tags —
+  /** The <link> we drive. Appended last so it wins over the static tags -
    *  browsers use the final `rel=icon` they understand. */
   function iconLink() {
     let el = document.querySelector('link[rel="icon"][data-animated]');
