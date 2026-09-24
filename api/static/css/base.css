@@ -226,6 +226,48 @@ a { color: inherit; text-decoration: none; }
   line-height: 16px;
   text-align: center;
 }
+/* =============================================================================
+ * Squad lockout: status pill + countdown, on the right of the banner.
+ *
+ * Order across that side is pill · timer · round · profile · logout. The pill
+ * moved here from squad.css when it stopped being squad-only - it is now on every
+ * page, written solely by base.js.
+ * ========================================================================== */
+.mtyby-lock-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: var(--r-full);
+  background: rgba(245, 241, 232, .10);
+  font-size: 11px; font-weight: 700; color: var(--cream);
+}
+.mtyby-lock-pill.is-locked { background: rgba(179, 58, 46, .30); color: #FFDDD8; }
+
+.mtyby-lock-timer {
+  display: inline-flex; align-items: baseline; gap: 5px;
+  font-family: var(--font-display);
+  /* White on the forest banner, per spec. */
+  color: #FFFFFF;
+  white-space: nowrap;
+}
+.mtyby-lock-timer-lbl {
+  font-size: 10px; font-weight: 700; letter-spacing: .05em;
+  text-transform: uppercase; opacity: .75;
+}
+.mtyby-lock-timer-val {
+  font-size: 13px; font-weight: 800; letter-spacing: .02em;
+  /* Tabular figures so the seconds ticking over doesn't shuffle the layout
+     beside it once per second. */
+  font-variant-numeric: tabular-nums;
+}
+/* Inside the last hour before picks close. Not --danger (#B33A2E): that is tuned
+   for cream backgrounds and reads as muddy brown on the forest banner. This is a
+   red light enough to hold contrast against #0B3B2E. */
+.mtyby-lock-timer.is-urgent { color: #FF6B5A; }
+.mtyby-lock-timer.is-urgent .mtyby-lock-timer-lbl { opacity: .9; }
+
+/* Both ship with the `hidden` attribute, and an author `display` would otherwise
+   beat it - the same trap as .save-bar[hidden] in squad.css. */
+.mtyby-lock-pill[hidden], .mtyby-lock-timer[hidden] { display: none !important; }
+
 .mtyby-round-tag {
   display: inline-flex;
   align-items: center;
@@ -799,6 +841,15 @@ a { color: inherit; text-decoration: none; }
   }
   .mtyby-brand-mark { font-size: 17px; }
   .mtyby-brand-sub { display: none; }
+
+  /* The banner is 50px and already carries brand, round, trades, profile and
+     logout. Drop the pill and keep the countdown: its own label says which way
+     the clock runs ("Locks in" only shows while open, "Opens in" only while
+     locked), so the pill was the redundant half. */
+  .mtyby-lock-pill { display: none !important; }
+  .mtyby-lock-timer { gap: 4px; }
+  .mtyby-lock-timer-lbl { font-size: 9px; letter-spacing: .03em; }
+  .mtyby-lock-timer-val { font-size: 12px; }
   .mtyby-tabs { display: none; }
   .mtyby-main { display: block; overflow: visible; }
   .mtyby-bottom-nav {

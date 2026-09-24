@@ -783,6 +783,24 @@ def get_user():
         current_round = get_next_round(conn, league_id)
     else:
         current_round = 0
+
+    # Lock state rides along here rather than on its own endpoint: base.js already
+    # fetches this on every page for the user chip, and /api/state - the other
+    # place that carries it - also serializes every player in the league, which is
+    # a lot of JSON to move for a countdown in the banner.
+    #
+    # Two deadlines, because the timer counts toward whichever is next:
+    #   locks_at   the round's FIRST kickoff, when picks close league-wide
+    #   reopens_at the Tuesday 12:00 rollover, when the next round opens
+    # Built before conn.close() - all three of these need the connection.
+    lock = None
+    if league_id is not None and current_round:
+        lock = {
+            'is_locked': is_locked(conn, league_id),
+            'locks_at': next_lock_time(conn, current_round, league_id),
+            'reopens_at': reopen_time(conn, current_round, league_id),
+            'round': current_round,
+        }
     conn.close()
 
     return jsonify({
@@ -790,6 +808,9 @@ def get_user():
         'username': session['username'],
         'team_name': team_name,
         'current_round': current_round,
+        # Squad lockout, for the banner countdown (null before there is a
+        # calendar, i.e. pre-season with no rounds).
+        'lock': lock,
         'is_commissioner': bool(ctx and ctx['is_commissioner']),
         # Whether to advertise the observability page at all. The route and its
         # API 404 for everyone else regardless - this only decides whether the

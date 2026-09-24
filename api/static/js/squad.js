@@ -75,8 +75,9 @@
     CLUB_JERSEYS = new Set(st.club_jerseys || []);
     (st.players || []).forEach((p) => { statusByPid[p.player_id] = p.lineup_status; });
 
-    el('lock-pill').classList.toggle('is-locked', isLocked);
-    el('lock-text').textContent = isLocked ? 'Locked' : 'Open';
+    // The lock pill is in the shared banner now and base.js writes it from
+    // /api/auth/user. `isLocked` is still read here to disable the squad's own
+    // controls - but two writers on one element is how they drift apart.
 
     MODEL = (mp && mp.roster_model) || MODEL;
     myTeam = (mp && mp.team_name) || '';
