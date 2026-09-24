@@ -76,6 +76,8 @@
   --surface-2:     #EEF1F8;
   --border:        #D5DBEA;
   --border-strong: #B3BCD6;
+
+  --captains:      #EFBF04;
 }
 
 /* League-selection state: render everything desaturated until a league is
