@@ -37,16 +37,15 @@
   font-family: var(--font-display); font-weight: 800; font-size: 12px; line-height: 1;
   color: var(--border-strong); }
 .pl .status-dot.s { color: var(--success); }
-.pl .status-dot.b { color: var(--amber); }
-.pl .status-dot.o { color: var(--border-strong); }
+.pl .status-dot.b { color: var(--warning); }
+.pl .status-dot.o { color: var(--danger); }
 .pl .nm { flex: 1; min-width: 0; }
 .pl .nm b { font-family: var(--font-display); font-weight: 400; color: var(--forest); }
 .pl .nm small { color: var(--ink-faint); font-weight: 500; }
 .pl .marks { display: flex; gap: 4px; }
 .ck-btn { width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--border-strong);
   font-family: var(--font-display); font-weight: 800; font-size: 12px; color: var(--ink-muted); background: var(--surface); }
-.ck-btn.on.cap  { background: var(--amber);  color: var(--forest-deep); border-color: var(--amber); }
-.ck-btn.on.kick { background: var(--forest); color: var(--cream); border-color: var(--forest); }
+.ck-btn.on.cap  { background: var(--captains);  color: var(--captains); border-color: var(--captains); }
 .bench-btn { font-size: 11px; }
 
 .empty { padding: 40px 20px; text-align: center; }
@@ -240,13 +239,13 @@
 /* Captain: the amber halo normally comes from the masked ::before, which art
    shirts don't have - put it on the art itself. */
 .fp.is-cap .fp-shirt.shirt--art, .bp.is-cap .bp-shirt.shirt--art {
-  filter: drop-shadow(0 0 3px var(--amber)) drop-shadow(0 0 1px var(--amber));
+  filter: drop-shadow(0 0 3px var(--captains)) drop-shadow(0 0 1px var(--captains));
 }
 
-/* Captain: amber jersey outline + halo (alongside the C badge). */
+/* Captain: captains jersey outline + halo (alongside the C badge). */
 .fp.is-cap .fp-shirt::before, .bp.is-cap .bp-shirt::before {
-  background: var(--amber);
-  filter: drop-shadow(0 0 2px var(--amber)) drop-shadow(0 1px 2px rgba(0,0,0,.30));
+  background: var(--captains);
+  filter: drop-shadow(0 0 2px var(--captains)) drop-shadow(0 1px 2px rgba(0,0,0,.30));
 }
 .fp-shirt--empty { color: rgba(255,255,255,.85); cursor: default; }
 .fp-shirt--empty::before { background: rgba(255,255,255,.55); filter: none; }
@@ -276,7 +275,7 @@
 /* Captain badge + lineup-status dot - shared by field tokens and bench chips. */
 .fp-c {
   position: absolute; top: 1px; right: 2px; width: 16px; height: 16px;
-  border-radius: 50%; background: var(--amber); color: var(--forest-deep);
+  border-radius: 50%; background: var(--captains); color: var(--forest-deep);
   font-size: 9px; font-weight: 800; display: grid; place-items: center;
   border: 1.5px solid #fff; z-index: 1;
 }
@@ -309,8 +308,8 @@
   font-size: clamp(8px, 2.1cqw, 10px);
 }
 .fp-dot.s { color: var(--success); }
-.fp-dot.b { color: var(--amber); }
-.fp-dot.o { color: var(--border-strong); }
+.fp-dot.b { color: var(--warning); }
+.fp-dot.o { color: var(--danger); }
 
 /* Replacements 16–23 - a vertical bench column beside the pitch, boxed in a
    surface panel so it reads as its own unit next to the field. */
