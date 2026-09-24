@@ -1,6 +1,12 @@
 # Dev/test dependencies (not shipped to Vercel — api/requirements.txt is runtime).
 -r api/requirements.txt
 pytest>=8.0
+# Build-time only: tools/generate_favicon.py renders the favicons from
+# img/animal.gif, and tests/test_favicon.py checks what it produced.
+# Deliberately NOT in api/requirements.txt — the app only ever serves those files
+# as static assets and never imports PIL, so the web process has no reason to
+# carry an imaging library.
+Pillow>=10.0,<12
 # The analysis job's deps. Deliberately NOT in api/requirements.txt: the web
 # process must stay light, and predict.py runs out-of-process. They belong here
 # so CI can actually exercise the prediction model rather than skipping it —
