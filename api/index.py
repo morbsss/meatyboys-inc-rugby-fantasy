@@ -27,7 +27,7 @@ Control pick locking behavior via environment variables:
 import os
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
-from functools import wraps
+from functools import lru_cache, wraps
 from flask import Flask, jsonify, render_template, request, session, redirect
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -352,6 +352,34 @@ def _club_colours(conn, league_id) -> dict:
     from . import prem_fixtures
     return {code: c['colour_dark']
             for code, c in prem_fixtures.clubs().items() if c.get('colour_dark')}
+
+
+JERSEY_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                          'static', 'img', 'jerseys')
+
+
+@lru_cache(maxsize=1)
+def _jersey_codes() -> frozenset:
+    """Club codes with jersey art on disk (api/static/img/jerseys/<CODE>.svg).
+
+    Read from the directory rather than hard-coded so adding a club is just
+    re-running tools/generate_jerseys.py. Cached: the files ship with the deploy
+    and cannot change while the process is up.
+    """
+    try:
+        return frozenset(f[:-4] for f in os.listdir(JERSEY_DIR) if f.endswith('.svg'))
+    except OSError:
+        return frozenset()          # art not generated — UI falls back to a flat tint
+
+
+def _club_jerseys(conn, league_id) -> list:
+    """Club codes whose jersey art the squad page may use for this league.
+
+    The page needs to know before rendering: a token that points at a missing
+    SVG would draw an empty box, so anything not listed here keeps the flat
+    club-coloured silhouette instead.
+    """
+    return sorted(_jersey_codes() & set(_club_colours(conn, league_id)))
 
 
 def _real_fixtures(conn, league_id, round_num) -> list:
@@ -1225,6 +1253,7 @@ def state():
     reopen  = reopen_time(conn, next_round, league_id)
     league  = _league_meta(conn, league_id)
     colours = _club_colours(conn, league_id)   # needs the connection; build it first
+    jerseys = _club_jerseys(conn, league_id)
     conn.close()
     return jsonify({
         'league':      league,
@@ -1247,6 +1276,9 @@ def state():
         # Real club colours, keyed by the same code as players.team, so the
         # squad pitch can show each player in his own club's jersey.
         'club_colours': colours,
+        # Clubs with real jersey art (tools/generate_jerseys.py). Players at any
+        # club not listed here fall back to the flat club-coloured silhouette.
+        'club_jerseys': jerseys,
     })
 
 

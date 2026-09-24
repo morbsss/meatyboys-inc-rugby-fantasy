@@ -51,6 +51,11 @@ EXTRA_ALIASES = {
     'newcastle falcons':  'NEW',
     'newcastle red bulls': 'NEW',
     'quins':              'HAR',
+    # Short forms. The club list carries these two only as 'Bath Rugby' and
+    # 'Gloucester Rugby', so the everyday name resolved to None — no other
+    # Premiership club shares either word, so they are unambiguous.
+    'bath':               'BAT',
+    'gloucester':         'GLO',
 }
 
 

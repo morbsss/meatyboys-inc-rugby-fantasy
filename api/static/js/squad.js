@@ -31,14 +31,33 @@
   let readOnly = false;     // true when viewing a team that isn't yours
   let TEAMS = [];           // [{name, owner, available}] for the team selector
   let CLUB_COLOURS = {};    // real_team code -> club brand colour (Premiership only)
+  let CLUB_JERSEYS = new Set();   // club codes with real jersey art on disk
 
-  /* Tint a player's jersey with his club's own colour. Returns an inline
-     custom property the shirt's ::after picks up; empty when the club is
-     unknown or the competition has no scraped colours, so the CSS falls back
-     to the league colour. */
-  const jerseyTint = (p) => {
-    const c = p && !p.is_fr && CLUB_COLOURS[p.real_team];
-    return c ? ` style="--jersey-col:${c}"` : '';
+  const JERSEY_BASE = '/static/img/jerseys/';
+
+  /* How to dress a player's shirt token.
+   *
+   * Two tiers, best first:
+   *   1. his club's real jersey art (stripes, hoops, quarters + club badge),
+   *      one SVG per club from tools/generate_jerseys.py;
+   *   2. the flat silhouette tinted with the club's brand colour.
+   *
+   * Tier 2 still covers Super Rugby (no art), club front-row units, and any
+   * club whose SVG hasn't been generated — hence CLUB_JERSEYS rather than
+   * assuming a file exists: a token pointing at a missing SVG draws an empty
+   * box, which is worse than the flat colour it replaced.
+   *
+   * Returns the modifier class and inline custom property separately because
+   * they land in different attributes of the same element.
+   */
+  const shirtArt = (p) => {
+    const club = (p && !p.is_fr) ? p.real_team : null;
+    if (club && CLUB_JERSEYS.has(club)) {
+      return { cls: ' shirt--art',
+               style: ` style="--club-jersey:url('${JERSEY_BASE}${encodeURIComponent(club)}.svg')"` };
+    }
+    const col = club && CLUB_COLOURS[club];
+    return { cls: '', style: col ? ` style="--jersey-col:${col}"` : '' };
   };
 
   const el = (id) => document.getElementById(id);
@@ -53,6 +72,7 @@
 
     isLocked = !!st.is_locked;
     CLUB_COLOURS = st.club_colours || {};
+    CLUB_JERSEYS = new Set(st.club_jerseys || []);
     (st.players || []).forEach((p) => { statusByPid[p.player_id] = p.lineup_status; });
 
     el('lock-pill').classList.toggle('is-locked', isLocked);
@@ -446,8 +466,9 @@
   // points + captain / bench actions). Shirt carries the jersey number, captain
   // badge and a real-match lineup dot.
   function fieldToken(p, slot) {
+    const art = shirtArt(p);
     return `<div class="fp${p.is_captain ? ' is-cap' : ''}" style="left:${slot.x}%;top:${slot.y}%">
-      <button class="fp-shirt" data-act="info" data-id="${p.player_id}"${jerseyTint(p)}
+      <button class="fp-shirt${art.cls}" data-act="info" data-id="${p.player_id}"${art.style}
         title="${esc(p.name)} — tap for points & options">
         ${slot.num}${statusDotHtml(p)}${p.is_captain ? '<span class="fp-c">C</span>' : ''}
       </button>
@@ -463,8 +484,9 @@
   }
 
   function benchToken(p, num) {
+    const art = shirtArt(p);
     return `<div class="bp${p.is_captain ? ' is-cap' : ''}">
-      <button class="bp-shirt" data-act="info" data-id="${p.player_id}"${jerseyTint(p)}
+      <button class="bp-shirt${art.cls}" data-act="info" data-id="${p.player_id}"${art.style}
         title="${esc(p.name)} — tap for points & options">
         ${num}${statusDotHtml(p)}${p.is_captain ? '<span class="fp-c">C</span>' : ''}
       </button>
@@ -590,8 +612,9 @@
 
   // A mtyby field token: position code on the shirt (no fixed jersey numbers).
   function flexFieldToken(p, slot) {
+    const art = shirtArt(p);
     return `<div class="fp" style="left:${slot.x}%;top:${slot.y}%">
-      <button class="fp-shirt fp-shirt--code" data-act="info" data-id="${p.player_id}"${jerseyTint(p)}
+      <button class="fp-shirt fp-shirt--code${art.cls}" data-act="info" data-id="${p.player_id}"${art.style}
         title="${esc(p.name)} — tap for points & options">
         <span class="fp-code">${p.position}</span>${statusDotHtml(p)}
       </button>

@@ -59,7 +59,7 @@
     {
       "id": "pre000",
       "name": "Wood,E",
-      "team": "Bath",
+      "team": "BAT",
       "position": "PR",
       "rate": 7.3,
       "vol": 0.6,
@@ -68,7 +68,7 @@
     {
       "id": "pre001",
       "name": "Havili,N",
-      "team": "Bath",
+      "team": "BAT",
       "position": "PR",
       "rate": 8.1,
       "vol": 0.4,
@@ -77,7 +77,7 @@
     {
       "id": "pre002",
       "name": "Clarke,F",
-      "team": "Bath",
+      "team": "BAT",
       "position": "PR",
       "rate": 4.5,
       "vol": 0.3,
@@ -86,7 +86,7 @@
     {
       "id": "pre003",
       "name": "Slipper,K",
-      "team": "Bath",
+      "team": "BAT",
       "position": "PR",
       "rate": 5.9,
       "vol": 0.8,
@@ -95,7 +95,7 @@
     {
       "id": "pre004",
       "name": "Nawaqanitawase,N",
-      "team": "Bath",
+      "team": "BAT",
       "position": "HK",
       "rate": 5.2,
       "vol": 0.5,
@@ -104,7 +104,7 @@
     {
       "id": "pre005",
       "name": "Petaia,J",
-      "team": "Bath",
+      "team": "BAT",
       "position": "HK",
       "rate": 7.4,
       "vol": 0.4,
@@ -113,7 +113,7 @@
     {
       "id": "pre006",
       "name": "Davies,T",
-      "team": "Bath",
+      "team": "BAT",
       "position": "LK",
       "rate": 6.4,
       "vol": 0.7,
@@ -122,7 +122,7 @@
     {
       "id": "pre007",
       "name": "Roberts,O",
-      "team": "Bath",
+      "team": "BAT",
       "position": "LK",
       "rate": 8.5,
       "vol": 0.7,
@@ -131,7 +131,7 @@
     {
       "id": "pre008",
       "name": "du Toit,M",
-      "team": "Bath",
+      "team": "BAT",
       "position": "LK",
       "rate": 9.7,
       "vol": 0.4,
@@ -140,7 +140,7 @@
     {
       "id": "pre009",
       "name": "Burns,R",
-      "team": "Bath",
+      "team": "BAT",
       "position": "LF",
       "rate": 6.1,
       "vol": 0.5,
@@ -149,7 +149,7 @@
     {
       "id": "pre010",
       "name": "Bell,K",
-      "team": "Bath",
+      "team": "BAT",
       "position": "LF",
       "rate": 6.7,
       "vol": 0.2,
@@ -158,7 +158,7 @@
     {
       "id": "pre011",
       "name": "van Rhyn,J",
-      "team": "Bath",
+      "team": "BAT",
       "position": "LF",
       "rate": 10.3,
       "vol": 0.8,
@@ -167,7 +167,7 @@
     {
       "id": "pre012",
       "name": "Vermeulen,G",
-      "team": "Bath",
+      "team": "BAT",
       "position": "LF",
       "rate": 6.5,
       "vol": 0.4,
@@ -176,7 +176,7 @@
     {
       "id": "pre013",
       "name": "Price,F",
-      "team": "Bath",
+      "team": "BAT",
       "position": "LF",
       "rate": 8.7,
       "vol": 0.5,
@@ -185,7 +185,7 @@
     {
       "id": "pre014",
       "name": "Shaw,T",
-      "team": "Bath",
+      "team": "BAT",
       "position": "SH",
       "rate": 11.2,
       "vol": 0.4,
@@ -194,7 +194,7 @@
     {
       "id": "pre015",
       "name": "Frost,T",
-      "team": "Bath",
+      "team": "BAT",
       "position": "SH",
       "rate": 11.0,
       "vol": 0.3,
@@ -203,7 +203,7 @@
     {
       "id": "pre016",
       "name": "Stone,O",
-      "team": "Bath",
+      "team": "BAT",
       "position": "FH",
       "rate": 11.2,
       "vol": 0.4,
@@ -212,7 +212,7 @@
     {
       "id": "pre017",
       "name": "Sititi,F",
-      "team": "Bath",
+      "team": "BAT",
       "position": "FH",
       "rate": 8.1,
       "vol": 0.2,
@@ -221,7 +221,7 @@
     {
       "id": "pre018",
       "name": "Davies,H",
-      "team": "Bath",
+      "team": "BAT",
       "position": "MID",
       "rate": 9.1,
       "vol": 0.4,
@@ -230,7 +230,7 @@
     {
       "id": "pre019",
       "name": "Taylor,E",
-      "team": "Bath",
+      "team": "BAT",
       "position": "MID",
       "rate": 6.9,
       "vol": 0.3,
@@ -239,7 +239,7 @@
     {
       "id": "pre020",
       "name": "Petaia,N",
-      "team": "Bath",
+      "team": "BAT",
       "position": "MID",
       "rate": 9.3,
       "vol": 0.3,
@@ -248,7 +248,7 @@
     {
       "id": "pre021",
       "name": "Brown,M",
-      "team": "Bath",
+      "team": "BAT",
       "position": "OBK",
       "rate": 8.8,
       "vol": 0.7,
@@ -257,7 +257,7 @@
     {
       "id": "pre022",
       "name": "Hughes,W",
-      "team": "Bath",
+      "team": "BAT",
       "position": "OBK",
       "rate": 11.5,
       "vol": 0.3,
@@ -266,7 +266,7 @@
     {
       "id": "pre023",
       "name": "Mapimpi,G",
-      "team": "Bath",
+      "team": "BAT",
       "position": "OBK",
       "rate": 10.5,
       "vol": 0.5,
@@ -275,7 +275,7 @@
     {
       "id": "pre024",
       "name": "Tupou,N",
-      "team": "Bath",
+      "team": "BAT",
       "position": "OBK",
       "rate": 11.3,
       "vol": 0.2,
@@ -284,7 +284,7 @@
     {
       "id": "pre025",
       "name": "Holloway,P",
-      "team": "Bath",
+      "team": "BAT",
       "position": "OBK",
       "rate": 11.4,
       "vol": 0.5,
@@ -293,7 +293,7 @@
     {
       "id": "pre026",
       "name": "Thompson,G",
-      "team": "Bristol Bears",
+      "team": "BRI",
       "position": "PR",
       "rate": 7.8,
       "vol": 0.2,
@@ -302,7 +302,7 @@
     {
       "id": "pre027",
       "name": "Hughes,L",
-      "team": "Bristol Bears",
+      "team": "BRI",
       "position": "PR",
       "rate": 5.1,
       "vol": 0.7,
@@ -311,7 +311,7 @@
     {
       "id": "pre028",
       "name": "Kolbe,L",
-      "team": "Bristol Bears",
+      "team": "BRI",
       "position": "PR",
       "rate": 8.9,
       "vol": 0.6,
@@ -320,7 +320,7 @@
     {
       "id": "pre029",
       "name": "Suaalii,F",
-      "team": "Bristol Bears",
+      "team": "BRI",
       "position": "PR",
       "rate": 9.2,
       "vol": 0.7,
@@ -329,7 +329,7 @@
     {
       "id": "pre030",
       "name": "Salakaia-Loto,N",
-      "team": "Bristol Bears",
+      "team": "BRI",
       "position": "HK",
       "rate": 8.6,
       "vol": 0.5,
@@ -338,7 +338,7 @@
     {
       "id": "pre031",
       "name": "Smith,D",
-      "team": "Bristol Bears",
+      "team": "BRI",
       "position": "HK",
       "rate": 9.3,
       "vol": 0.2,
@@ -347,7 +347,7 @@
     {
       "id": "pre032",
       "name": "Mapimpi,F",
-      "team": "Bristol Bears",
+      "team": "BRI",
       "position": "LK",
       "rate": 9.2,
       "vol": 0.2,
@@ -356,7 +356,7 @@
     {
       "id": "pre033",
       "name": "Mauala,G",
-      "team": "Bristol Bears",
+      "team": "BRI",
       "position": "LK",
       "rate": 10.2,
       "vol": 0.4,
@@ -365,7 +365,7 @@
     {
       "id": "pre034",
       "name": "Jones,N",
-      "team": "Bristol Bears",
+      "team": "BRI",
       "position": "LK",
       "rate": 6.1,
       "vol": 0.2,
@@ -374,7 +374,7 @@
     {
       "id": "pre035",
       "name": "Williams,N",
-      "team": "Bristol Bears",
+      "team": "BRI",
       "position": "LF",
       "rate": 10.0,
       "vol": 0.8,
@@ -383,7 +383,7 @@
     {
       "id": "pre036",
       "name": "Thomas,W",
-      "team": "Bristol Bears",
+      "team": "BRI",
       "position": "LF",
       "rate": 10.4,
       "vol": 0.7,
@@ -392,7 +392,7 @@
     {
       "id": "pre037",
       "name": "Edwards,N",
-      "team": "Bristol Bears",
+      "team": "BRI",
       "position": "LF",
       "rate": 9.1,
       "vol": 0.2,
@@ -401,7 +401,7 @@
     {
       "id": "pre038",
       "name": "King,O",
-      "team": "Bristol Bears",
+      "team": "BRI",
       "position": "LF",
       "rate": 7.7,
       "vol": 0.4,
@@ -410,7 +410,7 @@
     {
       "id": "pre039",
       "name": "Lolesio,J",
-      "team": "Bristol Bears",
+      "team": "BRI",
       "position": "LF",
       "rate": 9.8,
       "vol": 0.2,
@@ -419,7 +419,7 @@
     {
       "id": "pre040",
       "name": "Vermeulen,J",
-      "team": "Bristol Bears",
+      "team": "BRI",
       "position": "SH",
       "rate": 8.0,
       "vol": 0.4,
@@ -428,7 +428,7 @@
     {
       "id": "pre041",
       "name": "Thomas,J",
-      "team": "Bristol Bears",
+      "team": "BRI",
       "position": "SH",
       "rate": 8.8,
       "vol": 0.3,
@@ -437,7 +437,7 @@
     {
       "id": "pre042",
       "name": "Evans,K",
-      "team": "Bristol Bears",
+      "team": "BRI",
       "position": "FH",
       "rate": 11.8,
       "vol": 0.8,
@@ -446,7 +446,7 @@
     {
       "id": "pre043",
       "name": "Ioane,D",
-      "team": "Bristol Bears",
+      "team": "BRI",
       "position": "FH",
       "rate": 9.0,
       "vol": 0.2,
@@ -455,7 +455,7 @@
     {
       "id": "pre044",
       "name": "Ward,K",
-      "team": "Bristol Bears",
+      "team": "BRI",
       "position": "MID",
       "rate": 8.2,
       "vol": 0.6,
@@ -464,7 +464,7 @@
     {
       "id": "pre045",
       "name": "Lewis,F",
-      "team": "Bristol Bears",
+      "team": "BRI",
       "position": "MID",
       "rate": 10.2,
       "vol": 0.2,
@@ -473,7 +473,7 @@
     {
       "id": "pre046",
       "name": "Lewis,M",
-      "team": "Bristol Bears",
+      "team": "BRI",
       "position": "MID",
       "rate": 6.5,
       "vol": 0.3,
@@ -482,7 +482,7 @@
     {
       "id": "pre047",
       "name": "Evans,S",
-      "team": "Bristol Bears",
+      "team": "BRI",
       "position": "OBK",
       "rate": 11.3,
       "vol": 0.6,
@@ -491,7 +491,7 @@
     {
       "id": "pre048",
       "name": "Suaalii,G",
-      "team": "Bristol Bears",
+      "team": "BRI",
       "position": "OBK",
       "rate": 8.2,
       "vol": 0.6,
@@ -500,7 +500,7 @@
     {
       "id": "pre049",
       "name": "Phillips,N",
-      "team": "Bristol Bears",
+      "team": "BRI",
       "position": "OBK",
       "rate": 9.6,
       "vol": 0.5,
@@ -509,7 +509,7 @@
     {
       "id": "pre050",
       "name": "Salakaia-Loto,C",
-      "team": "Bristol Bears",
+      "team": "BRI",
       "position": "OBK",
       "rate": 11.6,
       "vol": 0.4,
@@ -518,7 +518,7 @@
     {
       "id": "pre051",
       "name": "Wilkin,M",
-      "team": "Bristol Bears",
+      "team": "BRI",
       "position": "OBK",
       "rate": 11.0,
       "vol": 0.6,
@@ -527,7 +527,7 @@
     {
       "id": "pre052",
       "name": "Bennett,O",
-      "team": "Exeter Chiefs",
+      "team": "EXE",
       "position": "PR",
       "rate": 8.1,
       "vol": 0.4,
@@ -536,7 +536,7 @@
     {
       "id": "pre053",
       "name": "King,F",
-      "team": "Exeter Chiefs",
+      "team": "EXE",
       "position": "PR",
       "rate": 9.1,
       "vol": 0.3,
@@ -545,7 +545,7 @@
     {
       "id": "pre054",
       "name": "Suaalii,S",
-      "team": "Exeter Chiefs",
+      "team": "EXE",
       "position": "PR",
       "rate": 5.5,
       "vol": 0.2,
@@ -554,7 +554,7 @@
     {
       "id": "pre055",
       "name": "Ioane,R",
-      "team": "Exeter Chiefs",
+      "team": "EXE",
       "position": "PR",
       "rate": 5.1,
       "vol": 0.5,
@@ -563,7 +563,7 @@
     {
       "id": "pre056",
       "name": "Brown,K",
-      "team": "Exeter Chiefs",
+      "team": "EXE",
       "position": "HK",
       "rate": 6.9,
       "vol": 0.4,
@@ -572,7 +572,7 @@
     {
       "id": "pre057",
       "name": "Cole,H",
-      "team": "Exeter Chiefs",
+      "team": "EXE",
       "position": "HK",
       "rate": 7.1,
       "vol": 0.5,
@@ -581,7 +581,7 @@
     {
       "id": "pre058",
       "name": "Walker,C",
-      "team": "Exeter Chiefs",
+      "team": "EXE",
       "position": "LK",
       "rate": 5.8,
       "vol": 0.8,
@@ -590,7 +590,7 @@
     {
       "id": "pre059",
       "name": "Thomas,K",
-      "team": "Exeter Chiefs",
+      "team": "EXE",
       "position": "LK",
       "rate": 6.6,
       "vol": 0.6,
@@ -599,7 +599,7 @@
     {
       "id": "pre060",
       "name": "Thomas,L",
-      "team": "Exeter Chiefs",
+      "team": "EXE",
       "position": "LK",
       "rate": 6.0,
       "vol": 0.3,
@@ -608,7 +608,7 @@
     {
       "id": "pre061",
       "name": "Barrett,A",
-      "team": "Exeter Chiefs",
+      "team": "EXE",
       "position": "LF",
       "rate": 6.9,
       "vol": 0.7,
@@ -617,7 +617,7 @@
     {
       "id": "pre062",
       "name": "Mapimpi,C",
-      "team": "Exeter Chiefs",
+      "team": "EXE",
       "position": "LF",
       "rate": 9.1,
       "vol": 0.7,
@@ -626,7 +626,7 @@
     {
       "id": "pre063",
       "name": "Morgan,O",
-      "team": "Exeter Chiefs",
+      "team": "EXE",
       "position": "LF",
       "rate": 7.2,
       "vol": 0.5,
@@ -635,7 +635,7 @@
     {
       "id": "pre064",
       "name": "Jones,A",
-      "team": "Exeter Chiefs",
+      "team": "EXE",
       "position": "LF",
       "rate": 7.7,
       "vol": 0.4,
@@ -644,7 +644,7 @@
     {
       "id": "pre065",
       "name": "Ward,E",
-      "team": "Exeter Chiefs",
+      "team": "EXE",
       "position": "LF",
       "rate": 6.8,
       "vol": 0.3,
@@ -653,7 +653,7 @@
     {
       "id": "pre066",
       "name": "Williams,O",
-      "team": "Exeter Chiefs",
+      "team": "EXE",
       "position": "SH",
       "rate": 10.0,
       "vol": 0.5,
@@ -662,7 +662,7 @@
     {
       "id": "pre067",
       "name": "Harris,R",
-      "team": "Exeter Chiefs",
+      "team": "EXE",
       "position": "SH",
       "rate": 11.5,
       "vol": 0.4,
@@ -671,7 +671,7 @@
     {
       "id": "pre068",
       "name": "Bell,W",
-      "team": "Exeter Chiefs",
+      "team": "EXE",
       "position": "FH",
       "rate": 12.3,
       "vol": 0.7,
@@ -680,7 +680,7 @@
     {
       "id": "pre069",
       "name": "Mauala,M",
-      "team": "Exeter Chiefs",
+      "team": "EXE",
       "position": "FH",
       "rate": 12.3,
       "vol": 0.4,
@@ -689,7 +689,7 @@
     {
       "id": "pre070",
       "name": "Carter,K",
-      "team": "Exeter Chiefs",
+      "team": "EXE",
       "position": "MID",
       "rate": 7.0,
       "vol": 0.2,
@@ -698,7 +698,7 @@
     {
       "id": "pre071",
       "name": "Edwards,K",
-      "team": "Exeter Chiefs",
+      "team": "EXE",
       "position": "MID",
       "rate": 7.8,
       "vol": 0.2,
@@ -707,7 +707,7 @@
     {
       "id": "pre072",
       "name": "King,T",
-      "team": "Exeter Chiefs",
+      "team": "EXE",
       "position": "MID",
       "rate": 10.0,
       "vol": 0.8,
@@ -716,7 +716,7 @@
     {
       "id": "pre073",
       "name": "Jones,E",
-      "team": "Exeter Chiefs",
+      "team": "EXE",
       "position": "OBK",
       "rate": 7.9,
       "vol": 0.2,
@@ -725,7 +725,7 @@
     {
       "id": "pre074",
       "name": "Barrett,D",
-      "team": "Exeter Chiefs",
+      "team": "EXE",
       "position": "OBK",
       "rate": 11.9,
       "vol": 0.5,
@@ -734,7 +734,7 @@
     {
       "id": "pre075",
       "name": "Shaw,B",
-      "team": "Exeter Chiefs",
+      "team": "EXE",
       "position": "OBK",
       "rate": 10.4,
       "vol": 0.2,
@@ -743,7 +743,7 @@
     {
       "id": "pre076",
       "name": "Phillips,P",
-      "team": "Exeter Chiefs",
+      "team": "EXE",
       "position": "OBK",
       "rate": 7.1,
       "vol": 0.3,
@@ -752,7 +752,7 @@
     {
       "id": "pre077",
       "name": "Roberts,N",
-      "team": "Exeter Chiefs",
+      "team": "EXE",
       "position": "OBK",
       "rate": 10.4,
       "vol": 0.7,
@@ -761,7 +761,7 @@
     {
       "id": "pre078",
       "name": "Watson,M",
-      "team": "Gloucester",
+      "team": "GLO",
       "position": "PR",
       "rate": 7.3,
       "vol": 0.6,
@@ -770,7 +770,7 @@
     {
       "id": "pre079",
       "name": "Stone,J",
-      "team": "Gloucester",
+      "team": "GLO",
       "position": "PR",
       "rate": 6.3,
       "vol": 0.3,
@@ -779,7 +779,7 @@
     {
       "id": "pre080",
       "name": "Lolesio,K",
-      "team": "Gloucester",
+      "team": "GLO",
       "position": "PR",
       "rate": 9.4,
       "vol": 0.6,
@@ -788,7 +788,7 @@
     {
       "id": "pre081",
       "name": "Sititi,N",
-      "team": "Gloucester",
+      "team": "GLO",
       "position": "PR",
       "rate": 6.0,
       "vol": 0.5,
@@ -797,7 +797,7 @@
     {
       "id": "pre082",
       "name": "Bennett,H",
-      "team": "Gloucester",
+      "team": "GLO",
       "position": "HK",
       "rate": 7.9,
       "vol": 0.6,
@@ -806,7 +806,7 @@
     {
       "id": "pre083",
       "name": "Walker,G",
-      "team": "Gloucester",
+      "team": "GLO",
       "position": "HK",
       "rate": 9.7,
       "vol": 0.5,
@@ -815,7 +815,7 @@
     {
       "id": "pre084",
       "name": "Latu,O",
-      "team": "Gloucester",
+      "team": "GLO",
       "position": "LK",
       "rate": 7.4,
       "vol": 0.4,
@@ -824,7 +824,7 @@
     {
       "id": "pre085",
       "name": "Petaia,K",
-      "team": "Gloucester",
+      "team": "GLO",
       "position": "LK",
       "rate": 6.0,
       "vol": 0.6,
@@ -833,7 +833,7 @@
     {
       "id": "pre086",
       "name": "Marsh,D",
-      "team": "Gloucester",
+      "team": "GLO",
       "position": "LK",
       "rate": 7.8,
       "vol": 0.6,
@@ -842,7 +842,7 @@
     {
       "id": "pre087",
       "name": "Sititi,G",
-      "team": "Gloucester",
+      "team": "GLO",
       "position": "LF",
       "rate": 8.0,
       "vol": 0.3,
@@ -851,7 +851,7 @@
     {
       "id": "pre088",
       "name": "Wright,G",
-      "team": "Gloucester",
+      "team": "GLO",
       "position": "LF",
       "rate": 8.1,
       "vol": 0.6,
@@ -860,7 +860,7 @@
     {
       "id": "pre089",
       "name": "Reece,R",
-      "team": "Gloucester",
+      "team": "GLO",
       "position": "LF",
       "rate": 8.9,
       "vol": 0.3,
@@ -869,7 +869,7 @@
     {
       "id": "pre090",
       "name": "Lolesio,P",
-      "team": "Gloucester",
+      "team": "GLO",
       "position": "LF",
       "rate": 9.6,
       "vol": 0.3,
@@ -878,7 +878,7 @@
     {
       "id": "pre091",
       "name": "Ward,O",
-      "team": "Gloucester",
+      "team": "GLO",
       "position": "LF",
       "rate": 6.6,
       "vol": 0.6,
@@ -887,7 +887,7 @@
     {
       "id": "pre092",
       "name": "Bennett,T",
-      "team": "Gloucester",
+      "team": "GLO",
       "position": "SH",
       "rate": 8.6,
       "vol": 0.7,
@@ -896,7 +896,7 @@
     {
       "id": "pre093",
       "name": "Reid,J",
-      "team": "Gloucester",
+      "team": "GLO",
       "position": "SH",
       "rate": 10.3,
       "vol": 0.2,
@@ -905,7 +905,7 @@
     {
       "id": "pre094",
       "name": "van Rhyn,K",
-      "team": "Gloucester",
+      "team": "GLO",
       "position": "FH",
       "rate": 11.7,
       "vol": 0.6,
@@ -914,7 +914,7 @@
     {
       "id": "pre095",
       "name": "Petaia,M",
-      "team": "Gloucester",
+      "team": "GLO",
       "position": "FH",
       "rate": 10.2,
       "vol": 0.3,
@@ -923,7 +923,7 @@
     {
       "id": "pre096",
       "name": "Mapimpi,T",
-      "team": "Gloucester",
+      "team": "GLO",
       "position": "MID",
       "rate": 7.6,
       "vol": 0.6,
@@ -932,7 +932,7 @@
     {
       "id": "pre097",
       "name": "Brown,A",
-      "team": "Gloucester",
+      "team": "GLO",
       "position": "MID",
       "rate": 10.5,
       "vol": 0.5,
@@ -941,7 +941,7 @@
     {
       "id": "pre098",
       "name": "Hill,R",
-      "team": "Gloucester",
+      "team": "GLO",
       "position": "MID",
       "rate": 10.6,
       "vol": 0.5,
@@ -950,7 +950,7 @@
     {
       "id": "pre099",
       "name": "Marsh,A",
-      "team": "Gloucester",
+      "team": "GLO",
       "position": "OBK",
       "rate": 10.0,
       "vol": 0.6,
@@ -959,7 +959,7 @@
     {
       "id": "pre100",
       "name": "Reid,R",
-      "team": "Gloucester",
+      "team": "GLO",
       "position": "OBK",
       "rate": 11.6,
       "vol": 0.4,
@@ -968,7 +968,7 @@
     {
       "id": "pre101",
       "name": "Cole,M",
-      "team": "Gloucester",
+      "team": "GLO",
       "position": "OBK",
       "rate": 11.7,
       "vol": 0.5,
@@ -977,7 +977,7 @@
     {
       "id": "pre102",
       "name": "Hill,A",
-      "team": "Gloucester",
+      "team": "GLO",
       "position": "OBK",
       "rate": 8.4,
       "vol": 0.2,
@@ -986,7 +986,7 @@
     {
       "id": "pre103",
       "name": "Roberts,D",
-      "team": "Gloucester",
+      "team": "GLO",
       "position": "OBK",
       "rate": 10.2,
       "vol": 0.7,
@@ -995,7 +995,7 @@
     {
       "id": "pre104",
       "name": "Suaalii,H",
-      "team": "Harlequins",
+      "team": "HAR",
       "position": "PR",
       "rate": 7.1,
       "vol": 0.4,
@@ -1004,7 +1004,7 @@
     {
       "id": "pre105",
       "name": "Burns,H",
-      "team": "Harlequins",
+      "team": "HAR",
       "position": "PR",
       "rate": 8.0,
       "vol": 0.8,
@@ -1013,7 +1013,7 @@
     {
       "id": "pre106",
       "name": "Petaia,T",
-      "team": "Harlequins",
+      "team": "HAR",
       "position": "PR",
       "rate": 6.8,
       "vol": 0.8,
@@ -1022,7 +1022,7 @@
     {
       "id": "pre107",
       "name": "Roberts,F",
-      "team": "Harlequins",
+      "team": "HAR",
       "position": "PR",
       "rate": 7.3,
       "vol": 0.8,
@@ -1031,7 +1031,7 @@
     {
       "id": "pre108",
       "name": "Edwards,L",
-      "team": "Harlequins",
+      "team": "HAR",
       "position": "HK",
       "rate": 9.2,
       "vol": 0.8,
@@ -1040,7 +1040,7 @@
     {
       "id": "pre109",
       "name": "Green,K",
-      "team": "Harlequins",
+      "team": "HAR",
       "position": "HK",
       "rate": 6.8,
       "vol": 0.3,
@@ -1049,7 +1049,7 @@
     {
       "id": "pre110",
       "name": "Jones,C",
-      "team": "Harlequins",
+      "team": "HAR",
       "position": "LK",
       "rate": 5.8,
       "vol": 0.4,
@@ -1058,7 +1058,7 @@
     {
       "id": "pre111",
       "name": "Taylor,T",
-      "team": "Harlequins",
+      "team": "HAR",
       "position": "LK",
       "rate": 9.7,
       "vol": 0.3,
@@ -1067,7 +1067,7 @@
     {
       "id": "pre112",
       "name": "Morgan,M",
-      "team": "Harlequins",
+      "team": "HAR",
       "position": "LK",
       "rate": 8.5,
       "vol": 0.4,
@@ -1076,7 +1076,7 @@
     {
       "id": "pre113",
       "name": "Ioane,C",
-      "team": "Harlequins",
+      "team": "HAR",
       "position": "LF",
       "rate": 6.7,
       "vol": 0.3,
@@ -1085,7 +1085,7 @@
     {
       "id": "pre114",
       "name": "Williams,J",
-      "team": "Harlequins",
+      "team": "HAR",
       "position": "LF",
       "rate": 10.9,
       "vol": 0.4,
@@ -1094,7 +1094,7 @@
     {
       "id": "pre115",
       "name": "Petaia,A",
-      "team": "Harlequins",
+      "team": "HAR",
       "position": "LF",
       "rate": 10.1,
       "vol": 0.8,
@@ -1103,7 +1103,7 @@
     {
       "id": "pre116",
       "name": "Naholo,S",
-      "team": "Harlequins",
+      "team": "HAR",
       "position": "LF",
       "rate": 7.0,
       "vol": 0.5,
@@ -1112,7 +1112,7 @@
     {
       "id": "pre117",
       "name": "Ward,G",
-      "team": "Harlequins",
+      "team": "HAR",
       "position": "LF",
       "rate": 9.4,
       "vol": 0.6,
@@ -1121,7 +1121,7 @@
     {
       "id": "pre118",
       "name": "Suaalii,C",
-      "team": "Harlequins",
+      "team": "HAR",
       "position": "SH",
       "rate": 11.9,
       "vol": 0.3,
@@ -1130,7 +1130,7 @@
     {
       "id": "pre119",
       "name": "Nawaqanitawase,L",
-      "team": "Harlequins",
+      "team": "HAR",
       "position": "SH",
       "rate": 10.5,
       "vol": 0.6,
@@ -1139,7 +1139,7 @@
     {
       "id": "pre120",
       "name": "Clarke,G",
-      "team": "Harlequins",
+      "team": "HAR",
       "position": "FH",
       "rate": 8.6,
       "vol": 0.2,
@@ -1148,7 +1148,7 @@
     {
       "id": "pre121",
       "name": "Salakaia-Loto,O",
-      "team": "Harlequins",
+      "team": "HAR",
       "position": "FH",
       "rate": 12.9,
       "vol": 0.7,
@@ -1157,7 +1157,7 @@
     {
       "id": "pre122",
       "name": "Holloway,R",
-      "team": "Harlequins",
+      "team": "HAR",
       "position": "MID",
       "rate": 9.9,
       "vol": 0.5,
@@ -1166,7 +1166,7 @@
     {
       "id": "pre123",
       "name": "Kelly,G",
-      "team": "Harlequins",
+      "team": "HAR",
       "position": "MID",
       "rate": 8.5,
       "vol": 0.2,
@@ -1175,7 +1175,7 @@
     {
       "id": "pre124",
       "name": "Evans,O",
-      "team": "Harlequins",
+      "team": "HAR",
       "position": "MID",
       "rate": 8.1,
       "vol": 0.6,
@@ -1184,7 +1184,7 @@
     {
       "id": "pre125",
       "name": "Morgan,F",
-      "team": "Harlequins",
+      "team": "HAR",
       "position": "OBK",
       "rate": 8.2,
       "vol": 0.5,
@@ -1193,7 +1193,7 @@
     {
       "id": "pre126",
       "name": "Kolbe,T",
-      "team": "Harlequins",
+      "team": "HAR",
       "position": "OBK",
       "rate": 9.4,
       "vol": 0.4,
@@ -1202,7 +1202,7 @@
     {
       "id": "pre127",
       "name": "Phillips,W",
-      "team": "Harlequins",
+      "team": "HAR",
       "position": "OBK",
       "rate": 9.5,
       "vol": 0.3,
@@ -1211,7 +1211,7 @@
     {
       "id": "pre128",
       "name": "Edwards,M",
-      "team": "Harlequins",
+      "team": "HAR",
       "position": "OBK",
       "rate": 8.9,
       "vol": 0.8,
@@ -1220,7 +1220,7 @@
     {
       "id": "pre129",
       "name": "Mapimpi,B",
-      "team": "Harlequins",
+      "team": "HAR",
       "position": "OBK",
       "rate": 8.5,
       "vol": 0.7,
@@ -1229,7 +1229,7 @@
     {
       "id": "pre130",
       "name": "Salakaia-Loto,T",
-      "team": "Leicester Tigers",
+      "team": "LEI",
       "position": "PR",
       "rate": 6.7,
       "vol": 0.2,
@@ -1238,7 +1238,7 @@
     {
       "id": "pre131",
       "name": "Wright,R",
-      "team": "Leicester Tigers",
+      "team": "LEI",
       "position": "PR",
       "rate": 5.4,
       "vol": 0.8,
@@ -1247,7 +1247,7 @@
     {
       "id": "pre132",
       "name": "Reid,O",
-      "team": "Leicester Tigers",
+      "team": "LEI",
       "position": "PR",
       "rate": 5.2,
       "vol": 0.5,
@@ -1256,7 +1256,7 @@
     {
       "id": "pre133",
       "name": "Clarke,M",
-      "team": "Leicester Tigers",
+      "team": "LEI",
       "position": "PR",
       "rate": 5.6,
       "vol": 0.5,
@@ -1265,7 +1265,7 @@
     {
       "id": "pre134",
       "name": "Green,F",
-      "team": "Leicester Tigers",
+      "team": "LEI",
       "position": "HK",
       "rate": 6.0,
       "vol": 0.3,
@@ -1274,7 +1274,7 @@
     {
       "id": "pre135",
       "name": "Price,N",
-      "team": "Leicester Tigers",
+      "team": "LEI",
       "position": "HK",
       "rate": 8.5,
       "vol": 0.8,
@@ -1283,7 +1283,7 @@
     {
       "id": "pre136",
       "name": "Phillips,O",
-      "team": "Leicester Tigers",
+      "team": "LEI",
       "position": "LK",
       "rate": 7.3,
       "vol": 0.6,
@@ -1292,7 +1292,7 @@
     {
       "id": "pre137",
       "name": "Brown,B",
-      "team": "Leicester Tigers",
+      "team": "LEI",
       "position": "LK",
       "rate": 9.7,
       "vol": 0.6,
@@ -1301,7 +1301,7 @@
     {
       "id": "pre138",
       "name": "White,E",
-      "team": "Leicester Tigers",
+      "team": "LEI",
       "position": "LK",
       "rate": 9.4,
       "vol": 0.6,
@@ -1310,7 +1310,7 @@
     {
       "id": "pre139",
       "name": "Wood,S",
-      "team": "Leicester Tigers",
+      "team": "LEI",
       "position": "LF",
       "rate": 9.8,
       "vol": 0.7,
@@ -1319,7 +1319,7 @@
     {
       "id": "pre140",
       "name": "Ward,C",
-      "team": "Leicester Tigers",
+      "team": "LEI",
       "position": "LF",
       "rate": 8.2,
       "vol": 0.6,
@@ -1328,7 +1328,7 @@
     {
       "id": "pre141",
       "name": "Ward,D",
-      "team": "Leicester Tigers",
+      "team": "LEI",
       "position": "LF",
       "rate": 7.3,
       "vol": 0.8,
@@ -1337,7 +1337,7 @@
     {
       "id": "pre142",
       "name": "Brown,F",
-      "team": "Leicester Tigers",
+      "team": "LEI",
       "position": "LF",
       "rate": 6.4,
       "vol": 0.3,
@@ -1346,7 +1346,7 @@
     {
       "id": "pre143",
       "name": "Moore,K",
-      "team": "Leicester Tigers",
+      "team": "LEI",
       "position": "LF",
       "rate": 7.1,
       "vol": 0.6,
@@ -1355,7 +1355,7 @@
     {
       "id": "pre144",
       "name": "Martin,H",
-      "team": "Leicester Tigers",
+      "team": "LEI",
       "position": "SH",
       "rate": 10.5,
       "vol": 0.7,
@@ -1364,7 +1364,7 @@
     {
       "id": "pre145",
       "name": "Gordon,C",
-      "team": "Leicester Tigers",
+      "team": "LEI",
       "position": "SH",
       "rate": 7.2,
       "vol": 0.8,
@@ -1373,7 +1373,7 @@
     {
       "id": "pre146",
       "name": "Morgan,R",
-      "team": "Leicester Tigers",
+      "team": "LEI",
       "position": "FH",
       "rate": 12.2,
       "vol": 0.5,
@@ -1382,7 +1382,7 @@
     {
       "id": "pre147",
       "name": "Slipper,O",
-      "team": "Leicester Tigers",
+      "team": "LEI",
       "position": "FH",
       "rate": 12.6,
       "vol": 0.8,
@@ -1391,7 +1391,7 @@
     {
       "id": "pre148",
       "name": "Wood,T",
-      "team": "Leicester Tigers",
+      "team": "LEI",
       "position": "MID",
       "rate": 10.8,
       "vol": 0.2,
@@ -1400,7 +1400,7 @@
     {
       "id": "pre149",
       "name": "Harris,O",
-      "team": "Leicester Tigers",
+      "team": "LEI",
       "position": "MID",
       "rate": 9.3,
       "vol": 0.5,
@@ -1409,7 +1409,7 @@
     {
       "id": "pre150",
       "name": "Morgan,L",
-      "team": "Leicester Tigers",
+      "team": "LEI",
       "position": "MID",
       "rate": 10.5,
       "vol": 0.7,
@@ -1418,7 +1418,7 @@
     {
       "id": "pre151",
       "name": "Tupou,M",
-      "team": "Leicester Tigers",
+      "team": "LEI",
       "position": "OBK",
       "rate": 9.3,
       "vol": 0.2,
@@ -1427,7 +1427,7 @@
     {
       "id": "pre152",
       "name": "Lolesio,E",
-      "team": "Leicester Tigers",
+      "team": "LEI",
       "position": "OBK",
       "rate": 10.2,
       "vol": 0.2,
@@ -1436,7 +1436,7 @@
     {
       "id": "pre153",
       "name": "Wright,H",
-      "team": "Leicester Tigers",
+      "team": "LEI",
       "position": "OBK",
       "rate": 11.6,
       "vol": 0.5,
@@ -1445,7 +1445,7 @@
     {
       "id": "pre154",
       "name": "Kelly,P",
-      "team": "Leicester Tigers",
+      "team": "LEI",
       "position": "OBK",
       "rate": 8.3,
       "vol": 0.4,
@@ -1454,7 +1454,7 @@
     {
       "id": "pre155",
       "name": "Walker,A",
-      "team": "Leicester Tigers",
+      "team": "LEI",
       "position": "OBK",
       "rate": 8.9,
       "vol": 0.2,
@@ -1463,7 +1463,7 @@
     {
       "id": "pre156",
       "name": "Naholo,D",
-      "team": "Northampton Saints",
+      "team": "NOR",
       "position": "PR",
       "rate": 8.4,
       "vol": 0.6,
@@ -1472,7 +1472,7 @@
     {
       "id": "pre157",
       "name": "Turner,H",
-      "team": "Northampton Saints",
+      "team": "NOR",
       "position": "PR",
       "rate": 7.4,
       "vol": 0.5,
@@ -1481,7 +1481,7 @@
     {
       "id": "pre158",
       "name": "Carter,M",
-      "team": "Northampton Saints",
+      "team": "NOR",
       "position": "PR",
       "rate": 8.8,
       "vol": 0.8,
@@ -1490,7 +1490,7 @@
     {
       "id": "pre159",
       "name": "Price,M",
-      "team": "Northampton Saints",
+      "team": "NOR",
       "position": "PR",
       "rate": 6.7,
       "vol": 0.8,
@@ -1499,7 +1499,7 @@
     {
       "id": "pre160",
       "name": "Smith,A",
-      "team": "Northampton Saints",
+      "team": "NOR",
       "position": "HK",
       "rate": 8.5,
       "vol": 0.2,
@@ -1508,7 +1508,7 @@
     {
       "id": "pre161",
       "name": "Marsh,B",
-      "team": "Northampton Saints",
+      "team": "NOR",
       "position": "HK",
       "rate": 6.8,
       "vol": 0.8,
@@ -1517,7 +1517,7 @@
     {
       "id": "pre162",
       "name": "Nawaqanitawase,A",
-      "team": "Northampton Saints",
+      "team": "NOR",
       "position": "LK",
       "rate": 7.0,
       "vol": 0.6,
@@ -1526,7 +1526,7 @@
     {
       "id": "pre163",
       "name": "Cooper,O",
-      "team": "Northampton Saints",
+      "team": "NOR",
       "position": "LK",
       "rate": 7.0,
       "vol": 0.5,
@@ -1535,7 +1535,7 @@
     {
       "id": "pre164",
       "name": "Roberts,P",
-      "team": "Northampton Saints",
+      "team": "NOR",
       "position": "LK",
       "rate": 6.2,
       "vol": 0.4,
@@ -1544,7 +1544,7 @@
     {
       "id": "pre165",
       "name": "Fihaki,A",
-      "team": "Northampton Saints",
+      "team": "NOR",
       "position": "LF",
       "rate": 7.8,
       "vol": 0.3,
@@ -1553,7 +1553,7 @@
     {
       "id": "pre166",
       "name": "Petaia,B",
-      "team": "Northampton Saints",
+      "team": "NOR",
       "position": "LF",
       "rate": 6.4,
       "vol": 0.8,
@@ -1562,7 +1562,7 @@
     {
       "id": "pre167",
       "name": "Murphy,T",
-      "team": "Northampton Saints",
+      "team": "NOR",
       "position": "LF",
       "rate": 6.8,
       "vol": 0.5,
@@ -1571,7 +1571,7 @@
     {
       "id": "pre168",
       "name": "Bennett,W",
-      "team": "Northampton Saints",
+      "team": "NOR",
       "position": "LF",
       "rate": 6.1,
       "vol": 0.8,
@@ -1580,7 +1580,7 @@
     {
       "id": "pre169",
       "name": "Wood,P",
-      "team": "Northampton Saints",
+      "team": "NOR",
       "position": "LF",
       "rate": 9.2,
       "vol": 0.5,
@@ -1589,7 +1589,7 @@
     {
       "id": "pre170",
       "name": "Roberts,A",
-      "team": "Northampton Saints",
+      "team": "NOR",
       "position": "SH",
       "rate": 11.3,
       "vol": 0.6,
@@ -1598,7 +1598,7 @@
     {
       "id": "pre171",
       "name": "Cooper,G",
-      "team": "Northampton Saints",
+      "team": "NOR",
       "position": "SH",
       "rate": 7.3,
       "vol": 0.2,
@@ -1607,7 +1607,7 @@
     {
       "id": "pre172",
       "name": "Kolbe,W",
-      "team": "Northampton Saints",
+      "team": "NOR",
       "position": "FH",
       "rate": 9.4,
       "vol": 0.5,
@@ -1616,7 +1616,7 @@
     {
       "id": "pre173",
       "name": "Brown,O",
-      "team": "Northampton Saints",
+      "team": "NOR",
       "position": "FH",
       "rate": 8.0,
       "vol": 0.7,
@@ -1625,7 +1625,7 @@
     {
       "id": "pre174",
       "name": "Kolbe,F",
-      "team": "Northampton Saints",
+      "team": "NOR",
       "position": "MID",
       "rate": 9.2,
       "vol": 0.2,
@@ -1634,7 +1634,7 @@
     {
       "id": "pre175",
       "name": "Williams,P",
-      "team": "Northampton Saints",
+      "team": "NOR",
       "position": "MID",
       "rate": 8.4,
       "vol": 0.7,
@@ -1643,7 +1643,7 @@
     {
       "id": "pre176",
       "name": "Roberts,G",
-      "team": "Northampton Saints",
+      "team": "NOR",
       "position": "MID",
       "rate": 7.6,
       "vol": 0.4,
@@ -1652,7 +1652,7 @@
     {
       "id": "pre177",
       "name": "Brown,C",
-      "team": "Northampton Saints",
+      "team": "NOR",
       "position": "OBK",
       "rate": 8.4,
       "vol": 0.3,
@@ -1661,7 +1661,7 @@
     {
       "id": "pre178",
       "name": "Lolesio,O",
-      "team": "Northampton Saints",
+      "team": "NOR",
       "position": "OBK",
       "rate": 7.8,
       "vol": 0.6,
@@ -1670,7 +1670,7 @@
     {
       "id": "pre179",
       "name": "Lolesio,C",
-      "team": "Northampton Saints",
+      "team": "NOR",
       "position": "OBK",
       "rate": 8.5,
       "vol": 0.5,
@@ -1679,7 +1679,7 @@
     {
       "id": "pre180",
       "name": "Marsh,C",
-      "team": "Northampton Saints",
+      "team": "NOR",
       "position": "OBK",
       "rate": 8.4,
       "vol": 0.4,
@@ -1688,7 +1688,7 @@
     {
       "id": "pre181",
       "name": "Shaw,D",
-      "team": "Northampton Saints",
+      "team": "NOR",
       "position": "OBK",
       "rate": 9.9,
       "vol": 0.8,
@@ -1697,7 +1697,7 @@
     {
       "id": "pre182",
       "name": "Cole,S",
-      "team": "Sale Sharks",
+      "team": "SAL",
       "position": "PR",
       "rate": 5.4,
       "vol": 0.7,
@@ -1706,7 +1706,7 @@
     {
       "id": "pre183",
       "name": "Slipper,B",
-      "team": "Sale Sharks",
+      "team": "SAL",
       "position": "PR",
       "rate": 8.5,
       "vol": 0.5,
@@ -1715,7 +1715,7 @@
     {
       "id": "pre184",
       "name": "Tuipulotu,C",
-      "team": "Sale Sharks",
+      "team": "SAL",
       "position": "PR",
       "rate": 4.8,
       "vol": 0.7,
@@ -1724,7 +1724,7 @@
     {
       "id": "pre185",
       "name": "du Toit,L",
-      "team": "Sale Sharks",
+      "team": "SAL",
       "position": "PR",
       "rate": 8.8,
       "vol": 0.3,
@@ -1733,7 +1733,7 @@
     {
       "id": "pre186",
       "name": "Wood,K",
-      "team": "Sale Sharks",
+      "team": "SAL",
       "position": "HK",
       "rate": 6.9,
       "vol": 0.4,
@@ -1742,7 +1742,7 @@
     {
       "id": "pre187",
       "name": "Nawaqanitawase,W",
-      "team": "Sale Sharks",
+      "team": "SAL",
       "position": "HK",
       "rate": 6.4,
       "vol": 0.6,
@@ -1751,7 +1751,7 @@
     {
       "id": "pre188",
       "name": "Mauala,W",
-      "team": "Sale Sharks",
+      "team": "SAL",
       "position": "LK",
       "rate": 10.2,
       "vol": 0.2,
@@ -1760,7 +1760,7 @@
     {
       "id": "pre189",
       "name": "Cole,B",
-      "team": "Sale Sharks",
+      "team": "SAL",
       "position": "LK",
       "rate": 7.6,
       "vol": 0.4,
@@ -1769,7 +1769,7 @@
     {
       "id": "pre190",
       "name": "Falesolo,E",
-      "team": "Sale Sharks",
+      "team": "SAL",
       "position": "LK",
       "rate": 9.0,
       "vol": 0.2,
@@ -1778,7 +1778,7 @@
     {
       "id": "pre191",
       "name": "Moore,A",
-      "team": "Sale Sharks",
+      "team": "SAL",
       "position": "LF",
       "rate": 10.5,
       "vol": 0.4,
@@ -1787,7 +1787,7 @@
     {
       "id": "pre192",
       "name": "Tuipulotu,N",
-      "team": "Sale Sharks",
+      "team": "SAL",
       "position": "LF",
       "rate": 6.6,
       "vol": 0.5,
@@ -1796,7 +1796,7 @@
     {
       "id": "pre193",
       "name": "Bell,T",
-      "team": "Sale Sharks",
+      "team": "SAL",
       "position": "LF",
       "rate": 9.3,
       "vol": 0.8,
@@ -1805,7 +1805,7 @@
     {
       "id": "pre194",
       "name": "Turner,B",
-      "team": "Sale Sharks",
+      "team": "SAL",
       "position": "LF",
       "rate": 7.0,
       "vol": 0.6,
@@ -1814,7 +1814,7 @@
     {
       "id": "pre195",
       "name": "Mauala,H",
-      "team": "Sale Sharks",
+      "team": "SAL",
       "position": "LF",
       "rate": 6.8,
       "vol": 0.6,
@@ -1823,7 +1823,7 @@
     {
       "id": "pre196",
       "name": "Havili,A",
-      "team": "Sale Sharks",
+      "team": "SAL",
       "position": "SH",
       "rate": 9.2,
       "vol": 0.4,
@@ -1832,7 +1832,7 @@
     {
       "id": "pre197",
       "name": "Williams,K",
-      "team": "Sale Sharks",
+      "team": "SAL",
       "position": "SH",
       "rate": 9.5,
       "vol": 0.2,
@@ -1841,7 +1841,7 @@
     {
       "id": "pre198",
       "name": "Bell,J",
-      "team": "Sale Sharks",
+      "team": "SAL",
       "position": "FH",
       "rate": 12.9,
       "vol": 0.8,
@@ -1850,7 +1850,7 @@
     {
       "id": "pre199",
       "name": "Vermeulen,K",
-      "team": "Sale Sharks",
+      "team": "SAL",
       "position": "FH",
       "rate": 12.3,
       "vol": 0.7,
@@ -1859,7 +1859,7 @@
     {
       "id": "pre200",
       "name": "Clarke,D",
-      "team": "Sale Sharks",
+      "team": "SAL",
       "position": "MID",
       "rate": 10.3,
       "vol": 0.8,
@@ -1868,7 +1868,7 @@
     {
       "id": "pre201",
       "name": "Petaia,G",
-      "team": "Sale Sharks",
+      "team": "SAL",
       "position": "MID",
       "rate": 9.5,
       "vol": 0.8,
@@ -1877,7 +1877,7 @@
     {
       "id": "pre202",
       "name": "Bennett,J",
-      "team": "Sale Sharks",
+      "team": "SAL",
       "position": "MID",
       "rate": 7.7,
       "vol": 0.3,
@@ -1886,7 +1886,7 @@
     {
       "id": "pre203",
       "name": "Martin,P",
-      "team": "Sale Sharks",
+      "team": "SAL",
       "position": "OBK",
       "rate": 7.3,
       "vol": 0.6,
@@ -1895,7 +1895,7 @@
     {
       "id": "pre204",
       "name": "Barrett,O",
-      "team": "Sale Sharks",
+      "team": "SAL",
       "position": "OBK",
       "rate": 10.1,
       "vol": 0.7,
@@ -1904,7 +1904,7 @@
     {
       "id": "pre205",
       "name": "Latu,P",
-      "team": "Sale Sharks",
+      "team": "SAL",
       "position": "OBK",
       "rate": 11.8,
       "vol": 0.2,
@@ -1913,7 +1913,7 @@
     {
       "id": "pre206",
       "name": "Reid,P",
-      "team": "Sale Sharks",
+      "team": "SAL",
       "position": "OBK",
       "rate": 7.1,
       "vol": 0.3,
@@ -1922,7 +1922,7 @@
     {
       "id": "pre207",
       "name": "Phillips,E",
-      "team": "Sale Sharks",
+      "team": "SAL",
       "position": "OBK",
       "rate": 8.1,
       "vol": 0.7,
@@ -1931,7 +1931,7 @@
     {
       "id": "pre208",
       "name": "Stone,K",
-      "team": "Saracens",
+      "team": "SAR",
       "position": "PR",
       "rate": 6.9,
       "vol": 0.3,
@@ -1940,7 +1940,7 @@
     {
       "id": "pre209",
       "name": "Brown,D",
-      "team": "Saracens",
+      "team": "SAR",
       "position": "PR",
       "rate": 6.0,
       "vol": 0.4,
@@ -1949,7 +1949,7 @@
     {
       "id": "pre210",
       "name": "Lolesio,G",
-      "team": "Saracens",
+      "team": "SAR",
       "position": "PR",
       "rate": 5.9,
       "vol": 0.4,
@@ -1958,7 +1958,7 @@
     {
       "id": "pre211",
       "name": "Burns,C",
-      "team": "Saracens",
+      "team": "SAR",
       "position": "PR",
       "rate": 6.6,
       "vol": 0.7,
@@ -1967,7 +1967,7 @@
     {
       "id": "pre212",
       "name": "Bell,A",
-      "team": "Saracens",
+      "team": "SAR",
       "position": "HK",
       "rate": 6.7,
       "vol": 0.4,
@@ -1976,7 +1976,7 @@
     {
       "id": "pre213",
       "name": "Nawaqanitawase,P",
-      "team": "Saracens",
+      "team": "SAR",
       "position": "HK",
       "rate": 8.5,
       "vol": 0.4,
@@ -1985,7 +1985,7 @@
     {
       "id": "pre214",
       "name": "Murphy,H",
-      "team": "Saracens",
+      "team": "SAR",
       "position": "LK",
       "rate": 6.3,
       "vol": 0.5,
@@ -1994,7 +1994,7 @@
     {
       "id": "pre215",
       "name": "Bennett,G",
-      "team": "Saracens",
+      "team": "SAR",
       "position": "LK",
       "rate": 5.8,
       "vol": 0.2,
@@ -2003,7 +2003,7 @@
     {
       "id": "pre216",
       "name": "Petaia,E",
-      "team": "Saracens",
+      "team": "SAR",
       "position": "LK",
       "rate": 8.3,
       "vol": 0.3,
@@ -2012,7 +2012,7 @@
     {
       "id": "pre217",
       "name": "Tupou,L",
-      "team": "Saracens",
+      "team": "SAR",
       "position": "LF",
       "rate": 6.6,
       "vol": 0.7,
@@ -2021,7 +2021,7 @@
     {
       "id": "pre218",
       "name": "Mauala,A",
-      "team": "Saracens",
+      "team": "SAR",
       "position": "LF",
       "rate": 9.5,
       "vol": 0.7,
@@ -2030,7 +2030,7 @@
     {
       "id": "pre219",
       "name": "Taylor,G",
-      "team": "Saracens",
+      "team": "SAR",
       "position": "LF",
       "rate": 9.8,
       "vol": 0.8,
@@ -2039,7 +2039,7 @@
     {
       "id": "pre220",
       "name": "Bell,B",
-      "team": "Saracens",
+      "team": "SAR",
       "position": "LF",
       "rate": 9.7,
       "vol": 0.2,
@@ -2048,7 +2048,7 @@
     {
       "id": "pre221",
       "name": "Lewis,C",
-      "team": "Saracens",
+      "team": "SAR",
       "position": "LF",
       "rate": 7.4,
       "vol": 0.7,
@@ -2057,7 +2057,7 @@
     {
       "id": "pre222",
       "name": "Marsh,H",
-      "team": "Saracens",
+      "team": "SAR",
       "position": "SH",
       "rate": 9.3,
       "vol": 0.6,
@@ -2066,7 +2066,7 @@
     {
       "id": "pre223",
       "name": "Clarke,A",
-      "team": "Saracens",
+      "team": "SAR",
       "position": "SH",
       "rate": 7.3,
       "vol": 0.4,
@@ -2075,7 +2075,7 @@
     {
       "id": "pre224",
       "name": "Clarke,H",
-      "team": "Saracens",
+      "team": "SAR",
       "position": "FH",
       "rate": 11.2,
       "vol": 0.7,
@@ -2084,7 +2084,7 @@
     {
       "id": "pre225",
       "name": "Evans,W",
-      "team": "Saracens",
+      "team": "SAR",
       "position": "FH",
       "rate": 12.0,
       "vol": 0.2,
@@ -2093,7 +2093,7 @@
     {
       "id": "pre226",
       "name": "Morgan,W",
-      "team": "Saracens",
+      "team": "SAR",
       "position": "MID",
       "rate": 10.8,
       "vol": 0.2,
@@ -2102,7 +2102,7 @@
     {
       "id": "pre227",
       "name": "Salakaia-Loto,S",
-      "team": "Saracens",
+      "team": "SAR",
       "position": "MID",
       "rate": 11.3,
       "vol": 0.4,
@@ -2111,7 +2111,7 @@
     {
       "id": "pre228",
       "name": "White,C",
-      "team": "Saracens",
+      "team": "SAR",
       "position": "MID",
       "rate": 7.0,
       "vol": 0.7,
@@ -2120,7 +2120,7 @@
     {
       "id": "pre229",
       "name": "Ioane,A",
-      "team": "Saracens",
+      "team": "SAR",
       "position": "OBK",
       "rate": 9.7,
       "vol": 0.3,
@@ -2129,7 +2129,7 @@
     {
       "id": "pre230",
       "name": "Gordon,D",
-      "team": "Saracens",
+      "team": "SAR",
       "position": "OBK",
       "rate": 8.6,
       "vol": 0.8,
@@ -2138,7 +2138,7 @@
     {
       "id": "pre231",
       "name": "Frost,P",
-      "team": "Saracens",
+      "team": "SAR",
       "position": "OBK",
       "rate": 8.2,
       "vol": 0.6,
@@ -2147,7 +2147,7 @@
     {
       "id": "pre232",
       "name": "Reece,F",
-      "team": "Saracens",
+      "team": "SAR",
       "position": "OBK",
       "rate": 11.8,
       "vol": 0.7,
@@ -2156,7 +2156,7 @@
     {
       "id": "pre233",
       "name": "Taylor,O",
-      "team": "Saracens",
+      "team": "SAR",
       "position": "OBK",
       "rate": 10.0,
       "vol": 0.8,
@@ -2165,7 +2165,7 @@
     {
       "id": "pre234",
       "name": "Sititi,D",
-      "team": "Newcastle Red Bulls",
+      "team": "NEW",
       "position": "PR",
       "rate": 5.4,
       "vol": 0.8,
@@ -2174,7 +2174,7 @@
     {
       "id": "pre235",
       "name": "Wood,F",
-      "team": "Newcastle Red Bulls",
+      "team": "NEW",
       "position": "PR",
       "rate": 7.4,
       "vol": 0.6,
@@ -2183,7 +2183,7 @@
     {
       "id": "pre236",
       "name": "Havili,B",
-      "team": "Newcastle Red Bulls",
+      "team": "NEW",
       "position": "PR",
       "rate": 8.6,
       "vol": 0.5,
@@ -2192,7 +2192,7 @@
     {
       "id": "pre237",
       "name": "du Toit,O",
-      "team": "Newcastle Red Bulls",
+      "team": "NEW",
       "position": "PR",
       "rate": 6.0,
       "vol": 0.6,
@@ -2201,7 +2201,7 @@
     {
       "id": "pre238",
       "name": "Wilkin,P",
-      "team": "Newcastle Red Bulls",
+      "team": "NEW",
       "position": "HK",
       "rate": 8.0,
       "vol": 0.8,
@@ -2210,7 +2210,7 @@
     {
       "id": "pre239",
       "name": "Marsh,E",
-      "team": "Newcastle Red Bulls",
+      "team": "NEW",
       "position": "HK",
       "rate": 5.9,
       "vol": 0.6,
@@ -2219,7 +2219,7 @@
     {
       "id": "pre240",
       "name": "Bennett,A",
-      "team": "Newcastle Red Bulls",
+      "team": "NEW",
       "position": "LK",
       "rate": 8.5,
       "vol": 0.6,
@@ -2228,7 +2228,7 @@
     {
       "id": "pre241",
       "name": "Cole,D",
-      "team": "Newcastle Red Bulls",
+      "team": "NEW",
       "position": "LK",
       "rate": 6.3,
       "vol": 0.2,
@@ -2237,7 +2237,7 @@
     {
       "id": "pre242",
       "name": "Vermeulen,M",
-      "team": "Newcastle Red Bulls",
+      "team": "NEW",
       "position": "LK",
       "rate": 5.8,
       "vol": 0.2,
@@ -2246,7 +2246,7 @@
     {
       "id": "pre243",
       "name": "Bell,G",
-      "team": "Newcastle Red Bulls",
+      "team": "NEW",
       "position": "LF",
       "rate": 6.6,
       "vol": 0.3,
@@ -2255,7 +2255,7 @@
     {
       "id": "pre244",
       "name": "Williams,T",
-      "team": "Newcastle Red Bulls",
+      "team": "NEW",
       "position": "LF",
       "rate": 6.8,
       "vol": 0.8,
@@ -2264,7 +2264,7 @@
     {
       "id": "pre245",
       "name": "Turner,J",
-      "team": "Newcastle Red Bulls",
+      "team": "NEW",
       "position": "LF",
       "rate": 8.8,
       "vol": 0.8,
@@ -2273,7 +2273,7 @@
     {
       "id": "pre246",
       "name": "Turner,O",
-      "team": "Newcastle Red Bulls",
+      "team": "NEW",
       "position": "LF",
       "rate": 6.2,
       "vol": 0.4,
@@ -2282,7 +2282,7 @@
     {
       "id": "pre247",
       "name": "Wilson,J",
-      "team": "Newcastle Red Bulls",
+      "team": "NEW",
       "position": "LF",
       "rate": 9.5,
       "vol": 0.8,
@@ -2291,7 +2291,7 @@
     {
       "id": "pre248",
       "name": "Latu,G",
-      "team": "Newcastle Red Bulls",
+      "team": "NEW",
       "position": "SH",
       "rate": 11.2,
       "vol": 0.7,
@@ -2300,7 +2300,7 @@
     {
       "id": "pre249",
       "name": "Jones,W",
-      "team": "Newcastle Red Bulls",
+      "team": "NEW",
       "position": "SH",
       "rate": 8.0,
       "vol": 0.8,
@@ -2309,7 +2309,7 @@
     {
       "id": "pre250",
       "name": "Bell,C",
-      "team": "Newcastle Red Bulls",
+      "team": "NEW",
       "position": "FH",
       "rate": 12.7,
       "vol": 0.3,
@@ -2318,7 +2318,7 @@
     {
       "id": "pre251",
       "name": "Carter,N",
-      "team": "Newcastle Red Bulls",
+      "team": "NEW",
       "position": "FH",
       "rate": 11.3,
       "vol": 0.7,
@@ -2327,7 +2327,7 @@
     {
       "id": "pre252",
       "name": "Bell,L",
-      "team": "Newcastle Red Bulls",
+      "team": "NEW",
       "position": "MID",
       "rate": 9.0,
       "vol": 0.4,
@@ -2336,7 +2336,7 @@
     {
       "id": "pre253",
       "name": "Cole,J",
-      "team": "Newcastle Red Bulls",
+      "team": "NEW",
       "position": "MID",
       "rate": 9.8,
       "vol": 0.3,
@@ -2345,7 +2345,7 @@
     {
       "id": "pre254",
       "name": "Barrett,P",
-      "team": "Newcastle Red Bulls",
+      "team": "NEW",
       "position": "MID",
       "rate": 6.6,
       "vol": 0.8,
@@ -2354,7 +2354,7 @@
     {
       "id": "pre255",
       "name": "Price,G",
-      "team": "Newcastle Red Bulls",
+      "team": "NEW",
       "position": "OBK",
       "rate": 7.8,
       "vol": 0.5,
@@ -2363,7 +2363,7 @@
     {
       "id": "pre256",
       "name": "Shaw,A",
-      "team": "Newcastle Red Bulls",
+      "team": "NEW",
       "position": "OBK",
       "rate": 7.2,
       "vol": 0.5,
@@ -2372,7 +2372,7 @@
     {
       "id": "pre257",
       "name": "White,M",
-      "team": "Newcastle Red Bulls",
+      "team": "NEW",
       "position": "OBK",
       "rate": 8.7,
       "vol": 0.8,
@@ -2381,7 +2381,7 @@
     {
       "id": "pre258",
       "name": "Gordon,F",
-      "team": "Newcastle Red Bulls",
+      "team": "NEW",
       "position": "OBK",
       "rate": 9.2,
       "vol": 0.7,
@@ -2390,7 +2390,7 @@
     {
       "id": "pre259",
       "name": "Nawaqanitawase,M",
-      "team": "Newcastle Red Bulls",
+      "team": "NEW",
       "position": "OBK",
       "rate": 7.8,
       "vol": 0.4,
@@ -2404,24 +2404,24 @@
       "last_kickoff": "2026-03-01T15:00:00Z",
       "matches": [
         {
-          "home": "Bristol Bears",
-          "away": "Bath"
+          "home": "BRI",
+          "away": "BAT"
         },
         {
-          "home": "Exeter Chiefs",
-          "away": "Newcastle Red Bulls"
+          "home": "EXE",
+          "away": "NEW"
         },
         {
-          "home": "Gloucester",
-          "away": "Saracens"
+          "home": "GLO",
+          "away": "SAR"
         },
         {
-          "home": "Harlequins",
-          "away": "Sale Sharks"
+          "home": "HAR",
+          "away": "SAL"
         },
         {
-          "home": "Leicester Tigers",
-          "away": "Northampton Saints"
+          "home": "LEI",
+          "away": "NOR"
         }
       ]
     },
@@ -2431,24 +2431,24 @@
       "last_kickoff": "2026-03-08T15:00:00Z",
       "matches": [
         {
-          "home": "Exeter Chiefs",
-          "away": "Bristol Bears"
+          "home": "EXE",
+          "away": "BRI"
         },
         {
-          "home": "Gloucester",
-          "away": "Bath"
+          "home": "GLO",
+          "away": "BAT"
         },
         {
-          "home": "Harlequins",
-          "away": "Newcastle Red Bulls"
+          "home": "HAR",
+          "away": "NEW"
         },
         {
-          "home": "Leicester Tigers",
-          "away": "Saracens"
+          "home": "LEI",
+          "away": "SAR"
         },
         {
-          "home": "Northampton Saints",
-          "away": "Sale Sharks"
+          "home": "NOR",
+          "away": "SAL"
         }
       ]
     },
@@ -2458,24 +2458,24 @@
       "last_kickoff": "2026-03-15T15:00:00Z",
       "matches": [
         {
-          "home": "Gloucester",
-          "away": "Exeter Chiefs"
+          "home": "GLO",
+          "away": "EXE"
         },
         {
-          "home": "Harlequins",
-          "away": "Bristol Bears"
+          "home": "HAR",
+          "away": "BRI"
         },
         {
-          "home": "Leicester Tigers",
-          "away": "Bath"
+          "home": "LEI",
+          "away": "BAT"
         },
         {
-          "home": "Northampton Saints",
-          "away": "Newcastle Red Bulls"
+          "home": "NOR",
+          "away": "NEW"
         },
         {
-          "home": "Sale Sharks",
-          "away": "Saracens"
+          "home": "SAL",
+          "away": "SAR"
         }
       ]
     },
@@ -2485,24 +2485,24 @@
       "last_kickoff": "2026-03-22T15:00:00Z",
       "matches": [
         {
-          "home": "Harlequins",
-          "away": "Gloucester"
+          "home": "HAR",
+          "away": "GLO"
         },
         {
-          "home": "Leicester Tigers",
-          "away": "Exeter Chiefs"
+          "home": "LEI",
+          "away": "EXE"
         },
         {
-          "home": "Northampton Saints",
-          "away": "Bristol Bears"
+          "home": "NOR",
+          "away": "BRI"
         },
         {
-          "home": "Sale Sharks",
-          "away": "Bath"
+          "home": "SAL",
+          "away": "BAT"
         },
         {
-          "home": "Saracens",
-          "away": "Newcastle Red Bulls"
+          "home": "SAR",
+          "away": "NEW"
         }
       ]
     },
@@ -2512,24 +2512,24 @@
       "last_kickoff": "2026-03-29T15:00:00Z",
       "matches": [
         {
-          "home": "Leicester Tigers",
-          "away": "Harlequins"
+          "home": "LEI",
+          "away": "HAR"
         },
         {
-          "home": "Northampton Saints",
-          "away": "Gloucester"
+          "home": "NOR",
+          "away": "GLO"
         },
         {
-          "home": "Sale Sharks",
-          "away": "Exeter Chiefs"
+          "home": "SAL",
+          "away": "EXE"
         },
         {
-          "home": "Saracens",
-          "away": "Bristol Bears"
+          "home": "SAR",
+          "away": "BRI"
         },
         {
-          "home": "Newcastle Red Bulls",
-          "away": "Bath"
+          "home": "NEW",
+          "away": "BAT"
         }
       ]
     },
@@ -2539,24 +2539,24 @@
       "last_kickoff": "2026-04-05T15:00:00Z",
       "matches": [
         {
-          "home": "Northampton Saints",
-          "away": "Leicester Tigers"
+          "home": "NOR",
+          "away": "LEI"
         },
         {
-          "home": "Sale Sharks",
-          "away": "Harlequins"
+          "home": "SAL",
+          "away": "HAR"
         },
         {
-          "home": "Saracens",
-          "away": "Gloucester"
+          "home": "SAR",
+          "away": "GLO"
         },
         {
-          "home": "Newcastle Red Bulls",
-          "away": "Exeter Chiefs"
+          "home": "NEW",
+          "away": "EXE"
         },
         {
-          "home": "Bath",
-          "away": "Bristol Bears"
+          "home": "BAT",
+          "away": "BRI"
         }
       ]
     },
@@ -2566,24 +2566,24 @@
       "last_kickoff": "2026-04-12T15:00:00Z",
       "matches": [
         {
-          "home": "Sale Sharks",
-          "away": "Northampton Saints"
+          "home": "SAL",
+          "away": "NOR"
         },
         {
-          "home": "Saracens",
-          "away": "Leicester Tigers"
+          "home": "SAR",
+          "away": "LEI"
         },
         {
-          "home": "Newcastle Red Bulls",
-          "away": "Harlequins"
+          "home": "NEW",
+          "away": "HAR"
         },
         {
-          "home": "Bath",
-          "away": "Gloucester"
+          "home": "BAT",
+          "away": "GLO"
         },
         {
-          "home": "Bristol Bears",
-          "away": "Exeter Chiefs"
+          "home": "BRI",
+          "away": "EXE"
         }
       ]
     },
@@ -2593,24 +2593,24 @@
       "last_kickoff": "2026-04-19T15:00:00Z",
       "matches": [
         {
-          "home": "Saracens",
-          "away": "Sale Sharks"
+          "home": "SAR",
+          "away": "SAL"
         },
         {
-          "home": "Newcastle Red Bulls",
-          "away": "Northampton Saints"
+          "home": "NEW",
+          "away": "NOR"
         },
         {
-          "home": "Bath",
-          "away": "Leicester Tigers"
+          "home": "BAT",
+          "away": "LEI"
         },
         {
-          "home": "Bristol Bears",
-          "away": "Harlequins"
+          "home": "BRI",
+          "away": "HAR"
         },
         {
-          "home": "Exeter Chiefs",
-          "away": "Gloucester"
+          "home": "EXE",
+          "away": "GLO"
         }
       ]
     },
@@ -2620,24 +2620,24 @@
       "last_kickoff": "2026-04-26T15:00:00Z",
       "matches": [
         {
-          "home": "Newcastle Red Bulls",
-          "away": "Saracens"
+          "home": "NEW",
+          "away": "SAR"
         },
         {
-          "home": "Bath",
-          "away": "Sale Sharks"
+          "home": "BAT",
+          "away": "SAL"
         },
         {
-          "home": "Bristol Bears",
-          "away": "Northampton Saints"
+          "home": "BRI",
+          "away": "NOR"
         },
         {
-          "home": "Exeter Chiefs",
-          "away": "Leicester Tigers"
+          "home": "EXE",
+          "away": "LEI"
         },
         {
-          "home": "Gloucester",
-          "away": "Harlequins"
+          "home": "GLO",
+          "away": "HAR"
         }
       ]
     },
@@ -2647,24 +2647,24 @@
       "last_kickoff": "2026-05-03T15:00:00Z",
       "matches": [
         {
-          "home": "Bath",
-          "away": "Newcastle Red Bulls"
+          "home": "BAT",
+          "away": "NEW"
         },
         {
-          "home": "Bristol Bears",
-          "away": "Saracens"
+          "home": "BRI",
+          "away": "SAR"
         },
         {
-          "home": "Exeter Chiefs",
-          "away": "Sale Sharks"
+          "home": "EXE",
+          "away": "SAL"
         },
         {
-          "home": "Gloucester",
-          "away": "Northampton Saints"
+          "home": "GLO",
+          "away": "NOR"
         },
         {
-          "home": "Harlequins",
-          "away": "Leicester Tigers"
+          "home": "HAR",
+          "away": "LEI"
         }
       ]
     },
@@ -2674,24 +2674,24 @@
       "last_kickoff": "2026-05-10T15:00:00Z",
       "matches": [
         {
-          "home": "Bristol Bears",
-          "away": "Bath"
+          "home": "BRI",
+          "away": "BAT"
         },
         {
-          "home": "Exeter Chiefs",
-          "away": "Newcastle Red Bulls"
+          "home": "EXE",
+          "away": "NEW"
         },
         {
-          "home": "Gloucester",
-          "away": "Saracens"
+          "home": "GLO",
+          "away": "SAR"
         },
         {
-          "home": "Harlequins",
-          "away": "Sale Sharks"
+          "home": "HAR",
+          "away": "SAL"
         },
         {
-          "home": "Leicester Tigers",
-          "away": "Northampton Saints"
+          "home": "LEI",
+          "away": "NOR"
         }
       ]
     },
@@ -2701,24 +2701,24 @@
       "last_kickoff": "2026-05-17T15:00:00Z",
       "matches": [
         {
-          "home": "Exeter Chiefs",
-          "away": "Bristol Bears"
+          "home": "EXE",
+          "away": "BRI"
         },
         {
-          "home": "Gloucester",
-          "away": "Bath"
+          "home": "GLO",
+          "away": "BAT"
         },
         {
-          "home": "Harlequins",
-          "away": "Newcastle Red Bulls"
+          "home": "HAR",
+          "away": "NEW"
         },
         {
-          "home": "Leicester Tigers",
-          "away": "Saracens"
+          "home": "LEI",
+          "away": "SAR"
         },
         {
-          "home": "Northampton Saints",
-          "away": "Sale Sharks"
+          "home": "NOR",
+          "away": "SAL"
         }
       ]
     },
@@ -2728,24 +2728,24 @@
       "last_kickoff": "2026-05-24T15:00:00Z",
       "matches": [
         {
-          "home": "Gloucester",
-          "away": "Exeter Chiefs"
+          "home": "GLO",
+          "away": "EXE"
         },
         {
-          "home": "Harlequins",
-          "away": "Bristol Bears"
+          "home": "HAR",
+          "away": "BRI"
         },
         {
-          "home": "Leicester Tigers",
-          "away": "Bath"
+          "home": "LEI",
+          "away": "BAT"
         },
         {
-          "home": "Northampton Saints",
-          "away": "Newcastle Red Bulls"
+          "home": "NOR",
+          "away": "NEW"
         },
         {
-          "home": "Sale Sharks",
-          "away": "Saracens"
+          "home": "SAL",
+          "away": "SAR"
         }
       ]
     },
@@ -2755,24 +2755,24 @@
       "last_kickoff": "2026-05-31T15:00:00Z",
       "matches": [
         {
-          "home": "Harlequins",
-          "away": "Gloucester"
+          "home": "HAR",
+          "away": "GLO"
         },
         {
-          "home": "Leicester Tigers",
-          "away": "Exeter Chiefs"
+          "home": "LEI",
+          "away": "EXE"
         },
         {
-          "home": "Northampton Saints",
-          "away": "Bristol Bears"
+          "home": "NOR",
+          "away": "BRI"
         },
         {
-          "home": "Sale Sharks",
-          "away": "Bath"
+          "home": "SAL",
+          "away": "BAT"
         },
         {
-          "home": "Saracens",
-          "away": "Newcastle Red Bulls"
+          "home": "SAR",
+          "away": "NEW"
         }
       ]
     },
@@ -2782,24 +2782,24 @@
       "last_kickoff": "2026-06-07T15:00:00Z",
       "matches": [
         {
-          "home": "Leicester Tigers",
-          "away": "Harlequins"
+          "home": "LEI",
+          "away": "HAR"
         },
         {
-          "home": "Northampton Saints",
-          "away": "Gloucester"
+          "home": "NOR",
+          "away": "GLO"
         },
         {
-          "home": "Sale Sharks",
-          "away": "Exeter Chiefs"
+          "home": "SAL",
+          "away": "EXE"
         },
         {
-          "home": "Saracens",
-          "away": "Bristol Bears"
+          "home": "SAR",
+          "away": "BRI"
         },
         {
-          "home": "Newcastle Red Bulls",
-          "away": "Bath"
+          "home": "NEW",
+          "away": "BAT"
         }
       ]
     },
@@ -2809,24 +2809,24 @@
       "last_kickoff": "2026-06-14T15:00:00Z",
       "matches": [
         {
-          "home": "Northampton Saints",
-          "away": "Leicester Tigers"
+          "home": "NOR",
+          "away": "LEI"
         },
         {
-          "home": "Sale Sharks",
-          "away": "Harlequins"
+          "home": "SAL",
+          "away": "HAR"
         },
         {
-          "home": "Saracens",
-          "away": "Gloucester"
+          "home": "SAR",
+          "away": "GLO"
         },
         {
-          "home": "Newcastle Red Bulls",
-          "away": "Exeter Chiefs"
+          "home": "NEW",
+          "away": "EXE"
         },
         {
-          "home": "Bath",
-          "away": "Bristol Bears"
+          "home": "BAT",
+          "away": "BRI"
         }
       ]
     },
@@ -2836,24 +2836,24 @@
       "last_kickoff": "2026-06-21T15:00:00Z",
       "matches": [
         {
-          "home": "Sale Sharks",
-          "away": "Northampton Saints"
+          "home": "SAL",
+          "away": "NOR"
         },
         {
-          "home": "Saracens",
-          "away": "Leicester Tigers"
+          "home": "SAR",
+          "away": "LEI"
         },
         {
-          "home": "Newcastle Red Bulls",
-          "away": "Harlequins"
+          "home": "NEW",
+          "away": "HAR"
         },
         {
-          "home": "Bath",
-          "away": "Gloucester"
+          "home": "BAT",
+          "away": "GLO"
         },
         {
-          "home": "Bristol Bears",
-          "away": "Exeter Chiefs"
+          "home": "BRI",
+          "away": "EXE"
         }
       ]
     },
@@ -2863,24 +2863,24 @@
       "last_kickoff": "2026-06-28T15:00:00Z",
       "matches": [
         {
-          "home": "Saracens",
-          "away": "Sale Sharks"
+          "home": "SAR",
+          "away": "SAL"
         },
         {
-          "home": "Newcastle Red Bulls",
-          "away": "Northampton Saints"
+          "home": "NEW",
+          "away": "NOR"
         },
         {
-          "home": "Bath",
-          "away": "Leicester Tigers"
+          "home": "BAT",
+          "away": "LEI"
         },
         {
-          "home": "Bristol Bears",
-          "away": "Harlequins"
+          "home": "BRI",
+          "away": "HAR"
         },
         {
-          "home": "Exeter Chiefs",
-          "away": "Gloucester"
+          "home": "EXE",
+          "away": "GLO"
         }
       ]
     }

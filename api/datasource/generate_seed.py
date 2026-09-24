@@ -38,6 +38,25 @@ REAL_TEAMS = {
     ],
 }
 
+# Which half of those tuples identifies a club in the DB — it has to be whatever
+# the LIVE adapter writes, or mock and live data don't describe the same team and
+# nothing that joins on a club works under DATA_SOURCE=mock.
+#
+# Premiership: the canonical 3-letter code. LiveAdapter.fetch_rounds resolves
+# every club through prem_fixtures.resolve_team, so production holds 'BAT', and
+# anything keyed on the club — squad jersey art, the real-fixtures strip, lineup
+# joins, auto-substitution — looks up by code.
+#
+# Super Rugby: the display name. It has no scraped club list and no code
+# vocabulary, so the name IS the identifier there.
+TEAM_KEY = {'premiership': 'abbr', 'super_rugby': 'name'}
+
+
+def team_ids(competition: str) -> list[str]:
+    """The club identifiers to seed for a competition, in fixture order."""
+    idx = 1 if TEAM_KEY[competition] == 'abbr' else 0
+    return [t[idx] for t in REAL_TEAMS[competition]]
+
 # Mock fantasy teams per league slug (OFDS = 8, meatyboys = 10 — both even, so
 # no rotating byes).
 FANTASY_TEAMS = {
@@ -92,9 +111,14 @@ def _make_players(competition: str) -> list[dict]:
     players: list[dict] = []
     used: set[str] = set()
     pid = 0
-    for team_name, _abbr in REAL_TEAMS[competition]:
+    key = TEAM_KEY[competition]
+    for team_name, abbr in REAL_TEAMS[competition]:
+        team_id = abbr if key == 'abbr' else team_name
         for pos, count in SQUAD_SHAPE.items():
             for k in range(count):
+                # Seeded on the NAME, not the identifier, so switching the
+                # Premiership over to codes relabelled the clubs without
+                # regenerating every player's name, rate and price.
                 seed = _h(competition, team_name, pos, k)
                 surname = SURNAMES[seed % len(SURNAMES)]
                 initial = INITIALS[(seed // 7) % len(INITIALS)]
@@ -111,7 +135,7 @@ def _make_players(competition: str) -> list[dict]:
                 price = round(4.0 + rate * 0.6, 1)
                 players.append({
                     'id': f'{competition[:3]}{pid:03d}',
-                    'name': name, 'team': team_name, 'position': pos,
+                    'name': name, 'team': team_id, 'position': pos,
                     'rate': rate, 'vol': vol, 'price': price,
                 })
                 pid += 1
@@ -121,7 +145,7 @@ def _make_players(competition: str) -> list[dict]:
 def _make_rounds(competition: str) -> list[dict]:
     from datetime import datetime, timedelta
     start = datetime.fromisoformat(SEASON_START[competition])
-    teams = [t[0] for t in REAL_TEAMS[competition]]
+    teams = team_ids(competition)
     rounds = []
     for r in range(1, N_ROUNDS + 1):
         week0 = start + timedelta(weeks=r - 1)
