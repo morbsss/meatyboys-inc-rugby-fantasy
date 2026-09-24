@@ -32,14 +32,9 @@ ROUND_GAP_DAYS = 4
 
 
 def fetch_json(url):
-    req = Request(url, headers={
-        'User-Agent': (
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-            'AppleWebKit/537.36 (KHTML, like Gecko) '
-            'Chrome/124.0.0.0 Safari/537.36'
-        ),
-        'Accept': 'application/json',
-    })
+    # No User-Agent header on purpose — ESPN 403s a spoofed browser UA. See the
+    # measurements in api/real_lineups.fetch_json.
+    req = Request(url, headers={'Accept': 'application/json'})
     with urlopen(req, timeout=15) as resp:
         return json.loads(resp.read().decode('utf-8'))
 

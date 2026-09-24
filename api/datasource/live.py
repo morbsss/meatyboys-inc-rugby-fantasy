@@ -133,16 +133,40 @@ class LiveAdapter(PlayerSource, FixtureSource, LineupSource, ScoreSource):
             return []
         first = date.fromisoformat(window[0][:10]) - timedelta(days=1)
         last = date.fromisoformat(window[1][:10]) + timedelta(days=1)
-        url = (
-            f'https://site.api.espn.com/apis/site/v2/sports/rugby'
-            f'/{cfg["espn_league_id"]}/scoreboard'
-            f'?dates={first:%Y%m%d}-{last:%Y%m%d}&limit=200'
-        )
-        try:
-            data = fetch_json(url)
-        except Exception:
-            return []
-        return data.get('events', [])
+
+        # One request PER DAY, not a `dates=start-end` range. ESPN rejects the
+        # range form outright:
+        #     ?dates=20260924-20260928  -> HTTP 400
+        #     ?dates=20260925           -> 200, 2 events
+        # The range failure used to be swallowed by a bare `except: return []`,
+        # so the lineups job quietly recorded "0 entries" every run and
+        # auto-substitution silently stopped working.
+        events, seen, failures = [], set(), 0
+        days = (last - first).days + 1
+        for offset in range(days):
+            day = first + timedelta(days=offset)
+            url = (
+                f'https://site.api.espn.com/apis/site/v2/sports/rugby'
+                f'/{cfg["espn_league_id"]}/scoreboard?dates={day:%Y%m%d}'
+            )
+            try:
+                data = fetch_json(url)
+            except Exception:
+                failures += 1
+                continue
+            for ev in data.get('events', []):
+                # A fixture can appear on neighbouring days as the window is
+                # padded by a day at each end; keep the first sighting only.
+                if ev.get('id') and ev['id'] not in seen:
+                    seen.add(ev['id'])
+                    events.append(ev)
+
+        # Every request failing is an outage, not an empty round — raise so the
+        # scheduler logs an error against the job instead of a clean "0 entries".
+        if failures == days and days:
+            raise RuntimeError(
+                f'ESPN scoreboard unreachable for all {days} days of round {round_number}')
+        return events
 
     # --- §4.1 players / §4.4 scores (SuperBru) ---------------------------
     def _scrape_superbru(self, competition: str) -> list[dict]:

@@ -74,15 +74,22 @@ def parse_espn_url(raw):
 
 
 def fetch_json(url):
-    """GET a URL and return parsed JSON. Sends browser-like headers."""
-    req = Request(url, headers={
-        'User-Agent': (
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-            'AppleWebKit/537.36 (KHTML, like Gecko) '
-            'Chrome/124.0.0.0 Safari/537.36'
-        ),
-        'Accept': 'application/json, text/javascript, */*',
-    })
+    """GET a URL and return parsed JSON.
+
+    DO NOT add a User-Agent header. ESPN's edge (Akamai) 403s a spoofed browser
+    UA and any custom app UA, but serves urllib's default and curl's. Measured
+    on both the scoreboard and summary endpoints:
+
+        (no User-Agent)            -> 200
+        Python-urllib/3.12         -> 200
+        curl/8.5.0                 -> 200
+        Mozilla/5.0 ... Chrome/124 -> 403
+        meatyboys-fantasy/1.0      -> 403
+
+    This function used to send the Chrome UA, which silently 403'd every ESPN
+    call — lineups and auto-substitution stopped working with no visible error.
+    """
+    req = Request(url, headers={'Accept': 'application/json, text/javascript, */*'})
     with urlopen(req, timeout=15) as resp:
         return json.loads(resp.read().decode('utf-8'))
 
