@@ -28,7 +28,8 @@ import os
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from functools import lru_cache, wraps
-from flask import Flask, jsonify, render_template, request, session, redirect
+from flask import (Flask, jsonify, render_template, request, send_from_directory,
+                   session, redirect)
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -584,6 +585,27 @@ def reopen_time(conn, next_round, league_id=None) -> str:
 
 # ---------------------------------------------------------------------------
 # Routes
+# ===========================================================================
+
+
+@app.route('/favicon.ico')
+def favicon():
+    """Serve the icon at the path browsers ask for without being told.
+
+    The `rel=icon` tags in base.html cover normal page views, but browsers,
+    crawlers and bookmark services still probe /favicon.ico directly — and that
+    404s on every one of them otherwise, since the file lives under /static.
+    """
+    return send_from_directory(
+        os.path.join(app.static_folder, 'img'), 'favicon.ico',
+        mimetype='image/vnd.microsoft.icon',
+        # A week, not a month: the artwork changes rarely but a favicon is the
+        # one asset with no cache-busting in its URL, so a long max-age is a long
+        # time to be stuck with the old animal.
+        max_age=60 * 60 * 24 * 7,
+    )
+
+
 # ===========================================================================
 # ====== AUTH & ACCOUNT ======
 # Sign-in screen, register/login/logout, the logged-in user + profile, team
