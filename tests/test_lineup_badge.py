@@ -161,3 +161,39 @@ def test_every_player_is_returned_regardless_of_badge(conn):
     _announce(conn, 'BAT', starters=['Obano,B'])
 
     assert len(_state_players(conn, LEAGUE, LAST_ROUND, NEXT_ROUND)) == len(PLAYERS)
+
+
+def test_badges_work_before_any_scoring_data_exists(conn):
+    """Pre-season: weekly_stats is completely empty and last_round is 0.
+
+    This is the state the league is in the week before round 1 — and the week the
+    first team sheets are published, so it is precisely when the badges need to
+    work. `weekly_stats` was INNER JOINed on last_round, so an empty table
+    eliminated every player, /api/state returned no players at all, and the squad
+    page had no statuses to render. Verified live: 92 lineup rows on the VM, 4
+    clubs announced, and not a single badge on the page.
+    """
+    conn.execute('DELETE FROM weekly_stats')
+    conn.commit()
+    _announce(conn, 'BAT', starters=['Obano,B'], bench=['Dunn,T'])
+
+    rows = _state_players(conn, LEAGUE, 0, NEXT_ROUND)
+
+    assert len(rows) == len(PLAYERS), 'no scores yet must not hide the players'
+    by_name = {r['name']: r['lineup_status'] for r in rows}
+    assert by_name['Obano,B'] == 'S'
+    assert by_name['Dunn,T'] == 'B'
+    assert by_name['du Toit,T'] == 'O'
+    assert by_name['Sio,S'] is None          # EXE has not announced
+
+
+def test_missing_scores_leave_price_and_score_null_not_zero(conn):
+    """A player with no weekly_stats row has an UNKNOWN price, not a free one —
+    the LEFT JOIN must not invent numbers the UI could display."""
+    conn.execute('DELETE FROM weekly_stats')
+    conn.commit()
+
+    row = _state_players(conn, LEAGUE, 0, NEXT_ROUND)[0]
+
+    assert row['price'] is None
+    assert row['last_round_score'] is None

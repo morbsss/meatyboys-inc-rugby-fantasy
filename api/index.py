@@ -1231,7 +1231,13 @@ def _state_players(conn, league_id, last_round, next_round):
                 ELSE 'O'
             END AS lineup_status
         FROM players p
-        JOIN weekly_stats ws
+        -- LEFT, not INNER. weekly_stats only gets rows once live_scoring has run,
+        -- so before a league's first match it is EMPTY and last_round is 0 — an
+        -- inner join then eliminated every player and this endpoint returned an
+        -- empty list. The squad page reads lineup_status from that list, so the
+        -- S/B/O badges could never appear in the pre-season week, which is
+        -- exactly when the first team sheets land.
+        LEFT JOIN weekly_stats ws
             ON ws.player_id = p.player_id AND ws.round = ?
         LEFT JOIN weekly_stats ws_prev
             ON ws_prev.player_id = p.player_id AND ws_prev.round = ?
@@ -1240,7 +1246,8 @@ def _state_players(conn, league_id, last_round, next_round):
             ON REPLACE(p.name, '''', '') = ml.player_name
             AND ml.round = ? AND ml.league_id = p.league_id
         WHERE p.league_id = ?
-        ORDER BY p.position, ws.total_points DESC
+        -- COALESCE so the ordering is stable when there are no scores yet.
+        ORDER BY p.position, COALESCE(ws.total_points, 0) DESC
     """, (league_id, league_id, next_round, last_round, last_round - 1, next_round,
           league_id))
     players = [dict(r) for r in cursor.fetchall()]
@@ -3485,8 +3492,32 @@ def _run_job(conn, league_id, competition, job, active_round):
     """Execute one ingestion job, returning a short detail string."""
     if job == 'sync_rounds':
         return active_round, f'{ingest.ingest_rounds(conn, league_id, competition)} rounds'
+    if job == 'sync_players':
+        c = ingest.ingest_players(conn, league_id, competition)
+        detail = (f"{c['added']} added, {c['transferred']} transferred, "
+                  f"{c['unchanged']} unchanged, {c['departed']} departed")
+        if c['ambiguous']:
+            detail += f", {c['ambiguous']} ambiguous"
+        # Name what changed, not just how much. Transfers silently change which
+        # club a drafted player belongs to; an addition alongside a departure at
+        # the same club is an upstream RENAME rather than a signing. Neither is
+        # reconstructable from counts alone once the run is over.
+        for label, items in (('moved', c['moves']), ('new', c['new']),
+                             ('gone', c['gone'])):
+            if items:
+                detail += f" | {label}: " + ', '.join(items[:6])
+                if len(items) > 6:
+                    detail += f' +{len(items) - 6}'
+        return active_round, detail
     if job == 'lineups':
-        return active_round, f'{ingest.ingest_lineups(conn, league_id, competition, active_round)} entries'
+        n = ingest.ingest_lineups(conn, league_id, competition, active_round)
+        detail = f'{n} entries'
+        # An entry we couldn't match to a player row is a row that joins to
+        # nothing — invisible on every page unless the count is surfaced here.
+        if ingest.LAST_LINEUP_UNRESOLVED:
+            miss = ingest.LAST_LINEUP_UNRESOLVED
+            detail += f' ({len(miss)} unresolved: ' + ', '.join(miss[:5]) + ')'
+        return active_round, detail
     if job == 'live_scoring':
         n = ingest.ingest_player_scores(conn, league_id, competition, active_round)
         _carry_forward_picks(conn, league_id, active_round)
@@ -3532,8 +3563,13 @@ def cron_tick():
             kickoffs = []
         live_now = scheduler.match_is_live(now, kickoffs)
 
+        # Every job whose cadence is an interval must be listed here: a job the
+        # log isn't queried for looks like it has never run, so its interval floor
+        # always passes and it fires on every tick — for sync_players that would
+        # be an 8-page SuperBru scrape every 10 minutes.
         last_runs = {j: _last_run(conn, league_id, j)
-                     for j in ('sync_rounds', 'lineups', 'live_scoring')}
+                     for j in ('sync_rounds', 'sync_players', 'lineups',
+                               'live_scoring')}
         # The once-per-round gate has to ask about the same round _run_job will
         # settle - the one that just rolled over, not the newly active one.
         fin_round = _round_to_finalize(conn, league_id)
