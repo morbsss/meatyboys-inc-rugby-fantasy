@@ -194,6 +194,55 @@
   background: var(--jersey-col, var(--forest));
 }
 .fp-shirt:disabled, .bp-shirt:disabled { cursor: default; }
+
+/* =============================================================================
+ * Real club jersey art (tools/generate_jerseys.py) — the player's actual kit
+ * instead of a flat club-coloured silhouette. Applied to field and bench tokens
+ * alike, hence the unprefixed modifier.
+ *
+ * The SVG already carries its own outline, collar, placket and club badge, so
+ * the two masked pseudo-layers are dropped and the art is painted as the
+ * button's own background. It is drawn to the same 4:3 box and the same
+ * footprint as the mask it replaces (see the viewBox note in the generator), so
+ * `100% 100%` scales it uniformly and the status dot, name box and formation
+ * offsets all still line up.
+ * ========================================================================== */
+.shirt--art {
+  background: var(--club-jersey) center / 100% 100% no-repeat;
+  text-shadow: 0 1px 2px rgba(0,0,0,.75);   /* reads on white and striped kits */
+}
+/* No masked layers: the art supplies the outline, so an inset white silhouette
+   behind it would show as a halo in the wrong shape. */
+.shirt--art::before, .shirt--art::after { content: none; }
+
+/* Seat the number in the lower torso, clear of the club badge.
+ *
+ * The badge is centred at y=51 of the art's 16..100 shirt, so it ends 56% of the
+ * way down the token and the free torso runs 56%..100%. `align-content: end`
+ * drops the number into that band; the bottom padding lifts it off the hem and
+ * scales with the token so the clearance holds from a 44px phone jersey to the
+ * 80px desktop one.
+ *
+ * Both selectors are doubled up deliberately: `.fp .fp-shirt` sets padding-top
+ * earlier in this file and the mobile `.bp-shirt` sets it later, so a
+ * single-class rule would lose one fight or the other.
+ *
+ * The offset is in `em` rather than `cqw`: the font-size already scales with the
+ * token, and only the pitch is a query container — a `cqw` value would resolve
+ * against the viewport on the bench, which sits outside it.
+ */
+.fp-shirt.shirt--art, .bp-shirt.shirt--art {
+  align-content: end;
+  padding: 0 0 0.28em;
+}
+.fp .fp-shirt.shirt--art { padding-top: 0; }
+
+/* Captain: the amber halo normally comes from the masked ::before, which art
+   shirts don't have — put it on the art itself. */
+.fp.is-cap .fp-shirt.shirt--art, .bp.is-cap .bp-shirt.shirt--art {
+  filter: drop-shadow(0 0 3px var(--amber)) drop-shadow(0 0 1px var(--amber));
+}
+
 /* Captain: amber jersey outline + halo (alongside the C badge). */
 .fp.is-cap .fp-shirt::before, .bp.is-cap .bp-shirt::before {
   background: var(--amber);
