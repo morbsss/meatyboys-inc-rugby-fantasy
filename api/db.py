@@ -221,7 +221,7 @@ def ensure_schema(conn):
             )
         ''')
 
-    # Rounds table — stores first/last kickoff per round (populated by sync_rounds.py).
+    # Rounds table - stores first/last kickoff per round (populated by sync_rounds.py).
     # No sole PK on round_number: round numbers repeat across leagues, so
     # uniqueness is enforced per-league via idx_rounds_league_round (added in
     # _ensure_league_schema). Legacy DBs keep their original round_number PK.
@@ -314,7 +314,7 @@ def _ensure_league_schema(conn, cursor) -> None:
     backfilled to the default (Premiership / OFDS) league."""
     serial = 'SERIAL PRIMARY KEY' if DB_TYPE == 'postgres' else 'INTEGER PRIMARY KEY AUTOINCREMENT'
 
-    # Leagues registry table — mirrors api/leagues.py so the DB is queryable.
+    # Leagues registry table - mirrors api/leagues.py so the DB is queryable.
     cursor.execute(f'''
         CREATE TABLE IF NOT EXISTS leagues (
             league_id {serial},
@@ -342,7 +342,7 @@ def _ensure_league_schema(conn, cursor) -> None:
         )
     ''')
 
-    # One row per drafted entity — a player_id, OR a club front-row unit (fr_club).
+    # One row per drafted entity - a player_id, OR a club front-row unit (fr_club).
     cursor.execute(f'''
         CREATE TABLE IF NOT EXISTS draft_picks (
             id {serial},
@@ -374,7 +374,7 @@ def _ensure_league_schema(conn, cursor) -> None:
         )
     ''')
 
-    # Trades log — free-agent pickups and inter-team (user↔user) trades.
+    # Trades log - free-agent pickups and inter-team (user↔user) trades.
     # free_agent: from_team picks up in_player_id and drops out_player_id (→ FA),
     #             status 'completed' immediately.
     # player_trade: from_team offers out_player_id for to_team's in_player_id,
@@ -400,7 +400,7 @@ def _ensure_league_schema(conn, cursor) -> None:
         if not _column_exists(cursor, 'trades', col):
             cursor.execute(f'ALTER TABLE trades ADD COLUMN {col} TEXT')
 
-    # Real-life fixtures per round (who each real team played) — used to show a
+    # Real-life fixtures per round (who each real team played) - used to show a
     # player's opponent alongside their per-round points.
     cursor.execute(f'''
         CREATE TABLE IF NOT EXISTS real_fixtures (
@@ -414,7 +414,7 @@ def _ensure_league_schema(conn, cursor) -> None:
     ''')
 
     # Analysis predictions (written by the offline model job api/predict.py;
-    # the Analysis page only reads these — no ML libs needed at request time).
+    # the Analysis page only reads these - no ML libs needed at request time).
     # One row per player (or FR unit) per round; denormalised for easy reads.
     cursor.execute(f'''
         CREATE TABLE IF NOT EXISTS player_predictions (
@@ -454,7 +454,7 @@ def _ensure_league_schema(conn, cursor) -> None:
         )
     ''')
 
-    # Previous-season archive — one row per player carrying last season's final
+    # Previous-season archive - one row per player carrying last season's final
     # totals. Populated at season rollover (round selections + weekly_stats are
     # reset for the fresh season); read by the draft to rank the player pool by
     # last season's points. New-season weekly_stats starts empty.

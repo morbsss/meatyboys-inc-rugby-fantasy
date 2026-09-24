@@ -1,5 +1,5 @@
 """
-Timezone-aware ingestion scheduler (spec §3 + §4.5) — pure decisions, no DB.
+Timezone-aware ingestion scheduler (spec §3 + §4.5) - pure decisions, no DB.
 
 A single scheduler service (the /api/cron/tick endpoint) calls `due_jobs` per
 league on each run to decide which ingestion jobs should fire *now*, evaluated
@@ -12,11 +12,11 @@ Job windows (local time, spec §4.3/§4.4):
 
   Premiership (Europe/London)
     lineups : Thu 14:00 → Sun 18:00, every 2h
-    finalize: Tue 12:00 — the round rollover (once per gameweek)
+    finalize: Tue 12:00 - the round rollover (once per gameweek)
 
   Super Rugby Pacific (Australia/Sydney)
     lineups : Wed 15:00 (pre-round) + Fri 15:00 → Sun 17:00, every 2h
-    finalize: Tue 12:00 — the round rollover (once per gameweek)
+    finalize: Tue 12:00 - the round rollover (once per gameweek)
 
   Both
     live_scoring: every 3 min while any match is live (now within a fixture's
@@ -73,7 +73,7 @@ def in_lineup_window(local: datetime, competition: str) -> bool:
 
 
 def is_finalize_time(local: datetime) -> bool:
-    """Tuesday 12:00+ in local time — the round rollover (spec §4.4).
+    """Tuesday 12:00+ in local time - the round rollover (spec §4.4).
 
     Pinned to the rollover rather than a fixed Monday so the definitive scrape
     can never run before the round's last fixture has finished. Monday noon was
@@ -82,7 +82,7 @@ def is_finalize_time(local: datetime) -> bool:
     finalize would have run and recorded itself done.
 
     Because the rollover has already happened by the time this fires, the round
-    to finalize is the one that just rolled, not the newly active one — see
+    to finalize is the one that just rolled, not the newly active one - see
     _round_to_finalize in api/index.py.
     """
     return local.weekday() == _TUE and local.hour >= 12

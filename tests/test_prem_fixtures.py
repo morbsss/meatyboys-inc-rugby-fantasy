@@ -73,7 +73,7 @@ def test_round_window_unknown_round_is_none():
 
 
 # ---------------------------------------------------------------------------
-# Adapter — fixtures come from the file, so this needs no network
+# Adapter - fixtures come from the file, so this needs no network
 # ---------------------------------------------------------------------------
 
 def test_fetch_rounds_emits_joinable_team_codes():

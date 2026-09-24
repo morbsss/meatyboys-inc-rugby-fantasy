@@ -1,6 +1,6 @@
 """Scrape the full Gallagher PREM fixture list from premiershiprugby.com.
 
-The fixtures-results page is a Nuxt app that renders nothing server-side — it
+The fixtures-results page is a Nuxt app that renders nothing server-side - it
 fetches its data client-side from the InCrowd rugby-union feed. Rather than
 driving a browser over 20 round pages, we call that feed directly (the params
 come from window.__NUXT__.config on the page: compId=1011, season=202601).
@@ -8,7 +8,7 @@ come from window.__NUXT__.config on the page: compId=1011, season=202601).
 The feed serves the WHOLE season in one request, so the 20 "pages" (rounds
 1-18, plus 19 = play-offs and 20 = final) are just a `round` field to group by.
 
-Club branding (stadium, colours, crests, socials) isn't in the match feed — it
+Club branding (stadium, colours, crests, socials) isn't in the match feed - it
 lives in the page's embedded Nuxt payload, which we parse separately. Clubs key
 on the same numeric id the match feed uses for teams, so the two join directly.
 
@@ -19,7 +19,7 @@ on the same numeric id the match feed uses for teams, so the two join directly.
 
 Kickoff times are published in UTC (ISO-8601 'Z') and are copied through as-is.
 Note `time_confirmed`: rounds 10-19 are still placeholder 15:00 slots that the
-league hasn't fixed yet — see the notes in the emitted file's `meta`.
+league hasn't fixed yet - see the notes in the emitted file's `meta`.
 """
 import argparse
 import json
@@ -171,12 +171,12 @@ def build(comp_id: int, season: int, flat: bool, with_clubs: bool) -> dict:
         'notes': [
             "Rounds 1-18 are the regular season; round 19 = play-offs ('PO'), "
             "round 20 = final ('F').",
-            "time_confirmed=false means the league has not fixed that kickoff yet — "
+            "time_confirmed=false means the league has not fixed that kickoff yet - "
             "the feed carries a placeholder 15:00 UTC slot. Currently true for "
             "rounds 1-9 and 20 only; rounds 10-19 are unconfirmed.",
             "Play-off team names are 'TBC' until the regular season finishes.",
             "Score fields (score, half_time_score, eighty_min_score, match_winner, "
-            "attendance) are null pre-season and fill in as matches are played — "
+            "attendance) are null pre-season and fill in as matches are played - "
             "re-run this script to refresh them.",
             "home.id / away.id are provider team ids that join to clubs[].team_id.",
         ],

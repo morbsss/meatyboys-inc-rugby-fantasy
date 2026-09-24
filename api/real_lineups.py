@@ -59,7 +59,7 @@ POSITION_MAP = {
     'RW':  'OBK',  # Right Wing
     'FB':  'OBK',  # Fullback
     'OBK': 'OBK',
-    'R':   None,   # Replacement (bench) — position determined by jersey number
+    'R':   None,   # Replacement (bench) - position determined by jersey number
 }
 
 
@@ -87,7 +87,7 @@ def fetch_json(url):
         meatyboys-fantasy/1.0      -> 403
 
     This function used to send the Chrome UA, which silently 403'd every ESPN
-    call — lineups and auto-substitution stopped working with no visible error.
+    call - lineups and auto-substitution stopped working with no visible error.
     """
     req = Request(url, headers={'Accept': 'application/json, text/javascript, */*'})
     with urlopen(req, timeout=15) as resp:
@@ -124,7 +124,7 @@ def extract_lineups(data):
     """
     rosters = data.get('rosters', [])
     if not rosters:
-        # Some events nest under 'header' or use a different key — check a few
+        # Some events nest under 'header' or use a different key - check a few
         raise ValueError(
             'No "rosters" key found in ESPN API response. '
             'The event may not have lineups published yet, or the URL/game ID may be wrong.'
@@ -157,7 +157,7 @@ def extract_lineups(data):
             except (ValueError, TypeError):
                 jersey = None
 
-            # Position — may be on the player record or nested inside athlete
+            # Position - may be on the player record or nested inside athlete
             pos_obj = p.get('position') or athlete.get('position') or {}
             espn_pos = (
                 pos_obj.get('abbreviation')
@@ -168,7 +168,7 @@ def extract_lineups(data):
 
             # Jersey number is the most reliable way to determine bench status.
             # ESPN's 'starter' flag is False for all players on completed matches,
-            # so we can't trust it — always use jersey number instead.
+            # so we can't trust it - always use jersey number instead.
             is_bench = jersey is not None and jersey > 15
 
             players.append({
@@ -327,7 +327,7 @@ def get_round_events(round_num, end_year=2026):
         rounds.append(current_round)
 
     if round_num < 1 or round_num > len(rounds):
-        raise ValueError(f'Round {round_num} not found — season has {len(rounds)} rounds')
+        raise ValueError(f'Round {round_num} not found - season has {len(rounds)} rounds')
 
     return rounds[round_num - 1]
 

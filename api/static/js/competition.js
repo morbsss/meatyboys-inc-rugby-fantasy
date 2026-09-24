@@ -1,5 +1,5 @@
 /* =============================================================================
- * competition.js — The League Table / Competition page: standings, weekly results, playoffs.
+ * competition.js - The League Table / Competition page: standings, weekly results, playoffs.
  * Extracted from templates/competition.html. Shared helpers: common.js, leagues.js, base.js.
  * ========================================================================== */
 
@@ -7,8 +7,8 @@
    STATE
    ============================================================ */
 let TABLE = [];          // league table rows (sorted)
-let RESULTS = [];        // [{week, matches:[...]}] — source for weekly scores
-let HISTORY = [];        // [{round, order:[names]}] — per-round standings
+let RESULTS = [];        // [{week, matches:[...]}] - source for weekly scores
+let HISTORY = [];        // [{round, order:[names]}] - per-round standings
 let MOVE = {};           // team → {dir:'up'|'down'|'same', delta}
 let TEAM_COLORS = {};
 let champEnd = 0;        // championship = indices [0, champEnd)
@@ -17,7 +17,7 @@ let BONUS = true;        // mtyby = false → hide BP & Pts; rank purely on wins
 let PRESEASON = false;   // no rounds played yet → teams listed alphabetically, no bands
 
 // Career honours (🏆 championships / 🍆 sackos) now come from the DB per row
-// (t.champs / t.sackos), resolved via the team's owning account — see
+// (t.champs / t.sackos), resolved via the team's owning account - see
 // _honours_by_team in api/index.py. No hard-coded map.
 
 /* ========================================= ===================
@@ -30,7 +30,7 @@ async function init() {
     data = await res.json();
   } catch (err) {
     document.getElementById('table-wrap').innerHTML =
-      '<div class="lt-loading">Failed to load — refresh to retry.</div>';
+      '<div class="lt-loading">Failed to load - refresh to retry.</div>';
     return;
   }
   TABLE    = data.table    || [];
@@ -138,7 +138,7 @@ function renderTable(table) {
 }
 
 /* ============================================================
-   POSITION-HISTORY CHART (spec §7) — one rank line per team
+   POSITION-HISTORY CHART (spec §7) - one rank line per team
    ============================================================ */
 const PH_PALETTE = ['#0B3B2E', '#E89B2C', '#2E7D4F', '#B33A2E', '#1B5340',
                     '#C97A1F', '#173A8A', '#8B5E00', '#5C6063', '#9E0C24'];
@@ -210,7 +210,7 @@ function renderPositionChart() {
 }
 
 /* ============================================================
-   SHARED CHART HOVER — tracking line + dots + tooltip (round-indexed)
+   SHARED CHART HOVER - tracking line + dots + tooltip (round-indexed)
    ============================================================ */
 function attachChartHover(cfg) {
   const NS = 'http://www.w3.org/2000/svg';
@@ -279,7 +279,7 @@ function attachChartHover(cfg) {
   overlay.addEventListener('pointercancel', () => { scrubbing = false; hide(); });
 }
 
-// Team weekly-points chart hover — coords mirror buildChart() exactly.
+// Team weekly-points chart hover - coords mirror buildChart() exactly.
 function attachTeamChartHover(svg, wrap, series, avg) {
   const W = 500, H = 230, padL = 38, padR = 16, padT = 16, padB = 30;
   const n = series.length;
@@ -311,12 +311,12 @@ function clearHighlight() {
 }
 
 /* ============================================================
-   TEAM DETAIL SHEET — weekly points + average
+   TEAM DETAIL SHEET - weekly points + average
    ============================================================ */
 function openTeamSheet(name) {
   const idx  = TABLE.findIndex(t => t.name === name);
   const t    = idx >= 0 ? TABLE[idx] : null;
-  const rank = idx >= 0 ? idx + 1 : '—';
+  const rank = idx >= 0 ? idx + 1 : '-';
   const bracket = idx < 0 ? '' :
     (idx < champEnd ? 'champ' : (idx >= sackoStart ? 'sacko' : ''));
 
@@ -348,17 +348,17 @@ function openTeamSheet(name) {
     recEl.textContent = '';
   }
 
-  // Stat tiles — summarise the weekly scoring shown in the chart. mtyby has no
+  // Stat tiles - summarise the weekly scoring shown in the chart. mtyby has no
   // league points, so the first tile shows wins instead.
   const firstTile = BONUS
-    ? `<div class="ts-stat"><div class="ts-stat-value">${t ? t.league_points : '—'}</div><div class="ts-stat-label">Points</div></div>`
-    : `<div class="ts-stat"><div class="ts-stat-value">${t ? t.won : '—'}</div><div class="ts-stat-label">Wins</div></div>`;
+    ? `<div class="ts-stat"><div class="ts-stat-value">${t ? t.league_points : '-'}</div><div class="ts-stat-label">Points</div></div>`
+    : `<div class="ts-stat"><div class="ts-stat-value">${t ? t.won : '-'}</div><div class="ts-stat-label">Wins</div></div>`;
   const statsEl = document.getElementById('ts-stats');
   statsEl.innerHTML = `
     ${firstTile}
-    <div class="ts-stat"><div class="ts-stat-value amber">${ys.length ? avg.toFixed(1) : '—'}</div><div class="ts-stat-label">Avg / rd</div></div>
-    <div class="ts-stat"><div class="ts-stat-value">${ys.length ? hi.toFixed(0) : '—'}</div><div class="ts-stat-label">High</div></div>
-    <div class="ts-stat"><div class="ts-stat-value">${ys.length ? lo.toFixed(0) : '—'}</div><div class="ts-stat-label">Low</div></div>`;
+    <div class="ts-stat"><div class="ts-stat-value amber">${ys.length ? avg.toFixed(1) : '-'}</div><div class="ts-stat-label">Avg / rd</div></div>
+    <div class="ts-stat"><div class="ts-stat-value">${ys.length ? hi.toFixed(0) : '-'}</div><div class="ts-stat-label">High</div></div>
+    <div class="ts-stat"><div class="ts-stat-value">${ys.length ? lo.toFixed(0) : '-'}</div><div class="ts-stat-label">Low</div></div>`;
 
   // Chart
   const body = document.getElementById('ts-body');

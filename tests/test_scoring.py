@@ -59,7 +59,7 @@ def test_tie_splits_two_each():
 
 
 # ---------------------------------------------------------------------------
-# Standings tiebreak — higher Points For, NOT points difference (spec §5.4)
+# Standings tiebreak - higher Points For, NOT points difference (spec §5.4)
 # ---------------------------------------------------------------------------
 
 def test_tiebreak_uses_points_for_not_diff(monkeypatch):
@@ -80,7 +80,7 @@ def test_tiebreak_uses_points_for_not_diff(monkeypatch):
 
 
 # ---------------------------------------------------------------------------
-# Byes — score the average of the other teams that round (spec §5.2)
+# Byes - score the average of the other teams that round (spec §5.2)
 # ---------------------------------------------------------------------------
 
 def test_bye_scores_average_of_other_teams(monkeypatch):

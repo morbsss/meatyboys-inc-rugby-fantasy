@@ -184,7 +184,7 @@ def _build_gbm_predictions(
 ) -> pd.DataFrame:
     model = train_gbm(features_df, target_round)
     if model is None:
-        log.warning('  GBM: insufficient training data — skipping')
+        log.warning('  GBM: insufficient training data - skipping')
         return pd.DataFrame(columns=['playerid', 'round_num', 'gbm_pred'])
 
     records = []
@@ -240,7 +240,7 @@ def run(con=None):
              f'{len(fixtures):,} fixture rows')
 
     if fixtures.empty:
-        log.warning('No fixtures found for current round — nothing to predict')
+        log.warning('No fixtures found for current round - nothing to predict')
         if close_after:
             con.close()
         return
@@ -252,7 +252,7 @@ def run(con=None):
     log.info(f'  {len(pred_frame):,} player-fixture pairs to predict')
 
     if pred_frame.empty:
-        log.warning('No players matched to fixtures — nothing to predict')
+        log.warning('No players matched to fixtures - nothing to predict')
         if close_after:
             con.close()
         return

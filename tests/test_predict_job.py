@@ -29,7 +29,7 @@ def _utc(y, mo, d, h, mi=0):
 def _due(**kw):
     base = dict(
         competition='premiership',
-        now_utc=_utc(2026, 9, 29, 11),          # Tue 12:00 BST — the rollover
+        now_utc=_utc(2026, 9, 29, 11),          # Tue 12:00 BST - the rollover
         tz_name=LON,
         last_runs={'sync_rounds': datetime.now(timezone.utc).isoformat(),
                    'lineups': None, 'live_scoring': None},

@@ -107,7 +107,7 @@ def _draft(players: list[dict], teams: list[str], model: dict) -> dict[str, dict
 # ---------------------------------------------------------------------------
 
 def _wipe_league(cur, league_id: int) -> None:
-    # Delete child rows before `players` — Postgres enforces the FKs that
+    # Delete child rows before `players` - Postgres enforces the FKs that
     # reference players(player_id) (weekly_stats, team_selections, draft_picks,
     # previous_season), so `players` must come last.
     for table in ('weekly_stats', 'team_selections', 'team_front_row', 'rounds',
@@ -141,7 +141,7 @@ def seed_league(conn, cur, slug: str, adapter: MockAdapter) -> dict:
         _exec(cur, 'INSERT INTO rounds (round_number, first_kickoff, last_kickoff, league_id) '
                    'VALUES (?, ?, ?, ?)',
               (rd.round_number, rd.first_kickoff, rd.last_kickoff, league_id))
-        # Real-life fixtures (home/away) for the round — shown on the player card.
+        # Real-life fixtures (home/away) for the round - shown on the player card.
         for m in rd.matches:
             _exec(cur, 'INSERT INTO real_fixtures (league_id, round, home_team, away_team) '
                        'VALUES (?, ?, ?, ?)',
@@ -173,7 +173,7 @@ def seed_league(conn, cur, slug: str, adapter: MockAdapter) -> dict:
 
     # --- mock draft → rosters --------------------------------------------
     # Only the model's draftable individual positions enter the pool. For
-    # meatyboys this excludes PR/HK (rule: no individual front-rowers — the club
+    # meatyboys this excludes PR/HK (rule: no individual front-rowers - the club
     # FR UNIT is the only way to hold a front row); those players still exist in
     # the players table because the FR unit scores off them.
     model = roster_model(slug)

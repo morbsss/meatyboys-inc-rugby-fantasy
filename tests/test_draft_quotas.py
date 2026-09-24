@@ -4,7 +4,7 @@ OFDS drafts exactly 23 players into 23 fixed slots, so every pick has to fill a
 slot that is still open. The manual pick path used to check only that a player
 was undrafted, so a manager could take a third hooker while still short a prop.
 The draft completed "successfully", then _finalize_draft quietly dropped the
-surplus player because there was nowhere to field him — leaving that manager 22
+surplus player because there was nowhere to field him - leaving that manager 22
 players with nothing to explain it.
 
 That is exactly what happened to Smith's Pizza in the 2026-27 draft, and
@@ -64,7 +64,7 @@ def test_empty_squad_accepts_any_position():
 
 def test_full_position_is_blocked_even_early():
     """OFDS quotas sum to exactly the pick count, so an overfill is never
-    affordable — not even on pick 3."""
+    affordable - not even on pick 3."""
     owned = _owned(SH=2)                    # SH quota is 2: now full
     assert idx._quota_blocked('SH', owned, OFDS, has_fr=False) is not None
     assert idx._quota_blocked('PR', owned, OFDS, has_fr=False) is None
@@ -84,7 +84,7 @@ def test_complete_squad_blocks_everything():
 
 
 def test_soft_model_is_exempt():
-    """meatyboys composition is advisory — never block a pick there."""
+    """meatyboys composition is advisory - never block a pick there."""
     owned = _owned(SH=6, FH=6)
     for pos in ('SH', 'FH', 'PR', 'OBK'):
         assert idx._quota_blocked(pos, owned, MTYBY, has_fr=False) is None
@@ -100,7 +100,7 @@ def test_front_row_unit_counts_against_the_pick_budget():
 
 
 # ---------------------------------------------------------------------------
-# Auto-pick was always correct — guard against regressing the two paths apart
+# Auto-pick was always correct - guard against regressing the two paths apart
 # ---------------------------------------------------------------------------
 
 def test_autopick_never_produces_a_blocked_position():

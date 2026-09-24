@@ -1,5 +1,5 @@
 """
-Ingestion jobs (spec §4) — league-aware, idempotent, adapter-driven.
+Ingestion jobs (spec §4) - league-aware, idempotent, adapter-driven.
 
 These pull through the data-source adapters (api/datasource), so they run
 offline against the mock adapter and against SuperBru/ESPN when
@@ -111,7 +111,7 @@ def _player_id(conn, name: str, team: str, position: str, league_id: int) -> int
 def ingest_player_scores(conn, league_id: int, competition: str,
                          round_number: int, finalize: bool = False) -> int:
     """Upsert one round of cumulative player scores. `finalize` is the Monday
-    authoritative pass (spec §4.4) — same write path, overwriting live values."""
+    authoritative pass (spec §4.4) - same write path, overwriting live values."""
     scores = get_score_source().fetch_player_scores(competition, round_number)
     now = _now()
     written = 0

@@ -1,4 +1,4 @@
-# Environment (contains secrets — never commit)
+# Environment (contains secrets - never commit)
 .env.local
 .env.development
 .env.production

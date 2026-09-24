@@ -4,7 +4,7 @@ The live adapter resolves every Premiership club through
 prem_fixtures.resolve_team, so production stores the canonical 3-letter code:
 `players.team = 'BAT'`. The mock seed used to store the display name
 ('Bath', 'Bristol Bears', ...) instead, which meant a DB built under
-DATA_SOURCE=mock described the same clubs under a different key — and everything
+DATA_SOURCE=mock described the same clubs under a different key - and everything
 keyed on a club quietly found nothing:
 
   * squad jersey art and club-colour tints, both looked up by code
@@ -70,7 +70,7 @@ def test_seeded_premiership_clubs_all_have_jersey_art():
 
 
 def test_super_rugby_seed_keeps_display_names():
-    """It has no code vocabulary — switching it to abbreviations would rename
+    """It has no code vocabulary - switching it to abbreviations would rename
     every club to something the rest of the app has never heard of."""
     from_players, _ = _seed_teams('super_rugby')
 
@@ -92,7 +92,7 @@ def test_team_ids_are_unique(competition):
 
 def test_short_club_names_resolve():
     """'Bath' and 'Gloucester' are the everyday names and what the seed used to
-    write, but the club list only carries 'Bath Rugby' / 'Gloucester Rugby' — so
+    write, but the club list only carries 'Bath Rugby' / 'Gloucester Rugby' - so
     both resolved to None until they were aliased."""
     assert prem_fixtures.resolve_team('Bath') == 'BAT'
     assert prem_fixtures.resolve_team('Gloucester') == 'GLO'

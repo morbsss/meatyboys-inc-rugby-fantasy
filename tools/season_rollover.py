@@ -7,7 +7,7 @@ What it does (idempotent-ish, transactional). Evergreen model: accounts, honours
 and past season_entries PERSIST; only the per-season competition data resets.
 
   1. Computes the FINAL standings (via the app's own calculate_table) and records
-     honours — champion / runner_up / sacko — keyed to each team's OWNING ACCOUNT
+     honours - champion / runner_up / sacko - keyed to each team's OWNING ACCOUNT
      (user_id), so a future rename never loses history. Skipped if no rounds were
      played.
   2. Archives each player's final totals into `previous_season` (the draft's

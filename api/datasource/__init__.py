@@ -4,8 +4,8 @@ Data-source adapter selection (spec §3).
 Choose the implementation via the DATA_SOURCE env var, defaulting to `mock`
 so the app is buildable and testable offline:
 
-    DATA_SOURCE=mock   (default) — seeded local data, no network
-    DATA_SOURCE=live             — best-effort SuperBru/ESPN scraping
+    DATA_SOURCE=mock   (default) - seeded local data, no network
+    DATA_SOURCE=live             - best-effort SuperBru/ESPN scraping
 
 Business logic should depend only on the interfaces in base.py and obtain the
 concrete adapter through these accessors.

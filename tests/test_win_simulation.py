@@ -2,13 +2,13 @@
 
 The model used to build a team's score distribution by summing its players'
 percentile curves elementwise. That asserts every player in a team lands on the
-same percentile at once — a team's p99 was all fifteen players having their best
+same percentile at once - a team's p99 was all fifteen players having their best
 game simultaneously. Treating within-team scores as perfectly correlated wildly
 overstates the spread of the total, and the spread is what a win probability is
 made of, so every fixture was dragged toward 50/50.
 
 Measured on the mock season, one 15-player team: the old model gave a total with
-mean 116.9 and standard deviation 117.6 — as uncertain as it was large.
+mean 116.9 and standard deviation 117.6 - as uncertain as it was large.
 Independent sampling gives the same mean with sd 48.0.
 """
 
@@ -19,7 +19,7 @@ from api.predict import simulate_totals, win_draw_pct
 
 
 def _flat(value, n_players):
-    """n players who always score exactly `value` — zero variance."""
+    """n players who always score exactly `value` - zero variance."""
     return np.full((n_players, 100), float(value))
 
 
@@ -74,7 +74,7 @@ def test_draws_shape_is_respected():
 
 
 # ---------------------------------------------------------------------------
-# Determinism — a published probability must not jitter between runs
+# Determinism - a published probability must not jitter between runs
 # ---------------------------------------------------------------------------
 
 def test_same_seed_gives_identical_totals():

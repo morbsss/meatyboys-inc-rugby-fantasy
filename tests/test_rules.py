@@ -2,7 +2,7 @@
 
 These tests bind the published rules to the constants that enforce them, so a
 scoring or roster change can't quietly leave the rule book lying. They also
-check the two leagues' rules stay separated — publishing OFDS's captain and
+check the two leagues' rules stay separated - publishing OFDS's captain and
 auto-sub rules to meatyboys managers (or vice versa) would be worse than
 publishing nothing.
 """
@@ -58,7 +58,7 @@ def test_squad_counts_add_up(slug):
 
 
 # ---------------------------------------------------------------------------
-# The two leagues genuinely differ — the payload must say so
+# The two leagues genuinely differ - the payload must say so
 # ---------------------------------------------------------------------------
 
 def test_ofds_is_a_strict_matchday_23_with_captain_and_autosub():

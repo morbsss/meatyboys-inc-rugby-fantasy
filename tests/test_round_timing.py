@@ -5,7 +5,7 @@ already said and never told you *when* a round was. It now shows the round's
 date, or a live marker while the round is being played.
 
 The date is formatted server-side on purpose. Round 1 kicks off 18:45 UTC on a
-Friday, which is already Saturday in Sydney — formatting in the browser would
+Friday, which is already Saturday in Sydney - formatting in the browser would
 show a manager abroad the wrong day for an English fixture.
 """
 
@@ -63,7 +63,7 @@ def _at(monkeypatch, moment):
 # ---------------------------------------------------------------------------
 
 def test_label_uses_the_leagues_local_date(conn, monkeypatch):
-    """18:45 UTC Friday is Friday in London — not Saturday, as a browser east of
+    """18:45 UTC Friday is Friday in London - not Saturday, as a browser east of
     UTC would render it."""
     _at(monkeypatch, _utc(2026, 9, 1, 12))
     assert idx._round_timing(conn, 2, 1)['date_label'] == '25 Sept 2026'
@@ -102,11 +102,11 @@ def test_unknown_round_has_no_label(conn, monkeypatch):
 @pytest.mark.parametrize('moment, live, why', [
     (_utc(2026, 9, 25, 18, 44), False, 'a minute before the first kickoff'),
     (_utc(2026, 9, 25, 18, 46), True,  'first match under way'),
-    (_utc(2026, 9, 26, 12),     True,  'Saturday, between matches — the round is on'),
+    (_utc(2026, 9, 26, 12),     True,  'Saturday, between matches - the round is on'),
     (_utc(2026, 9, 27, 14, 30), True,  'last match in play'),
     (_utc(2026, 9, 27, 15, 59), True,  'inside the 2h window after the last kickoff'),
     (_utc(2026, 9, 27, 16, 30), False, 'last match over'),
-    (_utc(2026, 9, 28, 12),     False, 'Monday — played, not live'),
+    (_utc(2026, 9, 28, 12),     False, 'Monday - played, not live'),
 ])
 def test_live_spans_the_whole_round(conn, monkeypatch, moment, live, why):
     _at(monkeypatch, moment)

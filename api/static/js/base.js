@@ -1,5 +1,5 @@
 /* =============================================================================
- * base.js — the shared app chrome, loaded on every page (via base.html).
+ * base.js - the shared app chrome, loaded on every page (via base.html).
  *
  * Owns the bits that live in the shared layout, not any one page:
  *   • toast notifications (window.mtybyToast)
@@ -106,9 +106,9 @@ async function checkUserSession() {
 function renderProfile(user) {
   window.__mtybyUser = user;
 
-  // Username (login) — always changeable.
+  // Username (login) - always changeable.
   const unameEl = document.getElementById('profile-username');
-  if (unameEl) unameEl.textContent = user.username || '—';
+  if (unameEl) unameEl.textContent = user.username || '-';
 
   // Team name + (conditionally shown) create/rename control. Until the manager
   // names their team it defaults to their username, so show a placeholder and a
@@ -142,8 +142,8 @@ function renderProfile(user) {
   }
   if (statusEl) {
     if (user.is_commissioner) statusEl.textContent = 'You are the league commissioner.';
-    else if (heldByOther) statusEl.textContent = `Held by ${user.commissioner_name} — they must step down first.`;
-    else statusEl.textContent = 'No commissioner yet — toggle on to take the role.';
+    else if (heldByOther) statusEl.textContent = `Held by ${user.commissioner_name} - they must step down first.`;
+    else statusEl.textContent = 'No commissioner yet - toggle on to take the role.';
   }
 
   // Commissioner-only: the "reset a member's password" control.
@@ -193,7 +193,7 @@ function dismissProfileSheet() {
   if (sheet) sheet.classList.remove('is-open');
 }
 
-// Fill the member picker from /api/league/members — every signed-up manager in
+// Fill the member picker from /api/league/members - every signed-up manager in
 // the commissioner's league. (It used to read /api/auth/teams, which only lists
 // teams that already have squad selections, so brand-new members were missing.)
 async function populateResetMembers() {
@@ -208,7 +208,7 @@ async function populateResetMembers() {
           // team_name defaults to username until they name a team; don't show "a (a)".
           const label = (m.team_name && m.team_name !== m.username)
             ? `${m.username} · ${m.team_name}` : m.username;
-          const flag = m.awaiting_reset ? ' — reset pending' : '';
+          const flag = m.awaiting_reset ? ' - reset pending' : '';
           return `<option value="${escAttr(String(m.user_id))}">${esc(label + flag)}</option>`;
         }).join('')
       : '<option value="">No other members yet</option>';
@@ -376,11 +376,11 @@ async function checkTradeOffers() {
     if (n > 0) {
       el.style.display = '';
       if (cnt) cnt.textContent = n;
-      el.title = `${n} trade offer${n === 1 ? '' : 's'} — tap to review`;
+      el.title = `${n} trade offer${n === 1 ? '' : 's'} - tap to review`;
     } else {
       el.style.display = 'none';
     }
-  } catch (err) { /* offline / not logged in — leave hidden */ }
+  } catch (err) { /* offline / not logged in - leave hidden */ }
 }
 window.checkTradeOffers = checkTradeOffers;
 

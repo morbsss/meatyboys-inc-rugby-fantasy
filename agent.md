@@ -1,4 +1,4 @@
-# Build Spec — Meatyboys Rugby Fantasy
+# Build Spec - Meatyboys Rugby Fantasy
 
 > **You are extending an existing repository** that already contains a skeleton for a fantasy league app. Build the features below on top of it. Do **not** scaffold a new project or replace the existing structure.
 
@@ -8,10 +8,10 @@
 
 Before writing any code:
 
-1. **Explore the repo.** Read the README, the package manifest (`package.json` / `requirements.txt` / etc.), the existing data models, routes/controllers, components, and the current styling/theme (CSS variables, Tailwind config, or theme file). Match the existing stack, conventions, naming, and folder layout — do not introduce a new framework or styling system.
+1. **Explore the repo.** Read the README, the package manifest (`package.json` / `requirements.txt` / etc.), the existing data models, routes/controllers, components, and the current styling/theme (CSS variables, Tailwind config, or theme file). Match the existing stack, conventions, naming, and folder layout - do not introduce a new framework or styling system.
 2. **Report what you found** in one short paragraph (stack, where models/routes/components/styles live, what the skeleton already implements) before you start, so we agree on the foundation.
 3. **Build in milestones** (see §9). After each milestone, summarise what changed and what's testable. Don't attempt the whole app in one pass.
-4. **Keep it runnable at every step.** External data (SuperBru, ESPN) is unreliable to depend on during development — implement the **adapter + mock pattern in §3** so the app runs end-to-end with seeded mock data and no live network access.
+4. **Keep it runnable at every step.** External data (SuperBru, ESPN) is unreliable to depend on during development - implement the **adapter + mock pattern in §3** so the app runs end-to-end with seeded mock data and no live network access.
 5. **When something is genuinely ambiguous**, consult §8. If a default is stated there, proceed with it and note the assumption. Only stop to ask if a decision would be expensive to reverse.
 
 ---
@@ -54,15 +54,15 @@ Select the adapter via config/env (e.g. `DATA_SOURCE=mock|live`), defaulting to 
 
 ## 4. Data sources & ingestion
 
-### 4.1 Players — source: SuperBru
+### 4.1 Players - source: SuperBru
 Scrape the full player pool for each competition. Persist player identity + position so they can be drafted and scored. Expose via the player adapter (§3).
 
-### 4.2 Season fixtures — source: ESPN
+### 4.2 Season fixtures - source: ESPN
 Ingest the full season fixture list per competition: every round's fixtures with **date and kickoff time**. Derive from this (a) the current **round number** and (b) whether any match is **live** (now is within a fixture's game window). These two derived values gate the live-scraping jobs below.
 
 > **Note:** ESPN does not publish an official public rugby API. Build the ESPN client against whatever endpoint is available behind the adapter, and treat the mock adapter as the contract of record. If the live endpoint can't be reached, the app must still function on mock data.
 
-### 4.3 Round lineups — source: ESPN
+### 4.3 Round lineups - source: ESPN
 Scrape team lineups weekly and **join them to players** with a status flag: `S` = starting, `B` = bench, `O` = out. Run on this schedule:
 
 | Competition | Window | Frequency | Timezone |
@@ -70,12 +70,12 @@ Scrape team lineups weekly and **join them to players** with a status flag: `S` 
 | Super Rugby Pacific | Wed 15:00 before the round → then Fri 15:00 to Sun 17:00 | every 2 hours within the Fri–Sun window | AEST/AEDT |
 | English Premiership | Thu 14:00 → Sun 18:00 | every 2 hours | GMT/BST |
 
-### 4.4 Player round scoring data — source: SuperBru
+### 4.4 Player round scoring data - source: SuperBru
 - **During live matches:** scrape player scoring data every **3 minutes**.
 - **Finalisation:** a definitive scrape at **Monday 12:00** following the gameweek (AEST/AEDT for Super Rugby; GMT/BST for the Premiership). The finalised values are authoritative for standings.
 
 ### 4.5 Timezone & DST handling
-Use IANA zones — `Australia/Sydney` (Super Rugby) and `Europe/London` (Premiership) — so AEST↔AEDT and GMT↔BST switch automatically. Schedule jobs in the competition's local zone; store results in UTC.
+Use IANA zones - `Australia/Sydney` (Super Rugby) and `Europe/London` (Premiership) - so AEST↔AEDT and GMT↔BST switch automatically. Schedule jobs in the competition's local zone; store results in UTC.
 
 ---
 
@@ -86,7 +86,7 @@ Two leagues run independently with separate players, fixtures, drafts, standings
 
 ### 5.2 League size & byes
 - A league has **8–10 fantasy teams**.
-- **Any league with an odd team count gives one team a bye each round, rotating** so every team gets an equal number of byes over the season. (The example given — 9 teams gets a bye — is the odd-count case.)
+- **Any league with an odd team count gives one team a bye each round, rotating** so every team gets an equal number of byes over the season. (The example given - 9 teams gets a bye - is the odd-count case.)
 - A team on bye scores the **average of all other teams' scores in that league for that round**, and that result counts toward standings like a normal fixture.
 
 ### 5.3 Regular season
@@ -111,8 +111,8 @@ A fantasy team's match score is the sum of its scoring players' SuperBru round d
 - **Top 4** of the regular-season table → **Championship bracket**. **Bottom 4** → **Sacko bracket**.
 - Each bracket runs **two-legged aggregate semi-finals** (rounds 1–2 of the playoff window) and a **single final** (round 3):
   - **Championship:** semi-final *winners* advance; the final winner is the **Champion**.
-  - **Sacko:** inverted — semi-final *losers* advance; the final **loser is the Sacko**.
-- Seeding within each bracket mirrors regular-season rank (1v4, 2v3 for Championship; the inverse logic for Sacko — confirm exact Sacko seeding, see §8).
+  - **Sacko:** inverted - semi-final *losers* advance; the final **loser is the Sacko**.
+- Seeding within each bracket mirrors regular-season rank (1v4, 2v3 for Championship; the inverse logic for Sacko - confirm exact Sacko seeding, see §8).
 - See §8 for how middle teams are handled when a league has 9 or 10 teams.
 
 ---
@@ -174,16 +174,16 @@ A fantasy team's match score is the sum of its scoring players' SuperBru round d
 
 ## 9. Build milestones
 
-1. **Repo recon + plan** — report stack/structure/theme; confirm assumptions in §8.
-2. **Domain model + migrations** — leagues, teams, users, players, fixtures, rosters, lineups, round scores, standings.
+1. **Repo recon + plan** - report stack/structure/theme; confirm assumptions in §8.
+2. **Domain model + migrations** - leagues, teams, users, players, fixtures, rosters, lineups, round scores, standings.
 3. **Data-source adapters + mock seed data** (§3, §4) so the app runs offline.
 4. **Auth & onboarding flow** (§6.1) + theming states (§7).
-5. **Draft engine** — snake order, roster rules, live join, auto-draft (§6.2).
+5. **Draft engine** - snake order, roster rules, live join, auto-draft (§6.2).
 6. **Scheduler + ingestion jobs** (§4) with timezone/DST handling.
-7. **Scoring & standings** — matchup scoring, bonus points, tiebreaks, byes (§5.2–5.4).
+7. **Scoring & standings** - matchup scoring, bonus points, tiebreaks, byes (§5.2–5.4).
 8. **Fixture generation + regular season + playoffs** (§5.3, §5.5).
-9. **UI** — five tabs, league-table arrows, historical-position graph (§7).
-10. **Tests** — unit tests for scoring, standings, byes, draft validity, and playoff progression.
+9. **UI** - five tabs, league-table arrows, historical-position graph (§7).
+10. **Tests** - unit tests for scoring, standings, byes, draft validity, and playoff progression.
 
 ---
 

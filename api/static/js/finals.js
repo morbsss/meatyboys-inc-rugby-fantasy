@@ -1,9 +1,9 @@
 /* =============================================================================
- * finals.js — The Finals page: playoff bracket.
+ * finals.js - The Finals page: playoff bracket.
  * Extracted from templates/finals.html. Shared helpers: common.js, leagues.js, base.js.
  * ========================================================================== */
 
-let TABLE = [];          // league standings — used for seed numbers
+let TABLE = [];          // league standings - used for seed numbers
 
 async function init() {
   let data;
@@ -12,7 +12,7 @@ async function init() {
     data = await res.json();
   } catch (err) {
     document.getElementById('brackets').innerHTML =
-      '<div class="finals-loading">Failed to load — refresh to retry.</div>';
+      '<div class="finals-loading">Failed to load - refresh to retry.</div>';
     return;
   }
   TABLE = data.table || [];
@@ -30,8 +30,8 @@ function renderPlayoffs(pl) {
 
   status.className = 'finals-status' + (pl.complete ? ' is-complete' : '');
   status.innerHTML = pl.complete
-    ? '<span class="dot"></span>Regular season complete — playoff seeds locked.'
-    : '<span class="dot"></span>Provisional seeds — finalised after Round 15.';
+    ? '<span class="dot"></span>Regular season complete - playoff seeds locked.'
+    : '<span class="dot"></span>Provisional seeds - finalised after Round 15.';
 
   let html = '';
   if (pl.championship) html += bracketHtml('Championship', '🏆', 'champ', pl.championship);
@@ -77,14 +77,14 @@ function tieSide(kind, t, side, isFinal) {
   const isWin = t.played && t.winner && t.winner === name;
   if (!name) {
     const from = (kind === 'sacko' ? 'Loser ' : 'Winner ') + (side === 'home' ? 'SF1' : 'SF2');
-    return `<div class="tie-side"><span class="tie-seed">·</span><span class="tie-name tie-tbd">${from}</span><span class="tie-score tie-tbd">—</span></div>`;
+    return `<div class="tie-side"><span class="tie-seed">·</span><span class="tie-name tie-tbd">${from}</span><span class="tie-score tie-tbd">-</span></div>`;
   }
   const seedNo = seedNumber(name);
   const agg = t[side + '_agg'];
   const legs = (!isFinal && t.played)
     ? `<span class="legs">${fmt(t[side + '_leg1'])}+${fmt(t[side + '_leg2'])}</span>`
     : '';
-  const score = t.played ? `${legs}${fmt(agg)}` : '<span class="tie-tbd">—</span>';
+  const score = t.played ? `${legs}${fmt(agg)}` : '<span class="tie-tbd">-</span>';
   const trophy = isWin && isFinal ? `<span class="tie-trophy">${kind === 'champ' ? '🏆' : '🍆'}</span>` : '';
   return `<div class="tie-side ${isWin ? 'is-winner' : ''}">
     <span class="tie-seed">${seedNo || ''}</span>

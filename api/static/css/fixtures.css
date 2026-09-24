@@ -23,7 +23,7 @@
    lot of the screen gone before a single fixture appears. */
 .round-select { display: none; }
 @media (max-width: 768px) {
-  /* The bar holds only the Wk chips, which the dropdown replaces here — left
+  /* The bar holds only the Wk chips, which the dropdown replaces here - left
      visible it would be an empty sticky strip above the heading. */
   .filter-bar { display: none; }
   .round-select {
@@ -49,7 +49,7 @@
 
 /* One round-card per row, filling the content width.
    The track minimum has to stay above half the container, or auto-fill packs
-   two cards per row and each one gets NARROWER as the page gets wider — which
+   two cards per row and each one gets NARROWER as the page gets wider - which
    is what would happen at 1618px with the old 660px minimum.
    min(..., 100%) keeps the track from exceeding the container on tablets and
    phones, where a bare 990px minimum would overflow horizontally. */
@@ -61,7 +61,7 @@
 .week-card {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow-1);
-  /* Fixed width for the centre score column — see .match-row. Sized so the
+  /* Fixed width for the centre score column - see .match-row. Sized so the
      widest score a team can realistically post still fits without the column
      having to grow; headroom is deliberate, since font metrics vary by
      platform and a too-tight box would reintroduce the shifting. */
@@ -90,7 +90,7 @@
 .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #c0392b;
   flex: 0 0 auto; animation: live-pulse 1.6s ease-in-out infinite; }
 @keyframes live-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
-/* Respect a reduced-motion preference — a pulsing dot is decorative. */
+/* Respect a reduced-motion preference - a pulsing dot is decorative. */
 @media (prefers-reduced-motion: reduce) { .live-dot { animation: none; } }
 
 /* Lift the round in play out of a long list of week-cards. */
@@ -99,7 +99,7 @@
 
 /* The centre column is a FIXED width, not `auto`.
    With `auto` it sized itself to whatever the score text happened to be, so
-   "5.0 v 12.0" and "123.4 v 98.7" produced different column widths — the team
+   "5.0 v 12.0" and "123.4 v 98.7" produced different column widths - the team
    names then sat in a different place in every round, and shifted again the
    moment a round went from Upcoming (a badge) to Played (two scores).
    Fixing the middle column makes all three columns identical in every round. */
@@ -127,7 +127,7 @@
 /* A bonus point is marked twice over, and exactly one is ever shown: the "BP"
    pill beside the team name on desktop, and a green asterisk against the score
    itself on mobile. Two elements rather than one restyled element, because they
-   live in different containers — the pill can't be moved into the score wrap
+   live in different containers - the pill can't be moved into the score wrap
    without dragging desktop along with it. */
 .bp-star { display: none; }
 @media (max-width: 768px) {
@@ -156,7 +156,7 @@
 .bye-label { color: var(--ink-muted); font-style: italic; font-size: 12px; }
 
 /* =============================================================================
- * Real club fixtures — the Premiership matches a fantasy round is scored from.
+ * Real club fixtures - the Premiership matches a fantasy round is scored from.
  * Collapsed by default: it's context, not the point of the page, and fifteen
  * weeks of it would bury the fantasy results.
  * ========================================================================== */

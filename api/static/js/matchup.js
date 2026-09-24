@@ -1,5 +1,5 @@
 /* =============================================================================
- * matchup.js — The Match Up page: head-to-head line-ups for the round.
+ * matchup.js - The Match Up page: head-to-head line-ups for the round.
  * Extracted from templates/matchup.html. Shared helpers: common.js, leagues.js, base.js.
  * ========================================================================== */
 
@@ -7,7 +7,7 @@ let RESULTS = [], weekSel = null, fixtureIdx = 0, IS_MTYBY = false, MY_TEAM = ''
 
 async function init() {
   // The round you're in comes from /api/state (get_next_round), not from
-  // max_round — max_round is the last round SCORED, which is 0 until the first
+  // max_round - max_round is the last round SCORED, which is 0 until the first
   // results land. The team name picks out your own fixture.
   const [data, state, me] = await Promise.all([
     fetch('/api/competition').then((r) => r.json()),
@@ -29,7 +29,7 @@ async function init() {
 
   // Open on the active round, and on your own fixture within it. Previously it
   // opened on the LAST week of the season and whichever fixture happened to be
-  // first — so mid-season you landed on two other teams in a round not yet played.
+  // first - so mid-season you landed on two other teams in a round not yet played.
   const active = Number(state.round) || 0;
   weekSel = RESULTS.some(w => w.week === active)
     ? active
@@ -101,9 +101,9 @@ async function renderMatch() {
       <div class="mu-col away">${colHTML(away)}</div>
     </div>
     <div class="mu-total">
-      <span class="v ${homeCls}">${played ? hs.toFixed(1) : '—'}</span>
+      <span class="v ${homeCls}">${played ? hs.toFixed(1) : '-'}</span>
       <span class="lbl">Total</span>
-      <span class="v away ${awayCls}">${played ? as.toFixed(1) : '—'}</span>
+      <span class="v away ${awayCls}">${played ? as.toFixed(1) : '-'}</span>
     </div>`;
 
   // Bench lives in its own card below, separated by a cream-page gap.
@@ -150,7 +150,7 @@ const mtybyRank = pos => {
 
 // OFDS line-up order, TOP → BOTTOM: the starting XV as it is read out on a team
 // sheet. Front row interleaves (loosehead prop, hooker, tighthead prop), which a
-// position-grouped sort can't express — hence an explicit 15-slot template
+// position-grouped sort can't express - hence an explicit 15-slot template
 // rather than a ranking function.
 const OFDS_STARTER_ORDER = [
   'PR', 'HK', 'PR',               // front row
@@ -177,7 +177,7 @@ function orderStarters(starters) {
 
   // A line-up that doesn't match the template (an auto-sub covering out of
   // position, or a squad short somewhere) leaves players unplaced. Append them
-  // rather than dropping them — a missing name on a match-day table reads as
+  // rather than dropping them - a missing name on a match-day table reads as
   // lost points.
   byPos.forEach((queue) => queue.forEach((p) => out.push(p)));
   return out;
@@ -216,7 +216,7 @@ function colHTML(team) {
     || '<div class="mu-p">-</div>';
 }
 
-// The bench: substitutes (and a benched FR unit) shown muted below the total —
+// The bench: substitutes (and a benched FR unit) shown muted below the total -
 // their points don't count toward the score.
 function benchColHTML(team) {
   const bench = (team.picks || []).filter(p => p.is_bench);

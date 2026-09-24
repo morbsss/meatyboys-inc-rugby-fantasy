@@ -13,7 +13,7 @@ each run while auto-substitution quietly did nothing.
    scoreboard and summary endpoints, from this machine and from the production
    VM: no UA and `curl/8.5.0` get 200; `Mozilla/5.0 ... Chrome/124` and a custom
    `meatyboys-fantasy/1.0` get 403. That is covered here by asserting
-   `fetch_json` sends no User-Agent — the header is the bug, so the test guards
+   `fetch_json` sends no User-Agent - the header is the bug, so the test guards
    its absence.
 
 These tests stub the network. They pin the shape of the requests we make, which
@@ -59,7 +59,7 @@ def espn(monkeypatch):
 
 
 def test_walks_the_window_one_day_at_a_time(espn):
-    """No request may carry a date range — ESPN 400s all of them."""
+    """No request may carry a date range - ESPN 400s all of them."""
     LiveAdapter._espn_round_events(CFG, ROUND)
 
     assert len(espn) == len(EXPECTED_DAYS)
@@ -84,7 +84,7 @@ def test_returns_every_fixture_in_the_round(espn):
 
 def test_deduplicates_events_seen_on_more_than_one_day(monkeypatch):
     """The window is padded, and ESPN lists a fixture under neighbouring days in
-    some timezones — the same event must not be fetched or scored twice."""
+    some timezones - the same event must not be fetched or scored twice."""
     monkeypatch.setattr('api.prem_fixtures.round_window', lambda n: WINDOW)
     monkeypatch.setattr(real_lineups, 'fetch_json',
                         lambda url: {'events': [{'id': '604614'}, {'id': '604616'}]})
@@ -95,7 +95,7 @@ def test_deduplicates_events_seen_on_more_than_one_day(monkeypatch):
 
 
 def test_partial_failure_keeps_the_days_that_answered(monkeypatch):
-    """One bad day must not cost the whole round — four fixtures still beat none."""
+    """One bad day must not cost the whole round - four fixtures still beat none."""
     monkeypatch.setattr('api.prem_fixtures.round_window', lambda n: WINDOW)
 
     def flaky(url):

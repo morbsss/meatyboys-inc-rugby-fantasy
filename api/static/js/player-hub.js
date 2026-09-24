@@ -1,5 +1,5 @@
 /* =============================================================================
- * player-hub.js — The Player Hub: browse/sort players, pick up free agents, trade.
+ * player-hub.js - The Player Hub: browse/sort players, pick up free agents, trade.
  * Extracted from templates/player_hub.html. Shared helpers: common.js, leagues.js, base.js.
  * ========================================================================== */
 
@@ -13,7 +13,7 @@ let likeForLike = false;   // positioned squads (OFDS) trade same-position only
 let pos = 'ALL', q = '', teamFilter = 'ALL', lineupFilter = 'ALL', roundSel = '', metric = 'total';
 let sortKey = 'value', sortDir = -1;
 
-// The table used to render rows.slice(0, 80) and stop — with 260 players in a
+// The table used to render rows.slice(0, 80) and stop - with 260 players in a
 // league, two thirds were simply unreachable and nothing on screen said so.
 const PAGE_SIZE = 80;
 let page = 1;
@@ -85,7 +85,7 @@ function renderPending(tr) {
   const inc = tr.incoming || [], out = tr.outgoing || [];
   if (!inc.length && !out.length) { card.hidden = true; return; }
   card.hidden = false;
-  const pl = p => p ? `${esc(p.name)} <span class="ph-team">${p.position}</span>` : '—';
+  const pl = p => p ? `${esc(p.name)} <span class="ph-team">${p.position}</span>` : '-';
   let html = '';
   inc.forEach(t => {
     html += `<div class="offer">
@@ -130,7 +130,7 @@ function setPos(p) {
 
 /** Position filter, rendered twice: chips for desktop, a select for mobile.
  *
- * Both are always in the DOM and CSS shows exactly one — simpler and steadier
+ * Both are always in the DOM and CSS shows exactly one - simpler and steadier
  * than swapping them on a resize listener, and because both read and write the
  * same `pos` they can never drift apart. The dropdown uses the full position
  * names (a select has room for them) where the chips only fit the codes.
@@ -214,7 +214,7 @@ function render() {
 
 /** Page indicator + controls, drawn above and below the table.
  *
- * `total` is the filtered row count (not ALL.length) — the numbers have to
+ * `total` is the filtered row count (not ALL.length) - the numbers have to
  * describe what you're actually looking at, or they contradict the filters.
  * Hidden entirely on a single page, so a short result set isn't cluttered with
  * a pager that can't do anything.
@@ -288,14 +288,14 @@ function fmtVal(v) { return (metric === 'form' || roundSel) ? (v ?? 0).toFixed(1
 function nextHTML(r) {
   return r.next
     ? `<span class="ph-next">${r.next.home ? 'v' : '@'} ${esc(r.next.opp)}</span>`
-    : `<span class="ph-na">—</span>`;
+    : `<span class="ph-na">-</span>`;
 }
 
 // Real matchday status for the upcoming round: Starting / Bench / Out.
 const LINEUP_LABEL = { S: ['Starting', 's'], B: ['Bench', 'b'], O: ['Out', 'o'] };
 function lineupHTML(r) {
   const e = LINEUP_LABEL[r.lineup];
-  return e ? `<span class="lu lu--${e[1]}">${e[0]}</span>` : `<span class="ph-na">—</span>`;
+  return e ? `<span class="lu lu--${e[1]}">${e[0]}</span>` : `<span class="ph-na">-</span>`;
 }
 
 function rowHTML(r) {

@@ -39,7 +39,7 @@ def compute(con):
 
     summary['avg_rank'] = summary['total_mean'].rank(ascending=False, method='min')
 
-    # Rolling averages — last N completed games per player
+    # Rolling averages - last N completed games per player
     def _last_n_avg(group, n):
         return group.sort_values('round_num')['total'].tail(n).mean()
 

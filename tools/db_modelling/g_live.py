@@ -98,7 +98,7 @@ def run(con=None):
 
     now_utc = dt.datetime.now(dt.timezone.utc)
     if not _in_live_window(now_utc):
-        log.info('Outside live window — skipping live computation')
+        log.info('Outside live window - skipping live computation')
         if close_after:
             con.close()
         return
@@ -118,7 +118,7 @@ def run(con=None):
     ''', con)
 
     if lineups.empty or matchups.empty:
-        log.warning('No lineups or matchups — nothing to compute')
+        log.warning('No lineups or matchups - nothing to compute')
         if close_after:
             con.close()
         return

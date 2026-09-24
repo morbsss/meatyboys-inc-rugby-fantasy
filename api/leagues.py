@@ -6,7 +6,7 @@ Two leagues run concurrently and independently (spec §1, §5.1):
   meatyboys  → Super Rugby Pacific   → existing repo theme  → Australia/Sydney
   ofds       → English Premiership   → red / blue / white   → Europe/London
 
-This module is pure configuration — no DB, no network — so it can be imported
+This module is pure configuration - no DB, no network - so it can be imported
 by the schema layer, the data-source adapters, the draft engine, and the UI
 without creating import cycles.
 """
@@ -24,7 +24,7 @@ LEAGUES = {
         'brand':       'Meatyboys',
         'competition': 'super_rugby',
         'comp_name':   'Super Rugby Pacific',
-        # "existing repo colours" — the forest/cream/amber design system already
+        # "existing repo colours" - the forest/cream/amber design system already
         # in base.html is the default theme.
         'theme':       'forest',
         'timezone':    'Australia/Sydney',
@@ -69,11 +69,11 @@ def joinable_leagues() -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Roster rules — front row is a CLUB UNIT, the rest are individual players
+# Roster rules - front row is a CLUB UNIT, the rest are individual players
 # ---------------------------------------------------------------------------
 #
 # A squad = ONE OPTIONAL club front-row unit (e.g. "Leicester FR") + 15
-# individual players. Props (PR) and hookers (HK) are NOT owned individually —
+# individual players. Props (PR) and hookers (HK) are NOT owned individually -
 # they only score via the front-row unit, whose scoring players come from the
 # club's real matchday lineup (status S/B). The individual squad is
 # unconstrained (any 15); the starting-team composition is enforced only on save
@@ -260,7 +260,7 @@ def model_individual_positions(model: dict) -> list[str]:
 
 
 def squad_quotas(model: dict) -> dict[str, int]:
-    """Per-position total squad size (starters + bench) — what a draft must fill.
+    """Per-position total squad size (starters + bench) - what a draft must fill.
     For an any-position bench (meatyboys) only the positioned starters count."""
     q = dict(model['starters'])
     if model.get('positioned_bench'):

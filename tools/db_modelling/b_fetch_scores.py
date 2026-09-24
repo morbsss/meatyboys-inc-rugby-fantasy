@@ -2,7 +2,7 @@
 Step B: Fetch game-by-game scores for every player in player_list.
 
 Reads:  player_list, ref_fixtures
-Writes: detailed_scores_staging  (always replaced — current season only)
+Writes: detailed_scores_staging  (always replaced - current season only)
 
 Then merge_to_historical() safely moves staging data into detailed_scores,
 deleting only the current season_year rows and leaving all prior years intact.
@@ -112,7 +112,7 @@ def fetch_scores(session, con, season):
 
         if i % log_every == 0:
             elapsed = (dt.datetime.now() - start).total_seconds()
-            print(f'  {i}/{total} ({i * 100 // total}%) — {elapsed:.0f}s elapsed')
+            print(f'  {i}/{total} ({i * 100 // total}%) - {elapsed:.0f}s elapsed')
 
     if not rows or stat_headers is None:
         print('No score data retrieved')
@@ -128,7 +128,7 @@ def fetch_scores(session, con, season):
     df = df.rename(columns=SCORE_COL_RENAMES)
     df = df.merge(player_list, on='playerid', how='left')
 
-    # Front Row players share a name in FRD — identify by team instead
+    # Front Row players share a name in FRD - identify by team instead
     df['playername'] = np.where(
         df['position'] == 'Front Row',
         df['team'] + ' Front Row',
@@ -154,7 +154,7 @@ def fetch_scores(session, con, season):
 
     df = df[[c for c in FINAL_COLS if c in df.columns]]
 
-    # Write to staging — always a full replace, never touches detailed_scores
+    # Write to staging - always a full replace, never touches detailed_scores
     df.to_sql('detailed_scores_staging', con, if_exists='replace', index=False)
     con.commit()
 
@@ -165,11 +165,11 @@ def fetch_scores(session, con, season):
 def merge_to_historical(con, season):
     """
     Safely merge detailed_scores_staging into detailed_scores.
-    Only deletes rows for the current season_year — prior years are untouched.
+    Only deletes rows for the current season_year - prior years are untouched.
     """
     staging_count = con.execute('SELECT COUNT(*) FROM detailed_scores_staging').fetchone()[0]
     if staging_count == 0:
-        print('Staging is empty — skipping merge')
+        print('Staging is empty - skipping merge')
         return
 
     con.execute('DELETE FROM detailed_scores WHERE season_year = ?', (season,))

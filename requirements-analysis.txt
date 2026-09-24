@@ -6,7 +6,7 @@
 # so gunicorn stays light and a model fit can never block a request.
 #
 # deploy.sh installs these on the VM. Without them `python -m api.predict`
-# fails with ModuleNotFoundError — which is why the Analysis page had never
+# fails with ModuleNotFoundError - which is why the Analysis page had never
 # produced a single row in production.
 -r api/requirements.txt
 numpy>=1.26,<3

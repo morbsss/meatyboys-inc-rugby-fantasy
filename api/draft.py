@@ -1,5 +1,5 @@
 """
-Snake-draft engine — pure logic, no DB or network.
+Snake-draft engine - pure logic, no DB or network.
 
 Teams draft in snake order (1..N, N..1, 1..N, ...) for the league model's pick
 count. Each league has its own roster model (api/leagues.py): meatyboys drafts

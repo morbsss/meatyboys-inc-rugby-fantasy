@@ -1,5 +1,5 @@
 """
-Mock data-source adapter (spec §3) — the contract of record (§8.6).
+Mock data-source adapter (spec §3) - the contract of record (§8.6).
 
 Reads the committed seed JSON (api/datasource/seed/<competition>.json) and
 derives per-round scores and match-day lineups deterministically, so the whole
@@ -125,7 +125,7 @@ class MockAdapter(PlayerSource, FixtureSource, LineupSource, ScoreSource):
 
     # --- §4.4 scores ------------------------------------------------------
     def fetch_player_scores(self, competition: str, round_number: int) -> list[ScoreRecord]:
-        # Cumulative totals through `round_number` — only rounds the player was
+        # Cumulative totals through `round_number` - only rounds the player was
         # in a match-day squad accrue points.
         squads = {r: _matchday_ids(competition, r) for r in range(1, round_number + 1)}
         records: list[ScoreRecord] = []

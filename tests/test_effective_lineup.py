@@ -53,7 +53,7 @@ def _names(effective):
 
 
 # ---------------------------------------------------------------------------
-# No published line-up — the normal case when projecting an upcoming round
+# No published line-up - the normal case when projecting an upcoming round
 # ---------------------------------------------------------------------------
 
 def test_without_a_lineup_the_named_starters_stand(conn):
@@ -146,7 +146,7 @@ def test_captain_flag_is_returned_for_doubling(conn):
 
 
 def test_a_substituted_captain_does_not_pass_the_armband_on(conn):
-    """If the captain is auto-subbed out, the replacement is not a captain —
+    """If the captain is auto-subbed out, the replacement is not a captain -
     the doubling is simply lost, matching the scorer."""
     _player(conn, 1, 'Capt,C', 'NOR', 'FH')       # captain, not really starting
     _player(conn, 2, 'Cover,B', 'BAT', 'FH')      # bench cover

@@ -1,5 +1,5 @@
 /* ============================================================
-   MTYBY DESIGN SYSTEM — TOKENS  (shared by both leagues)
+   MTYBY DESIGN SYSTEM - TOKENS  (shared by both leagues)
    ============================================================ */
 :root {
   /* Palette */
@@ -27,7 +27,7 @@
   --warning:       #C97A1F;
   --danger:        #B33A2E;
 
-  /* Typography — one family (Inter) across the whole app. --font-display is
+  /* Typography - one family (Inter) across the whole app. --font-display is
      kept as an alias so existing display rules keep their sizes/weights/colours,
      they just render in Inter now. */
   --font-body:     'Inter', system-ui, -apple-system, sans-serif;
@@ -62,12 +62,12 @@
    OFDS / English Premiership      → "union" red / blue / white.
    ============================================================ */
 :root[data-theme="union"] {
-  --forest:        #0A2472;   /* navy blue — used for header, primary */
+  --forest:        #0A2472;   /* navy blue - used for header, primary */
   --forest-deep:   #061539;
   --forest-soft:   #173A8A;
   --cream:         #FFFFFF;
   --cream-warm:    #EEF1F8;
-  --amber:         #C8102E;   /* red — used for accents */
+  --amber:         #C8102E;   /* red - used for accents */
   --amber-deep:    #9E0C24;
   --amber-soft:    #E8627A;
 
@@ -123,7 +123,7 @@ a { color: inherit; text-decoration: none; }
   border-radius: 4px;
 }
 
-/* Scrollbar — subtle, cream-toned */
+/* Scrollbar - subtle, cream-toned */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
@@ -195,7 +195,7 @@ a { color: inherit; text-decoration: none; }
   align-items: center;
   gap: 10px;
 }
-/* Trade-offer notification — appears when another team offers you a trade. */
+/* Trade-offer notification - appears when another team offers you a trade. */
 .mtyby-trade-notif {
   position: relative;
   display: inline-flex;
@@ -572,7 +572,7 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: .04em;
   text-transform: uppercase;
   /* align-items centres each child BOX; this centres the text inside it. Only
-     shows on a label that wraps — "MATCH UP" breaks onto two lines on a phone,
+     shows on a label that wraps - "MATCH UP" breaks onto two lines on a phone,
      and without this the second line sits left under the first. */
   text-align: center;
   line-height: 1.15;
@@ -776,7 +776,7 @@ a { color: inherit; text-decoration: none; }
   /* Body-scroll layout on mobile: html/body scroll naturally, header is
      sticky-top, bottom-nav + squad-footer are fixed at viewport bottom.
      Content (pitch + bench + quota) flows in the document and the browser
-     handles scrolling natively — this is the most reliable scroll mechanic
+     handles scrolling natively - this is the most reliable scroll mechanic
      on iOS Safari (no nested-overflow quirks). */
   html, body {
     height: auto;
@@ -808,7 +808,7 @@ a { color: inherit; text-decoration: none; }
   }
   /* Seven tabs have to share the width. A flex item defaults to
      min-width: auto, i.e. it refuses to shrink below its longest unbreakable
-     word — "TRANSFERS" alone claims ~62px — so the row overflowed and the last
+     word - "TRANSFERS" alone claims ~62px - so the row overflowed and the last
      tabs were pushed off screen. min-width: 0 lets `flex: 1` actually divide the
      space evenly; the rest is buying that space back for the label. */
   .mtyby-bottom-nav-item {
@@ -833,7 +833,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ============================================================
-   PLAYER CARD — shared modal (recent points + opponents).
+   PLAYER CARD - shared modal (recent points + opponents).
    Used by the Squad pitch (with captain/bench actions) and the
    read-only card on the Player Hub & Match Up pages.
    ============================================================ */

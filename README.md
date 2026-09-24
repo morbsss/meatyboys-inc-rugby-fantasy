@@ -1,9 +1,9 @@
-# OFDS — weekly lockouts, squad locking and transfers
+# OFDS - weekly lockouts, squad locking and transfers
 
 How the **Owen Farrell Disappreciation Society** league (`ofds`, league_id 2,
 English Premiership, `Europe/London`) opens and closes each week.
 
-Everything here comes from the code that enforces it — `api/index.py` for the
+Everything here comes from the code that enforces it - `api/index.py` for the
 lock, `api/scheduler.py` for the ingestion windows, `api/leagues.py` for league
 config. If you change a rule in the engine, update this file with it.
 
@@ -32,9 +32,9 @@ Tue 12:00  ──────── OPEN ────────  Fri 19:45  �
 
 Two functions in `api/index.py` decide all of it:
 
-- **`get_next_round`** — the lowest round whose *rollover* (the Tuesday noon
+- **`get_next_round`** - the lowest round whose *rollover* (the Tuesday noon
   after its last kickoff) is still in the future.
-- **`is_locked`** — `now >= first_kickoff(current round)`.
+- **`is_locked`** - `now >= first_kickoff(current round)`.
 
 Because the round stays current until Tuesday, `is_locked` needs no cool-down
 logic of its own: it simply stays true through the weekend and Monday.
@@ -52,7 +52,7 @@ point of putting them all there rather than on separate weekdays:
 
 - the round rolls over and the next one opens for picks;
 - the finished round's table and fixtures go final;
-- the authoritative scoring scrape (`finalize`) runs — see §5.
+- the authoritative scoring scrape (`finalize`) runs - see §5.
 
 Because the rollover is always *after* the round's last kickoff, a round can
 never be finalised, or reopened, while it is still being played.
@@ -65,11 +65,11 @@ All three go through `is_locked` and return HTTP 403:
 
 | Action | Endpoint | Message |
 |---|---|---|
-| Save squad / line-up | `POST /api/team/<name>` | *Deadline has passed — picks are locked until next round.* |
-| Free-agent pickup | `POST /api/trades/free-agent` | *Trades are locked — a game in this round has kicked off.* |
-| Accept a trade | `POST /api/trades/respond` | *Trades are locked — a game in this round has kicked off.* |
+| Save squad / line-up | `POST /api/team/<name>` | *Deadline has passed - picks are locked until next round.* |
+| Free-agent pickup | `POST /api/trades/free-agent` | *Trades are locked - a game in this round has kicked off.* |
+| Accept a trade | `POST /api/trades/respond` | *Trades are locked - a game in this round has kicked off.* |
 
-**Rejecting** a trade is deliberately *not* gated — you can always decline an
+**Rejecting** a trade is deliberately *not* gated - you can always decline an
 offer, even mid-round.
 
 `GET /api/state` publishes `is_locked`, `cutoff` (next lock = first kickoff) and
@@ -77,7 +77,7 @@ offer, even mid-round.
 
 ### The development override
 
-`ALLOW_UNRESTRICTED_EDITS=true` disables locking entirely — `is_locked` returns
+`ALLOW_UNRESTRICTED_EDITS=true` disables locking entirely - `is_locked` returns
 `False` no matter what. It is `true` in `.env.local` and **`false` in
 `.env.production`**. If the lock "isn't working" locally, this is why.
 
@@ -91,7 +91,7 @@ days before the season starts) but is switched off, so names stay editable.
 ## 3. The 2026-27 OFDS calendar
 
 Generated from `data/prem_fixtures_2026_27.json`. `*` marks rounds whose kickoff
-times the league has **not yet confirmed** — see the caveat below.
+times the league has **not yet confirmed** - see the caveat below.
 
 | Round | Locks (first kickoff) | Last fixture | Reopens (rollover) | Locked | Open |
 |---|---|---|---|---|---|
@@ -114,16 +114,16 @@ times the league has **not yet confirmed** — see the caveat below.
 | 17 * | Sat 29 May 15:00 BST | Sat 29 May 15:00 BST | Tue 01 Jun 12:00 BST | 69h | 99h |
 | 18 * | Sat 05 Jun 15:00 BST | Sat 05 Jun 15:00 BST | Tue 08 Jun 12:00 BST | 69h | 99h |
 | PO * | Sat 12 Jun 15:00 BST | Sat 12 Jun 15:00 BST | Tue 15 Jun 12:00 BST | 69h | 99h |
-| F | Sat 19 Jun 15:00 BST | Sat 19 Jun 15:00 BST | Tue 22 Jun 12:00 BST | 69h | — |
+| F | Sat 19 Jun 15:00 BST | Sat 19 Jun 15:00 BST | Tue 22 Jun 12:00 BST | 69h | - |
 
 Worth noticing:
 
-- A normal week is **~88h locked / ~80h open** — open Tuesday lunchtime to
+- A normal week is **~88h locked / ~80h open** - open Tuesday lunchtime to
   Friday evening.
 - **Long breaks**: 752h open after round 5 (the autumn internationals) and
   1275h after round 10. The squad is fully editable throughout.
 - **Round 8 locks on Boxing Day**, a Saturday, not a Friday.
-- Times are shown league-local. The rollover is *noon to managers* year round —
+- Times are shown league-local. The rollover is *noon to managers* year round -
   the BST→GMT switch (round 4) and GMT→BST (round 12) are handled automatically.
 
 ### Caveat: unconfirmed kickoff times
@@ -132,7 +132,7 @@ Rounds 10–20 are marked `time_confirmed: false` in the fixture feed. Every
 fixture in those rounds carries the same placeholder slot, so the "first" and
 "last" kickoff are identical and the table above shows a single time. Once the
 league confirms real times, the daily `sync_rounds` job picks them up and these
-rounds spread out on their own — no code change needed.
+rounds spread out on their own - no code change needed.
 
 ---
 
@@ -144,7 +144,7 @@ a final (20), so the fantasy finals are played during real rounds 16–18 and re
 rounds 19–20 are not used by the fantasy competition.
 
 Scoring (OFDS uses league points with bonuses): win 4, draw 2, loss 0, bonus
-point 1 — awarded to the winner at a margin ≥ 27 and to the loser at ≤ 11.
+point 1 - awarded to the winner at a margin ≥ 27 and to the loser at ≤ 11.
 
 ---
 
@@ -161,39 +161,39 @@ The VM's crontab has exactly **one** line:
 
 It decides nothing. It pokes `/api/cron/tick`, which loops over both leagues and
 asks `api/scheduler.py` which jobs are due **in that league's own timezone**
-(`Europe/London` for OFDS) — so BST/GMT are handled automatically and the
+(`Europe/London` for OFDS) - so BST/GMT are handled automatically and the
 schedule lives in code, not in crontab.
 
 Every write is an idempotent upsert, so a double-fire changes nothing, and each
-run is logged to `job_runs` — which is also how "once per round" is enforced.
+run is logged to `job_runs` - which is also how "once per round" is enforced.
 
 | Job | When (London) | Min gap | Round it targets |
 |---|---|---|---|
-| `sync_rounds` | any tick, daily | 24h | — (whole calendar) |
+| `sync_rounds` | any tick, daily | 24h | - (whole calendar) |
 | `lineups` | Thu 14:00 → Sun 18:00 | 2h | current |
 | `live_scoring` | while a match is live | 3 min | current |
-| `finalize` | **Tue 12:00 — the rollover**, once per round | once | the round that just rolled |
+| `finalize` | **Tue 12:00 - the rollover**, once per round | once | the round that just rolled |
 
-**`sync_rounds`** — reads `data/prem_fixtures_2026_27.json` and upserts `rounds`
+**`sync_rounds`** - reads `data/prem_fixtures_2026_27.json` and upserts `rounds`
 (which drives the lockout) and `real_fixtures` (who each club plays).
 
-**`lineups`** — writes `match_lineups`: who is starting vs benched, which is what
+**`lineups`** - writes `match_lineups`: who is starting vs benched, which is what
 auto-subs read. Window-gated because lineups aren't published before Thursday.
 
-**`live_scoring`** — fires only when `now` is within `MATCH_WINDOW` (2h) of a
+**`live_scoring`** - fires only when `now` is within `MATCH_WINDOW` (2h) of a
 kickoff **in the current round**. Upserts provisional scores and carries picks
 forward. This is why the round must not roll over at its last kickoff: it used
 to, and the scheduler then checked the *next* round's fixtures, concluded nothing
 was live, and skipped the final match of every round.
 
-**`finalize`** — the authoritative rescrape that overwrites the weekend's
+**`finalize`** - the authoritative rescrape that overwrites the weekend's
 provisional numbers, pinned to the **Tuesday-noon rollover**.
 
 Two consequences of tying finalize to the rollover rather than a fixed weekday:
 
 - It can **never run before a round's last fixture has finished**, because the
   rollover is by construction the first Tuesday noon *after* the last kickoff.
-  A fixed Monday noon could not promise that — round 8 of 2026-27 ends Mon 28 Dec
+  A fixed Monday noon could not promise that - round 8 of 2026-27 ends Mon 28 Dec
   17:00, five hours *after* a Monday-noon finalize would have run and recorded
   itself done, leaving that round with live scores only.
 - The round has **already advanced** by the time it fires, so it settles the
@@ -205,7 +205,7 @@ Two consequences of tying finalize to the rollover rather than a fixed weekday:
 
 `/api/cron/sync-rounds`, `/api/cron/lineups` and `/api/cron/player-data` still
 exist and default to OFDS. Nothing calls them. They **bypass the scheduler**, so
-they run their job regardless of window or cadence — useful for a backfill,
+they run their job regardless of window or cadence - useful for a backfill,
 risky by accident.
 
 ---
@@ -213,7 +213,7 @@ risky by accident.
 ## 6. Deployment
 
 **Deploys run in CI only.** `.github/workflows/deploy.yml` ships the repo to the
-VM when `main` moves — i.e. when a branch is merged — so whatever is running in
+VM when `main` moves - i.e. when a branch is merged - so whatever is running in
 production always corresponds to a commit on `main` that passed its tests.
 
 | Trigger | What runs |
@@ -229,12 +229,12 @@ a deploy.
 
 ### Local deploys are blocked
 
-- `deploy.ps1` is retired — it exits with a pointer to CI.
+- `deploy.ps1` is retired - it exits with a pointer to CI.
 - `deploy.sh` refuses to run on the VM unless `CI_DEPLOY=1` is set, which only
   the workflow does.
 
-A local deploy shipped whatever happened to be in someone's working tree —
-uncommitted edits included — with no tests in the way and no record of what went
+A local deploy shipped whatever happened to be in someone's working tree -
+uncommitted edits included - with no tests in the way and no record of what went
 out. Break-glass for an outage when CI itself is down:
 
 ```bash
@@ -266,7 +266,7 @@ documented above. Delete this section once resolved.
 **A. Production runs the mock data source.** `DATA_SOURCE` is unset in the VM's
 `.env`, and `api/datasource/__init__.py` defaults to `mock`. The mock calendar is
 synthesised from `SEASON_START['premiership'] = '2026-02-27'`, giving 18
-synthetic Friday→Sunday rounds spanning Feb–Jun **2026** — all in the past.
+synthetic Friday→Sunday rounds spanning Feb–Jun **2026** - all in the past.
 
 **B. OFDS is therefore locked shut.** With no round having a future rollover,
 `get_next_round` falls back to `MAX(weekly_stats.round) + 1` = 1, and round 1's
@@ -286,7 +286,7 @@ editing the `rounds` table by hand does not survive. The fix is
 
 **C. Mixed real and mock data.** `players` and `draft_picks` are real
 (`Ravouvou,K` / `BRI`) but `match_lineups` are mock synthetic (`Holloway,P` /
-`Bath`) — the team codes don't even match, so lineup joins and auto-subs cannot
+`Bath`) - the team codes don't even match, so lineup joins and auto-subs cannot
 resolve. Needs the mock-derived `real_fixtures` and `match_lineups` rows purged
 after the switch.
 

@@ -220,7 +220,7 @@ def engineer_features(scores_df):
 
 def build_prediction_row(playerid, team, opposition, position, news, scores_df, opp_agg):
     """
-    Build a single feature row for an upcoming round prediction (no lag needed —
+    Build a single feature row for an upcoming round prediction (no lag needed -
     we use the full history up to now).
     """
     history = scores_df[scores_df['playerid'] == playerid].sort_values('round_num')

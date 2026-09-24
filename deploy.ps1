@@ -1,9 +1,9 @@
 # -----------------------------------------------------------------------------
-# deploy.ps1 — RETIRED. Deploys now run in CI.
+# deploy.ps1 - RETIRED. Deploys now run in CI.
 #
 # This script used to copy the working tree straight from a Windows machine to
-# the VM. That meant whatever was on someone's disk at the time — uncommitted
-# edits, a stale branch, an unreviewed experiment — became production, with no
+# the VM. That meant whatever was on someone's disk at the time - uncommitted
+# edits, a stale branch, an unreviewed experiment - became production, with no
 # record of what shipped and no tests in the way.
 #
 # Deployment now happens in .github/workflows/deploy.yml when main moves, so the
@@ -14,7 +14,7 @@
 #   To check state : GitHub → Actions (each run logs what it copied and its
 #                    post-deploy smoke test).
 #
-# The VM refuses manual deploys too — deploy.sh exits unless CI_DEPLOY=1. See
+# The VM refuses manual deploys too - deploy.sh exits unless CI_DEPLOY=1. See
 # the break-glass note there for restoring service if CI itself is down.
 # -----------------------------------------------------------------------------
 

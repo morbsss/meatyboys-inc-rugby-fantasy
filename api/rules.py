@@ -1,6 +1,6 @@
 """League rules, derived from the live engine constants.
 
-Every number on the Rules page comes from the code that actually enforces it —
+Every number on the Rules page comes from the code that actually enforces it -
 the roster models in api/leagues.py, the scoring/table constants in
 api/competition.py, and the draft engine in api/draft.py. Nothing here is a
 hand-typed figure, so changing a rule in the engine changes the published rules

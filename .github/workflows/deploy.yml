@@ -1,7 +1,7 @@
 name: CI / Deploy
 
 # Tests run on every push and pull request. Deployment happens only when main
-# moves — i.e. when a branch is merged — so what runs on the VM is always a
+# moves - i.e. when a branch is merged - so what runs on the VM is always a
 # commit that exists on main and passed its tests. Local deploys are blocked
 # (see deploy.ps1 and the guard in deploy.sh).
 on:
@@ -12,7 +12,7 @@ on:
 
 env:
   PYTHON_VERSION: '3.12'
-  # Not secrets — these are already in the repo's history. Override with repo
+  # Not secrets - these are already in the repo's history. Override with repo
   # variables (Settings → Secrets and variables → Actions → Variables).
   VM_HOST: ${{ vars.VM_HOST || '45.32.106.113' }}
   VM_USER: ${{ vars.VM_USER || 'root' }}
@@ -49,7 +49,7 @@ jobs:
     environment: production        # lets you add required reviewers later
     # Scoped to this job, not the workflow: a workflow-level group would queue
     # unrelated PR test runs behind a production deploy. Queue rather than
-    # cancel, so a deploy already copying files is allowed to finish — the app
+    # cancel, so a deploy already copying files is allowed to finish - the app
     # is a single gunicorn process over one SQLite file.
     concurrency:
       group: deploy-production
@@ -92,7 +92,7 @@ jobs:
                 -e "$SSH" api tools nginx data "$TARGET/"
           # requirements-analysis.txt matters: deploy.sh installs the analysis
           # job's deps only `if [ -f requirements-analysis.txt ]`, so leaving it
-          # out of this list silently skipped the install — the predict job then
+          # out of this list silently skipped the install - the predict job then
           # launched on schedule and died on `import numpy`, logging "launched"
           # and never a result.
           rsync -az -e "$SSH" \
@@ -115,7 +115,7 @@ jobs:
           ssh -i ~/.ssh/deploy_key -p ${VM_SSH_PORT} -o BatchMode=yes \
               "${VM_USER}@${VM_HOST}" \
               'curl -fsS -m 10 -o /dev/null -w "app on VM: HTTP %{http_code}\n" http://127.0.0.1:5000/'
-          # And end-to-end over the public hostname, with TLS verified — hitting
+          # And end-to-end over the public hostname, with TLS verified - hitting
           # the bare IP would need --insecure and would hide a broken cert.
           curl -fsSL -m 20 -o /dev/null \
                -w "public %{url_effective}: HTTP %{http_code}\n" "${PUBLIC_URL}/"

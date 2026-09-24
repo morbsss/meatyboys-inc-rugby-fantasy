@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Rewrite Premiership club names in a DB to canonical 3-letter codes.
 
-The live app stores clubs by code — LiveAdapter.fetch_rounds resolves every club
+The live app stores clubs by code - LiveAdapter.fetch_rounds resolves every club
 through prem_fixtures.resolve_team, so production holds 'BAT', not 'Bath Rugby'.
 The mock seed used to write display names instead, so a DB built under
 DATA_SOURCE=mock described the same clubs by a different key and anything joining
@@ -92,14 +92,14 @@ def main(argv=None):
     con = sqlite3.connect(args.db)
     league_ids = _premiership_league_ids(con)
     if not league_ids:
-        print('No premiership league in this DB — nothing to do.')
+        print('No premiership league in this DB - nothing to do.')
         return 0
     print(f'premiership league_id(s): {league_ids}')
 
     todo, unresolved = plan(con, league_ids)
 
     if unresolved:
-        print('\nUNRESOLVED — no canonical code for these values:')
+        print('\nUNRESOLVED - no canonical code for these values:')
         for table, column, v, n in unresolved:
             print(f'  {table}.{column}: {v!r} ({n} rows)')
         print('  Add an alias to prem_fixtures.EXTRA_ALIASES, then re-run.')

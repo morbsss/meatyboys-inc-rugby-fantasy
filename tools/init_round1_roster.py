@@ -2,7 +2,7 @@
 
 Scrapes the live SuperBru player list (all 8 position pages), stores it as this
 season's ROUND 1 snapshot (weekly_stats, all pre-season 0-point rows), and makes
-the DRAFT board rank each player by their LAST SEASON total — matched BY NAME, so
+the DRAFT board rank each player by their LAST SEASON total - matched BY NAME, so
 returning players keep their points and newcomers start at 0.
 
   python tools/init_round1_roster.py fantasy_2026_27.db

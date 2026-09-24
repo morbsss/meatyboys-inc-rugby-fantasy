@@ -1,5 +1,5 @@
 /* =============================================================================
- * common.js — tiny utilities shared by every page's script.
+ * common.js - tiny utilities shared by every page's script.
  * Loaded once from base.html, before any page-specific script.
  * ========================================================================== */
 
@@ -31,7 +31,7 @@ async function apiFetch(path, body) {
 }
 
 /* ---------------------------------------------------------------------------
- * Shared player card — a read-only popup with the player's per-round points
+ * Shared player card - a read-only popup with the player's per-round points
  * and who they played, fetched from /api/player/points. Used by the Player Hub
  * and Match Up (the Squad pitch has its own card with captain/bench actions).
  * ------------------------------------------------------------------------- */
