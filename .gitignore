@@ -18,3 +18,7 @@ node_modules/
 .vercel/
 dist/
 build/
+
+# Runtime logs. predict.log is appended by the predict job's subprocess
+# (see _launch_predict) and rotated on the VM by deploy.sh's logrotate rule.
+*.log

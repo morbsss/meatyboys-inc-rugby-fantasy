@@ -29,10 +29,10 @@ from datetime import datetime, timedelta, timezone
 from .leagues import LEAGUES
 from . import scheduler
 
-# A tick is expected every 10 minutes (deploy.sh installs */10). Allow a wide
+# A tick is expected every 5 minutes (deploy.sh installs */5). Allow a wide
 # margin before calling the cron dead - a slow scrape can push a tick late, and
 # crying wolf on a healthy pipeline trains people to ignore the page.
-TICK_INTERVAL = timedelta(minutes=10)
+TICK_INTERVAL = timedelta(minutes=5)
 TICK_GRACE = timedelta(minutes=45)
 
 # Jobs we expect to exist, with what drives their cadence. `window` jobs only run
@@ -48,15 +48,16 @@ JOB_SPECS = {
     'lineups':      {'cadence': timedelta(hours=2), 'kind': 'window',
                      'writes': 'match_lineups',
                      'expect': 'every 2h inside the team-sheet window'},
-    'live_scoring': {'cadence': timedelta(minutes=3), 'kind': 'live',
+    'live_scoring': {'cadence': timedelta(minutes=5), 'kind': 'live',
                      'writes': 'weekly_stats',
-                     'expect': 'every 3 min while a match is live'},
+                     'expect': 'every 5 min while a match is live'},
     'finalize':     {'cadence': None, 'kind': 'rollover',
                      'writes': 'weekly_stats (authoritative)',
                      'expect': 'once at the Tue 12:00 rollover'},
-    'predict':      {'cadence': None, 'kind': 'rollover',
+    'predict':      {'cadence': timedelta(hours=2), 'kind': 'interval',
                      'writes': 'player_predictions + matchup_predictions',
-                     'expect': 'once at the Tue 12:00 rollover, after finalize'},
+                     'expect': 'every 2h, and every 5 min while a match is '
+                               'live, for the round being picked'},
 }
 
 ERROR, WARN, INFO = 'error', 'warn', 'info'

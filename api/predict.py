@@ -35,9 +35,14 @@ from api.competition import (
     get_league_teams, calculate_table, build_playoffs, playoff_fixtures,
     effective_lineup,
 )
+from api.db import DEFAULT_SQLITE_PATH
 from api.leagues import roster_model
 
-DB_PATH = os.getenv('DB_PATH', 'mock_fantasy.db')
+# Resolve the database exactly as the web app does. This used to default to
+# 'mock_fantasy.db', which meant a manual run without DB_PATH set opened a mock
+# database on the production VM, wrote predictions and a job_runs row into it,
+# and printed a cheerful summary - indistinguishable from having worked.
+DB_PATH = os.getenv('DB_PATH') or DEFAULT_SQLITE_PATH
 
 # Players-per-position group, used to normalise team-level scores to per-player
 # when computing opposition deltas (mirrors the reference model).

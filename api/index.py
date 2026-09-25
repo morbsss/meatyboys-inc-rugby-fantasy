@@ -3519,45 +3519,41 @@ def _last_run(conn, league_id, job):
 def _launch_predict(league_id, round_number) -> str:
     """Start api.predict for one league in a detached process.
 
-    Deliberately NOT run in-process. A full fit takes well over a minute, the
-    app runs a single gunicorn worker, and the cron curl gives up after 90s -
-    so an in-process run would stall requests and look like an outage. It also
-    keeps numpy/pandas/scipy/sklearn out of the web process entirely.
+    Deliberately NOT run in-process. Measured on the VM a run is ~7-9s wall at
+    ~180 MB peak, which is affordable on a 5-minute cadence but would still take
+    the single gunicorn worker's only core for the duration and pull
+    numpy/pandas/scipy/sklearn into the web process for good.
 
-    predict.py writes its own job_runs row on completion, so the outcome is
-    visible even though this returns immediately.
+    Output goes to a log file, NOT to DEVNULL. When this died on `import numpy`
+    for weeks, the only record anywhere was this function's own cheerful
+    "launched" - the traceback went to /dev/null, so nothing could say why the
+    Analysis page was empty.
+
+    predict.py writes its own job_runs row on completion, so a run that starts
+    and then fails is distinguishable from one that never started.
     """
     import subprocess
     import sys
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     cmd = [sys.executable, '-m', 'api.predict', '--league', str(league_id)]
     if round_number:
         cmd += ['--round', str(round_number)]
     try:
+        log = open(os.path.join(root, 'predict.log'), 'a', buffering=1)
+        stamp = datetime.now(timezone.utc).isoformat()
+        print(f'=== {stamp} league={league_id} round={round_number} ===',
+              file=log)
         subprocess.Popen(
             cmd,
-            cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            cwd=root,
             stdin=subprocess.DEVNULL,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+            stdout=log,
+            stderr=subprocess.STDOUT,
             start_new_session=True,      # survives the request that spawned it
         )
         return f'launched for round {round_number}'
     except Exception as e:
         return f'launch failed: {e}'
-
-
-def _predict_done(conn, league_id, round_number):
-    """Predictions already computed (or launched) for this round."""
-    if round_number is None:
-        return True
-    cursor = _get_cursor(conn)
-    cursor.execute(
-        "SELECT 1 FROM job_runs WHERE league_id = ? AND job = 'predict' "
-        "AND round_number = ? AND status = 'ok' LIMIT 1",
-        (league_id, round_number))
-    done = cursor.fetchone() is not None
-    cursor.close()
-    return done
 
 
 def _finalize_done(conn, league_id, round_number):
@@ -3686,10 +3682,10 @@ def cron_tick():
         # Every job whose cadence is an interval must be listed here: a job the
         # log isn't queried for looks like it has never run, so its interval floor
         # always passes and it fires on every tick - for sync_players that would
-        # be an 8-page SuperBru scrape every 10 minutes.
+        # be an 8-page SuperBru scrape every 5 minutes.
         last_runs = {j: _last_run(conn, league_id, j)
                      for j in ('sync_rounds', 'sync_players', 'lineups',
-                               'live_scoring')}
+                               'live_scoring', 'predict')}
         # The once-per-round gate has to ask about the same round _run_job will
         # settle - the one that just rolled over, not the newly active one.
         fin_round = _round_to_finalize(conn, league_id)
@@ -3698,9 +3694,6 @@ def cron_tick():
             finalize_done=(fin_round is None
                            or _finalize_done(conn, league_id, fin_round)),
             rounds_known=_rounds_known(conn, league_id),
-            # Predictions are for the round now being picked, not the one just
-            # settled - so this gate asks about active_round, unlike finalize.
-            predict_done=_predict_done(conn, league_id, active_round),
         )
 
         ran = []

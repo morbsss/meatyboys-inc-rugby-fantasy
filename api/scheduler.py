@@ -9,7 +9,7 @@ by the caller from the job_runs log), which keeps jobs idempotent regardless of
 how precisely the platform cron fires.
 
 Job windows (local time). The original brief specified these in §4.3/§4.4
-(docs/history/agent.md); finalize has since MOVED off its Monday — see below.
+(docs/history/agent.md); finalize has since MOVED off its Monday - see below.
 
   Premiership (Europe/London)
     lineups : Thu 14:00 → Sun 18:00, every 2h
@@ -20,7 +20,7 @@ Job windows (local time). The original brief specified these in §4.3/§4.4
     finalize: Tue 12:00 - the round rollover (once per gameweek)
 
   Both
-    live_scoring: every 3 min while any match is live (now within a fixture's
+    live_scoring: every 5 min while any match is live (now within a fixture's
                   game window)
     sync_rounds : refresh the fixture calendar, daily
     sync_players: reconcile the player list with SuperBru (new signings and
@@ -39,9 +39,29 @@ INTERVALS = {
     'sync_rounds':  timedelta(hours=24),
     'sync_players': timedelta(hours=24),
     'lineups':      timedelta(hours=2),
-    'live_scoring': timedelta(minutes=3),
+    'live_scoring': timedelta(minutes=5),
+    # Projections track the CURRENT round, so they refresh as their inputs do
+    # rather than once at the rollover. Two speeds:
+    #   live  - alongside live_scoring, so win probabilities move with the
+    #           scores; ordered AFTER it so it trains on what was just written
+    #   idle  - a slow refresh the rest of the week, picking up team sheets
+    #           (2h) and roster changes (daily)
+    # Affordable at measured cost: a full run is ~7-9s wall, ~180 MB peak on
+    # the 1 vCPU / 1 GB VM, so even the live cadence is a ~3% duty cycle.
+    'predict':      timedelta(hours=2),
+    'predict_live': timedelta(minutes=5),
     # finalize is once-per-round, gated by the job_runs log, not an interval.
 }
+
+# Slack allowed when testing an interval floor.
+#
+# A floor is measured from the last run's COMPLETION, so a job that takes 20s
+# finishes 20s into its tick. Compared strictly, the next tick one period later
+# is fractionally too early, the run is skipped, and the real cadence silently
+# becomes DOUBLE the intended one. That is not hypothetical: live_scoring
+# scrapes eight SuperBru pages, so a 5-minute floor on a 5-minute cron would
+# land on 10 minutes about half the time.
+INTERVAL_GRACE = timedelta(seconds=30)
 
 # How long after kickoff a match counts as "live" for §4.4 live scraping.
 MATCH_WINDOW = timedelta(hours=2)
@@ -118,12 +138,13 @@ def match_is_live(now_utc: datetime, kickoffs_iso: list[str]) -> bool:
 
 
 def _interval_ok(last_run_iso, now_utc: datetime, interval: timedelta) -> bool:
+    """Whether `interval` has elapsed since the last run, within INTERVAL_GRACE."""
     if not last_run_iso:
         return True
     last = datetime.fromisoformat(last_run_iso)
     if last.tzinfo is None:
         last = last.replace(tzinfo=timezone.utc)
-    return (now_utc - last) >= interval
+    return (now_utc - last) >= (interval - INTERVAL_GRACE)
 
 
 def due_jobs(
@@ -134,7 +155,6 @@ def due_jobs(
     live_now: bool,
     finalize_done: bool,
     rounds_known: bool,
-    predict_done: bool = True,
 ) -> list[str]:
     """Ordered list of jobs to run now for one league.
 
@@ -142,8 +162,6 @@ def due_jobs(
     `live_now`      : caller-computed (a match is currently live).
     `finalize_done` : finalize already recorded for the target gameweek.
     `rounds_known`  : the rounds calendar exists for this league.
-    `predict_done`  : analysis predictions already computed for that gameweek.
-                      Defaults True so a caller that doesn't know stays put.
     """
     if now_utc.tzinfo is None:
         now_utc = now_utc.replace(tzinfo=timezone.utc)
@@ -171,11 +189,19 @@ def due_jobs(
     if is_finalize_time(local) and not finalize_done:
         due.append('finalize')
 
-    # Analysis predictions, at the same rollover and AFTER finalize in this
-    # list, so the model trains on the settled scores rather than the weekend's
-    # provisional ones. Runs out-of-process (see _run_job): a model fit takes
-    # over a minute and must not occupy the single gunicorn worker.
-    if is_finalize_time(local) and not predict_done:
+    # Analysis predictions for the CURRENT round, refreshed on an interval rather
+    # than once at the rollover.
+    #
+    # It used to fire only at Tue 12:00, gated to once per round. That meant the
+    # round being played never got projections at all: the run that fired during
+    # round N's rollover targets round N+1, so managers picking for a round saw
+    # either nothing or the previous round's numbers with no sign they were stale.
+    #
+    # Always LAST in this list. At the rollover that puts it after `finalize`, so
+    # it trains on settled scores; while a match is live it puts it after
+    # `live_scoring`, so it sees the scores from this same tick.
+    predict_floor = INTERVALS['predict_live'] if live_now else INTERVALS['predict']
+    if rounds_known and _interval_ok(last_runs.get('predict'), now_utc, predict_floor):
         due.append('predict')
 
     return due

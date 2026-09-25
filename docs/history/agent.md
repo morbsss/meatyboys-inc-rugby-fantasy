@@ -1,4 +1,4 @@
-> **ARCHIVED — historical build brief, not a current specification.**
+> **ARCHIVED - historical build brief, not a current specification.**
 >
 > This is the one-shot brief the app was originally built from (June 2026). It is
 > kept because ~46 code comments still cite its section numbers (`spec §3`,
@@ -9,18 +9,19 @@
 >
 > | This brief says | The app actually does |
 > |---|---|
-> | §4.4 finalise at **Monday 12:00** | **Tuesday 12:00** league-local — the single round rollover (see README §1) |
+> | §4.4 finalise at **Monday 12:00** | **Tuesday 12:00** league-local - the single round rollover (see README §1) |
 > | §4.5 says nothing about lockout | Picks lock at a round's first kickoff and reopen at the Tuesday rollover |
+> | §4.4 live scraping **every 3 minutes** | **every 5 minutes**, and the cron tick that drives it is `*/5` |
 > | §4.1 players from SuperBru, one-off | A daily `sync_players` job reconciles signings and transfers; SuperBru is the source of truth for identity |
-> | §6.2 roster rules | Loosened — see "New Updates" at the foot of this file |
+> | §6.2 roster rules | Loosened - see "New Updates" at the foot of this file |
 >
 > Current, maintained sources of truth, in order of reliability:
 >
-> 1. **`tests/`** — 375 tests, most carrying a docstring explaining *why* the rule
+> 1. **`tests/`** - 375 tests, most carrying a docstring explaining *why* the rule
 >    exists. This is the specification of record: it cannot drift, because drift
 >    makes it fail.
-> 2. **`README.md`** — the weekly cycle, lock gates, season shape, deployment.
-> 3. **`CLAUDE.md`** — orientation and the traps worth knowing before changing code.
+> 2. **`README.md`** - the weekly cycle, lock gates, season shape, deployment.
+> 3. **`CLAUDE.md`** - orientation and the traps worth knowing before changing code.
 >
 > The amendments under "New Updates" below were appended rather than folded into
 > the numbered sections, so where they conflict with a section, the amendment won.

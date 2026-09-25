@@ -375,7 +375,8 @@ def main():
             print(f'  Lineups not yet available: {e}')
 
     if all_teams:
-        db_path = os.getenv('DB_PATH', 'fantasy_2025_26.db')
+        from .db import DEFAULT_SQLITE_PATH
+        db_path = os.getenv('DB_PATH', DEFAULT_SQLITE_PATH)
         insert_into_db(all_teams, db_path, round_num)
 
 

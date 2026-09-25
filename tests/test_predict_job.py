@@ -11,8 +11,7 @@ sklearn, which are intentionally NOT web dependencies. The prediction maths is
 validated separately against mock_fantasy.db.
 """
 
-import sqlite3
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import pytest
 
@@ -32,11 +31,10 @@ def _due(**kw):
         now_utc=_utc(2026, 9, 29, 11),          # Tue 12:00 BST - the rollover
         tz_name=LON,
         last_runs={'sync_rounds': datetime.now(timezone.utc).isoformat(),
-                   'lineups': None, 'live_scoring': None},
+                   'lineups': None, 'live_scoring': None, 'predict': None},
         live_now=False,
         finalize_done=True,
         rounds_known=True,
-        predict_done=False,
     )
     base.update(kw)
     return s.due_jobs(**base)
@@ -46,79 +44,71 @@ def _due(**kw):
 # When predict runs
 # ---------------------------------------------------------------------------
 
-def test_predict_is_due_at_the_rollover():
+def test_predict_runs_mid_week_for_the_round_being_picked():
+    """The behaviour this job was changed for.
+
+    It used to fire ONLY at the Tuesday rollover, gated to once per round - which
+    meant the round being played never got projections at all, because the run at
+    round N's rollover targets N+1. A manager picking for round 1 saw an empty
+    Analysis page all week.
+    """
+    for moment, label in [(_utc(2026, 9, 24, 15), 'Thursday'),
+                          (_utc(2026, 9, 25, 9), 'Friday morning'),
+                          (_utc(2026, 9, 26, 12), 'Saturday'),
+                          (_utc(2026, 9, 28, 11), 'Monday')]:
+        assert 'predict' in _due(now_utc=moment), label
+
+
+def test_predict_is_still_due_at_the_rollover():
     assert 'predict' in _due()
 
 
 def test_predict_runs_after_finalize_in_the_same_tick():
-    """Order matters: the model should train on settled scores, not the
-    weekend's provisional ones."""
+    """At the rollover the model must train on settled scores, not the weekend's
+    provisional ones."""
     due = _due(finalize_done=False)
+
     assert 'finalize' in due and 'predict' in due
     assert due.index('finalize') < due.index('predict')
 
 
-def test_predict_is_once_per_round():
-    assert 'predict' not in _due(predict_done=True)
+def test_predict_runs_after_live_scoring_in_the_same_tick():
+    """While a match is live both come due together, and predict must see the
+    scores written by this same tick rather than the previous one."""
+    due = _due(now_utc=_utc(2026, 9, 25, 19), live_now=True,
+               last_runs={'sync_rounds': datetime.now(timezone.utc).isoformat(),
+                          'lineups': None, 'live_scoring': None, 'predict': None})
+
+    assert 'live_scoring' in due and 'predict' in due
+    assert due.index('live_scoring') < due.index('predict')
 
 
-def test_predict_does_not_run_mid_week():
-    for moment, label in [(_utc(2026, 9, 25, 18), 'Friday'),
-                          (_utc(2026, 9, 26, 12), 'Saturday'),
-                          (_utc(2026, 9, 28, 11), 'Monday')]:
-        assert 'predict' not in _due(now_utc=moment), label
+def test_predict_uses_the_live_cadence_during_a_match():
+    """5 minutes, matching live_scoring, so win probabilities move with the score.
+    Affordable because a run measures ~7-9s wall on the VM."""
+    now = _utc(2026, 9, 25, 19)
+    recent = (now - timedelta(minutes=3)).isoformat()
+    older = (now - timedelta(minutes=7)).isoformat()
+
+    assert 'predict' not in _due(now_utc=now, live_now=True,
+                                 last_runs={'predict': recent})
+    assert 'predict' in _due(now_utc=now, live_now=True,
+                             last_runs={'predict': older})
 
 
-def test_predict_defaults_to_not_running():
-    """A caller that doesn't pass predict_done must not trigger the job."""
-    due = s.due_jobs('premiership', _utc(2026, 9, 29, 11), LON,
-                     {'sync_rounds': datetime.now(timezone.utc).isoformat(),
-                      'lineups': None, 'live_scoring': None},
-                     live_now=False, finalize_done=True, rounds_known=True)
-    assert 'predict' not in due
+def test_predict_uses_a_slow_cadence_when_nothing_is_live():
+    """A 2h floor off match day: inputs only change when team sheets (2h) or the
+    roster (daily) do, so there is nothing to gain from running hot."""
+    now = _utc(2026, 9, 24, 15)
+    assert 'predict' not in _due(now_utc=now,
+                                 last_runs={'predict': (now - timedelta(minutes=30)).isoformat()})
+    assert 'predict' in _due(now_utc=now,
+                             last_runs={'predict': (now - timedelta(hours=3)).isoformat()})
 
 
-# ---------------------------------------------------------------------------
-# The once-per-round gate
-# ---------------------------------------------------------------------------
-
-@pytest.fixture
-def conn():
-    c = sqlite3.connect(':memory:')
-    c.row_factory = sqlite3.Row
-    c.execute('CREATE TABLE job_runs (id INTEGER PRIMARY KEY AUTOINCREMENT, '
-              'league_id INTEGER, job TEXT, round_number INTEGER, status TEXT, '
-              'detail TEXT, run_at TEXT)')
-    c.commit()
-    yield c
-    c.close()
-
-
-def test_gate_is_open_until_a_run_is_logged(conn):
-    assert idx._predict_done(conn, 2, 3) is False
-    conn.execute("INSERT INTO job_runs (league_id, job, round_number, status) "
-                 "VALUES (2, 'predict', 3, 'ok')")
-    conn.commit()
-    assert idx._predict_done(conn, 2, 3) is True
-
-
-def test_gate_is_per_round_and_per_league(conn):
-    conn.execute("INSERT INTO job_runs (league_id, job, round_number, status) "
-                 "VALUES (2, 'predict', 3, 'ok')")
-    conn.commit()
-    assert idx._predict_done(conn, 2, 4) is False, 'next round still needs a run'
-    assert idx._predict_done(conn, 1, 3) is False, 'other league still needs a run'
-
-
-def test_a_failed_run_does_not_close_the_gate(conn):
-    conn.execute("INSERT INTO job_runs (league_id, job, round_number, status) "
-                 "VALUES (2, 'predict', 3, 'error')")
-    conn.commit()
-    assert idx._predict_done(conn, 2, 3) is False
-
-
-def test_gate_closed_when_there_is_no_round(conn):
-    assert idx._predict_done(conn, 2, None) is True
+def test_predict_does_not_run_without_a_calendar():
+    """No rounds means no target round and no fixtures to project against."""
+    assert 'predict' not in _due(rounds_known=False)
 
 
 # ---------------------------------------------------------------------------
