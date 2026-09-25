@@ -8,7 +8,8 @@ automatically. Cadence is enforced by minimum-interval-since-last-run (passed in
 by the caller from the job_runs log), which keeps jobs idempotent regardless of
 how precisely the platform cron fires.
 
-Job windows (local time, spec §4.3/§4.4):
+Job windows (local time). The original brief specified these in §4.3/§4.4
+(docs/history/agent.md); finalize has since MOVED off its Monday — see below.
 
   Premiership (Europe/London)
     lineups : Thu 14:00 → Sun 18:00, every 2h
@@ -80,7 +81,12 @@ def in_lineup_window(local: datetime, competition: str) -> bool:
 
 
 def is_finalize_time(local: datetime) -> bool:
-    """Tuesday 12:00+ in local time - the round rollover (spec §4.4).
+    """Tuesday 12:00+ in local time - the round rollover.
+
+    Supersedes the archived brief, which put this at Monday 12:00 (§4.4 of
+    docs/history/agent.md). Monday was wrong for any round ending on a Monday
+    evening, and pinning it to the rollover instead makes that structurally
+    impossible - see below.
 
     Pinned to the rollover rather than a fixed Monday so the definitive scrape
     can never run before the round's last fixture has finished. Monday noon was
