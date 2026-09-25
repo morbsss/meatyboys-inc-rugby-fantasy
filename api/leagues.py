@@ -33,6 +33,19 @@ LEAGUES = {
         'espn_league_id':   '270557',   # ESPN Super Rugby Pacific (best-effort)
         'superbru_table':   None,        # no confirmed SuperBru table id yet
         'joinable':         True,       # parked while OFDS is developed
+        # Ingestion is OFF for this league.
+        #
+        # Nothing it could fetch exists: the live adapter returns [] for any
+        # competition but the Premiership, and there is no SuperBru table id
+        # above. Every scheduled job was therefore a guaranteed no-op --
+        # sync_rounds '0 rounds', sync_players all zeros, lineups '0 entries'
+        # -- except predict, which happily spent ~7s every 2h projecting a
+        # round of a season that ended in June, for a league with no users
+        # and no team selections.
+        #
+        # Flip back to True once a Super Rugby data source is actually wired
+        # (api/datasource/live.py) -- the flag alone will not conjure one.
+        'jobs_enabled':     False,
     },
     'ofds': {
         'slug':        'ofds',
@@ -45,6 +58,7 @@ LEAGUES = {
         'espn_league_id':   '267979',   # ESPN Gallagher Premiership
         'superbru_table':   '2017',
         'joinable':         True,        # the active league under development
+        'jobs_enabled':     True,
     },
 }
 

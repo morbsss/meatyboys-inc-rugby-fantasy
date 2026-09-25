@@ -147,11 +147,14 @@
   // ---- league block ------------------------------------------------------
   function leagueHTML(L) {
     const badges = [
+      // Paused first: it changes how everything below should be read.
+      L.jobs_enabled === false
+        ? '<span class="ob-badge is-paused">ingestion off</span>' : '',
       L.live_now ? '<span class="ob-badge is-live">match live</span>' : '',
       L.in_lineup_window ? '<span class="ob-badge">team-sheet window open</span>' : '',
     ].filter(Boolean).join('');
 
-    return `<section class="ob-card">
+    return `<section class="ob-card${L.jobs_enabled === false ? ' is-paused' : ''}">
       <div class="ob-card-head">
         <h2>${esc(L.name)} <span class="ob-slug">${esc(L.slug)}</span></h2>
         <div class="ob-meta">

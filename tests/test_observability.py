@@ -307,3 +307,48 @@ def test_health_includes_the_context_a_reader_needs(conn):
                 'live_now', 'in_lineup_window', 'jobs', 'outputs', 'warnings',
                 'worst'):
         assert key in health
+
+
+# --- a league with ingestion switched off ------------------------------------
+
+def test_a_disabled_league_is_reported_as_paused_not_broken(conn, monkeypatch):
+    """meatyboys has no Super Rugby data source wired, no users and a season that
+    ended in June, so its jobs are switched off in api/leagues.py.
+
+    None of its jobs will ever run again, so every staleness check would fire —
+    and a health page that sits permanently amber for something switched off ON
+    PURPOSE is a health page nobody reads.
+    """
+    monkeypatch.setitem(obs.LEAGUES, SLUG, {**obs.LEAGUES[SLUG],
+                                            'jobs_enabled': False})
+    _beat(conn)
+    _run(conn, 'lineups', detail='0 entries')      # would normally be ok_but_empty
+
+    health = _health(conn)
+
+    assert health['jobs_enabled'] is False
+    assert health['worst'] == 'paused'
+    assert _codes(health) == ['jobs_disabled']
+
+
+def test_an_enabled_league_still_gets_its_checks(conn, monkeypatch):
+    """The switch must not become a way to silence a league that IS running."""
+    monkeypatch.setitem(obs.LEAGUES, SLUG, {**obs.LEAGUES[SLUG],
+                                            'jobs_enabled': True})
+    _beat(conn)
+    _run(conn, 'lineups', detail='0 entries')
+
+    assert 'ok_but_empty' in _codes(_health(conn))
+
+
+def test_jobs_are_still_listed_for_a_paused_league(conn, monkeypatch):
+    """Paused means 'not scheduled', not 'hidden' — you still want to see when it
+    last ran and what its tables hold."""
+    monkeypatch.setitem(obs.LEAGUES, SLUG, {**obs.LEAGUES[SLUG],
+                                            'jobs_enabled': False})
+    _beat(conn)
+
+    health = _health(conn)
+
+    assert {j['job'] for j in health['jobs']} == set(obs.JOB_SPECS)
+    assert health['outputs']
