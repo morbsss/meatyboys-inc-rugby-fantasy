@@ -36,6 +36,17 @@
       {% block header_controls %}{% endblock %}
     </div>
     <div class="mtyby-header-end">
+      {# Lockout status + countdown, on every page (base.js fills both from
+         /api/auth/user). Order across the banner's right side is deliberate:
+         pill, timer, round, profile, logout. Both ship hidden - there is nothing
+         honest to show until the lock state has loaded, and a placeholder that
+         flickers to a real time reads as a glitch. #}
+      <span class="mtyby-lock-pill" id="lock-pill" hidden><span id="lock-text">-</span></span>
+      <span class="mtyby-lock-timer" id="lock-timer" hidden
+            aria-live="polite" aria-atomic="true">
+        <span class="mtyby-lock-timer-lbl" id="lock-timer-label"></span>
+        <span class="mtyby-lock-timer-val" id="lock-timer-value"></span>
+      </span>
       <span class="mtyby-round-tag" id="header-round" style="display:none;" aria-label="Current round">Round <span id="header-round-num"></span></span>
       <a class="mtyby-trade-notif" id="trade-notif" href="/transfers" style="display:none;" title="Trade offers" aria-label="Trade offers - tap to review">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4 3 8l4 4"/><path d="M3 8h14"/><path d="m17 20 4-4-4-4"/><path d="M21 16H7"/></svg>

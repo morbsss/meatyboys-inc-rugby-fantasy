@@ -24,6 +24,94 @@ window.mtybyToast = function (msg, kind) {
 // The currently signed-in user (from /api/auth/user); null when logged out.
 window.__mtybyUser = null;
 
+// ---- Lockout countdown (banner) -------------------------------------------
+//
+// Counts toward whichever deadline is next:
+//   open   -> the round's first kickoff, when picks close league-wide
+//   locked -> the Tuesday 12:00 rollover, when the next round opens
+//
+// White normally, red inside the last hour. The lock is round-wide and trips at
+// the FIRST kickoff of the round, so a manager holding only Sunday players is
+// frozen from Friday evening - the last hour is the point at which that stops
+// being a date on a page and starts being something to act on.
+
+const LOCK_URGENT_MS = 60 * 60 * 1000;      // an hour, matching .is-urgent in CSS
+let lockState = null;
+let lockTimer = null;
+
+/** "3d 04h", "5h 12m", "48m 09s" - coarse far out, precise when it matters. */
+function formatCountdown(ms) {
+  const t = Math.max(0, Math.floor(ms / 1000));
+  const d = Math.floor(t / 86400);
+  const h = Math.floor((t % 86400) / 3600);
+  const m = Math.floor((t % 3600) / 60);
+  const s = t % 60;
+  const pad = (n) => String(n).padStart(2, '0');
+  if (d > 0) return `${d}d ${pad(h)}h`;
+  if (h > 0) return `${h}h ${pad(m)}m`;
+  return `${m}m ${pad(s)}s`;
+}
+
+function paintLock() {
+  const pill = document.getElementById('lock-pill');
+  const text = document.getElementById('lock-text');
+  const box = document.getElementById('lock-timer');
+  const label = document.getElementById('lock-timer-label');
+  const value = document.getElementById('lock-timer-value');
+  if (!pill || !box) return;
+
+  // No calendar yet (pre-season): nothing truthful to count toward.
+  if (!lockState) {
+    pill.hidden = true;
+    box.hidden = true;
+    box.classList.remove('is-urgent');
+    return;
+  }
+
+  const locked = !!lockState.is_locked;
+  pill.hidden = false;
+  pill.classList.toggle('is-locked', locked);
+  if (text) text.textContent = locked ? 'Locked' : 'Open';
+
+  const target = locked ? lockState.reopens_at : lockState.locks_at;
+  const at = target ? new Date(target).getTime() : NaN;
+  if (!target || isNaN(at)) { box.hidden = true; return; }
+
+  const left = at - Date.now();
+  box.hidden = false;
+  if (label) label.textContent = locked ? 'Opens in' : 'Locks in';
+
+  if (left <= 0) {
+    // The deadline has passed but the server hasn't been asked again. Say so as a
+    // whole phrase - the label and a bare "now" read as "Locks in now" - and
+    // re-check, since is_locked will have flipped and with it which deadline we
+    // count toward.
+    if (label) label.textContent = '';
+    if (value) value.textContent = locked ? 'Opening…' : 'Locking now';
+    // Red only for picks closing. A lapsed reopen is the good direction.
+    box.classList.toggle('is-urgent', !locked);
+    if (!box.dataset.refetching) {
+      box.dataset.refetching = '1';
+      setTimeout(() => { delete box.dataset.refetching; checkUserSession(); }, 15000);
+    }
+    return;
+  }
+
+  if (value) value.textContent = formatCountdown(left);
+  // Urgency is about picks closing. Counting down to the reopen is good news, so
+  // it never turns red.
+  box.classList.toggle('is-urgent', !locked && left <= LOCK_URGENT_MS);
+}
+
+/** Start (or restart) the once-a-second repaint. */
+function startLockTimer(lock) {
+  lockState = lock || null;
+  clearInterval(lockTimer);
+  lockTimer = null;
+  paintLock();
+  if (lockState) lockTimer = setInterval(paintLock, 1000);
+}
+
 // ---- "More" menu (bottom nav) ---------------------------------------------
 
 /** Open/close the overflow menu. The nav button's icon swaps bars <-> X via
@@ -68,6 +156,7 @@ async function checkUserSession() {
     if (!res.ok) {
       document.getElementById('user-chip').style.display = 'none';
       document.getElementById('logout-btn').style.display = 'none';
+      startLockTimer(null);        // signed out: stop ticking, hide the banner bits
       return;
     }
     const user = await res.json();
@@ -86,6 +175,8 @@ async function checkUserSession() {
     } else if (roundEl) {
       roundEl.style.display = 'none';
     }
+
+    startLockTimer(user.lock);
 
     const avatarSheet = document.getElementById('user-avatar-sheet');
     const infoSheet = document.getElementById('user-info-sheet');

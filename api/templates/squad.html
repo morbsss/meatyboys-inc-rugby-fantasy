@@ -4,9 +4,9 @@
 
 {% block extra_styles %}<link rel="stylesheet" href="/static/css/squad.css">{% endblock %}
 
-{% block header_controls %}
-  <span class="mtyby-lock-pill" id="lock-pill"><span id="lock-text">-</span></span>
-{% endblock %}
+{# The lock pill used to live here, in the header's centre slot and only on this
+   page. It is now in base.html on the right of the banner alongside the countdown,
+   on every page, and base.js is its single writer. #}
 
 {% block content %}
 <div class="content">
