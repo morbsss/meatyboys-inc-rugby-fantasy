@@ -166,3 +166,52 @@ def test_sync_players_is_not_tied_to_the_lineup_window():
 
     assert 'sync_players' in due
     assert 'lineups' not in due
+
+
+# --- interval floors vs the cron tick ---------------------------------------
+# The tick is the hard ceiling on every cadence: a floor can only be honoured if
+# a tick arrives that often. deploy.sh installs */5, so the 5-minute floors are
+# the tightest the scheduler can express.
+
+def test_a_never_run_job_is_always_due():
+    assert s._interval_ok(None, _utc(2026, 9, 25, 19), timedelta(minutes=5))
+
+
+def test_the_floor_tolerates_a_fractionally_early_tick():
+    """The bug this grace exists for.
+
+    A floor is measured from the last run's COMPLETION. live_scoring scrapes eight
+    SuperBru pages, so it finishes ~20s into its tick; the next */5 tick is then
+    4m40s later - strictly too early. Without the grace that run is skipped and
+    the real cadence quietly becomes 10 minutes, half the time.
+    """
+    now = _utc(2026, 9, 25, 19, 0)
+    completed = (now - timedelta(minutes=4, seconds=40)).isoformat()
+
+    assert s._interval_ok(completed, now, timedelta(minutes=5))
+
+
+def test_the_grace_is_small_enough_not_to_double_the_rate():
+    """It must absorb tick jitter, not licence a run a whole period early."""
+    now = _utc(2026, 9, 25, 19, 0)
+    half_a_period = (now - timedelta(minutes=2, seconds=30)).isoformat()
+
+    assert not s._interval_ok(half_a_period, now, timedelta(minutes=5))
+    assert s.INTERVAL_GRACE < timedelta(minutes=1)
+
+
+def test_live_scoring_and_predict_share_the_live_cadence():
+    """They run in the same tick during a match, so a mismatch would mean predict
+    either lagged a scrape behind or fired without new scores."""
+    assert s.INTERVALS['live_scoring'] == s.INTERVALS['predict_live']
+    assert s.INTERVALS['live_scoring'] == timedelta(minutes=5)
+
+
+def test_no_floor_is_tighter_than_the_cron_tick():
+    """deploy.sh installs */5. A floor below that can never be honoured, so it
+    would be documentation that lies about how often the job really runs - which
+    is exactly what the 3-minute live_scoring floor was doing behind a */10 tick.
+    """
+    tick = timedelta(minutes=5)
+    for job, floor in s.INTERVALS.items():
+        assert floor >= tick, f'{job} floor {floor} is tighter than the {tick} tick'

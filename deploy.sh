@@ -94,9 +94,15 @@ echo "[setup] Installing cron..."
 # previous schedule behind and the crontab grew by one line each time (18 by the
 # time it was noticed, 6 of them still using a rotated CRON_SECRET → 401s).
 (crontab -l 2>/dev/null | grep -v 'meatyboys-cron' | grep -v '/api/cron/tick') | crontab - || true
+# Every 5 minutes, because the TICK is the hard ceiling on every job's cadence:
+# a job's interval floor can only be honoured if a tick arrives that often. At
+# */10 the 5-minute floors on live_scoring and predict could never bind, so live
+# scoring during a match actually ran every 10 minutes regardless of what
+# INTERVALS said. A tick with nothing due is a handful of SELECTs, so doubling
+# the rate costs almost nothing.
 (crontab -l 2>/dev/null; cat <<CRON
 # meatyboys-cron - the in-app scheduler decides which ingestion jobs run.
-*/10 * * * * curl -fsS -m 90 -H "Authorization: Bearer ${CRON_SECRET}" http://127.0.0.1:${APP_PORT}/api/cron/tick >> ${APP_DIR}/cron.log 2>&1
+*/5 * * * * curl -fsS -m 90 -H "Authorization: Bearer ${CRON_SECRET}" http://127.0.0.1:${APP_PORT}/api/cron/tick >> ${APP_DIR}/cron.log 2>&1
 CRON
 ) | crontab -
 
@@ -111,7 +117,11 @@ CRON
 # log would silently stop updating until the next deploy restarted it.
 echo "[setup] Installing logrotate rule..."
 cat > /etc/logrotate.d/meatyboys <<LOGROTATE
-${APP_DIR}/gunicorn.log ${APP_DIR}/cron.log {
+# predict.log is included because the predict job now runs on a 5-minute
+# cadence while matches are live and appends its full stdout/stderr - it was
+# previously discarded to /dev/null, which is why a job dying on an import
+# left no trace at all.
+${APP_DIR}/gunicorn.log ${APP_DIR}/cron.log ${APP_DIR}/predict.log {
     weekly
     maxsize 20M
     rotate 8

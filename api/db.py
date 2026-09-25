@@ -16,6 +16,12 @@ from .leagues import LEAGUES, DEFAULT_LEAGUE
 
 DB_TYPE = os.getenv('DB_TYPE', 'sqlite').lower()
 
+# The SQLite file used when DB_PATH is unset. Named rather than inline so every
+# entry point resolves the database identically: api/predict.py used to default
+# to 'mock_fantasy.db' instead, so running it by hand on the VM silently opened
+# a mock database, wrote its results there, and reported success.
+DEFAULT_SQLITE_PATH = 'fantasy_2025_26.db'
+
 
 def _convert_query_placeholders(query: str) -> str:
     """Convert SQLite ? placeholders to PostgreSQL %s placeholders."""
@@ -54,7 +60,7 @@ def get_connection():
 
 def _get_sqlite_connection():
     """SQLite connection for local development."""
-    db_path = os.getenv('DB_PATH', 'fantasy_2025_26.db')
+    db_path = os.getenv('DB_PATH', DEFAULT_SQLITE_PATH)
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn

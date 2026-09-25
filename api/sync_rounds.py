@@ -139,7 +139,8 @@ def main():
                         help='Print rounds without writing to DB')
     args = parser.parse_args()
 
-    db_path = args.db or os.getenv('DB_PATH', 'fantasy_2025_26.db')
+    from .db import DEFAULT_SQLITE_PATH
+    db_path = args.db or os.getenv('DB_PATH', DEFAULT_SQLITE_PATH)
 
     print(f'Fetching {LEAGUE_ABBR} {args.year - 1}/{args.year} schedule...\n')
     try:

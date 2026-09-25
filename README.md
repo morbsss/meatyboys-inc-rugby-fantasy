@@ -171,7 +171,7 @@ run is logged to `job_runs` - which is also how "once per round" is enforced.
 |---|---|---|---|
 | `sync_rounds` | any tick, daily | 24h | - (whole calendar) |
 | `lineups` | Thu 14:00 → Sun 18:00 | 2h | current |
-| `live_scoring` | while a match is live | 3 min | current |
+| `live_scoring` | while a match is live | 5 min | current |
 | `finalize` | **Tue 12:00 - the rollover**, once per round | once | the round that just rolled |
 
 **`sync_rounds`** - reads `data/prem_fixtures_2026_27.json` and upserts `rounds`

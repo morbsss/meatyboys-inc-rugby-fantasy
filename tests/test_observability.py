@@ -213,15 +213,21 @@ def test_a_never_run_interval_job_is_warned_about(conn):
 
 
 def test_a_never_run_rollover_job_is_only_informational(conn):
-    """finalize and predict run weekly; before the first rollover, silence is
-    correct and must not read as a fault."""
+    """finalize runs once at the rollover; before the first one, silence is
+    correct and must not read as a fault.
+
+    predict is deliberately NOT in this group any more. It used to fire only at
+    the rollover, which meant the round being played never got projections - it
+    now runs on an interval against the current round, so never having run IS
+    worth a warning.
+    """
     _beat(conn)
 
     levels = {w['title'].split()[0]: w['level'] for w in _health(conn)['warnings']
               if w['code'] == 'job_never_ran'}
 
     assert levels.get('finalize') == obs.INFO
-    assert levels.get('predict') == obs.INFO
+    assert levels.get('predict') == obs.WARN
 
 
 def test_live_scoring_idle_outside_a_match_is_not_an_error(conn):
@@ -234,7 +240,7 @@ def test_live_scoring_idle_outside_a_match_is_not_an_error(conn):
 
 def test_live_scoring_stale_during_a_match_is_an_error(conn):
     _beat(conn)
-    _run(conn, 'live_scoring', minutes_ago=90)           # cadence is 3 min
+    _run(conn, 'live_scoring', minutes_ago=90)           # cadence is 5 min
 
     health = _health(conn, live_now=True)
 
