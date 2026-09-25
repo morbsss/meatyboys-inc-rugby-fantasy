@@ -18,14 +18,22 @@
 
 /* Filters share the row width evenly. */
 .filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+/* 14px is the app's body size (base.css). These had been dropped to 10px, which
+   was too small to read comfortably on a desktop toolbar.
+   Desktop-only in practice: base.css forces form controls to 16px !important
+   under 768px to stop iOS zooming on focus, so this value never reaches a
+   phone. */
 .filters select, .ph-search { padding: 9px 11px; border: 1px solid var(--border); border-radius: var(--r-md);
-  font-size: 10px; min-height: 40px; background: var(--surface); color: var(--ink);
+  font-size: 14px; min-height: 40px; background: var(--surface); color: var(--ink);
   flex: 1 1 140px; min-width: 0; }
 .ph-search:focus, .filters select:focus { outline: none; border-color: var(--forest); box-shadow: 0 0 0 3px rgba(11,59,46,.12); }
 .metric-toggle { display: inline-flex; border: 1px solid var(--border); border-radius: var(--r-full); overflow: hidden; flex-shrink: 0; }
-/* 10px matches .filters - the toggle sits in the same toolbar and reads as part
-   of it, so a larger label made it look like a different control set. */
-.metric-toggle button { padding: 8px 14px; font-size: 10px; font-weight: 700; color: var(--ink-muted); background: var(--surface); min-height: 40px; }
+/* Tracks .filters - the toggle sits in the same toolbar and reads as part of it,
+   so a different label size makes it look like a separate control set. */
+.metric-toggle button { padding: 8px 14px; font-size: 14px; font-weight: 700; color: var(--ink-muted); background: var(--surface); min-height: 40px; }
+/* A <button> is not a form control, so base.css's 16px-on-mobile rule does not
+   reach it. Pin the previous size here so this stays a desktop-only change. */
+@media (max-width: 768px) { .metric-toggle button { font-size: 10px; } }
 .metric-toggle button.on { background: var(--forest); color: var(--cream); }
 /* Metric toggle on top and right-aligned, position chips beneath it. Stacked
    rather than side-by-side so the chips get the full width to wrap across -
