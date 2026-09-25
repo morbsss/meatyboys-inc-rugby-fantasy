@@ -86,7 +86,16 @@ what runs. Adding a job means touching **four** places: `INTERVALS`, `due_jobs`,
 
 **A job missing from `last_runs` looks like it has never run**, so its interval
 floor always passes and it fires on *every* tick. That nearly shipped an 8-page
-SuperBru scrape every 10 minutes.
+SuperBru scrape every 5 minutes.
+
+**The tick is the ceiling on every cadence.** A floor tighter than the cron
+period can never bind — `live_scoring` claimed 3 minutes behind a `*/10` tick
+and actually ran every 10.
+
+**`jobs_enabled: False` in `api/leagues.py` switches a league's ingestion off**
+entirely. `meatyboys` is off: no Super Rugby source is wired, it has no users,
+and its season ended in June. The observability page shows such a league as
+*paused* and runs none of its staleness checks.
 
 `/observability` (maintainer only - `OBSERVABILITY_USERS`, default `morbsss`)
 shows job status, failures, and row counts.

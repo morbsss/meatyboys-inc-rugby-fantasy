@@ -215,3 +215,38 @@ def test_no_floor_is_tighter_than_the_cron_tick():
     tick = timedelta(minutes=5)
     for job, floor in s.INTERVALS.items():
         assert floor >= tick, f'{job} floor {floor} is tighter than the {tick} tick'
+
+
+def test_the_registry_declares_jobs_enabled_for_every_league():
+    """cron_tick defaults a missing flag to True, so a typo here silently turns a
+    league's ingestion back on rather than off."""
+    from api.leagues import LEAGUES
+
+    for slug, cfg in LEAGUES.items():
+        assert 'jobs_enabled' in cfg, slug
+        assert isinstance(cfg['jobs_enabled'], bool), slug
+
+
+def test_meatyboys_ingestion_is_off_and_ofds_is_on():
+    """Super Rugby has no data source wired (live.py returns [] for anything but
+    the Premiership, and superbru_table is None), no users and a season that ended
+    in June — so every job for it was a guaranteed no-op."""
+    from api.leagues import LEAGUES
+
+    assert LEAGUES['meatyboys']['jobs_enabled'] is False
+    assert LEAGUES['ofds']['jobs_enabled'] is True
+
+
+def test_the_tick_survives_a_disabled_league(tmp_path, monkeypatch):
+    """Regression: the heartbeat summed s['due'] across every league summary, and
+    a skipped league's entry has no 'due' key — so switching meatyboys off made
+    /api/cron/tick 500 on every single tick, for BOTH leagues."""
+    monkeypatch.setenv('DB_PATH', str(tmp_path / 'tick.db'))
+    from api import index as idx
+
+    r = idx.app.test_client().get('/api/cron/tick')
+
+    assert r.status_code == 200
+    by_league = {L['league']: L for L in r.get_json()['leagues']}
+    assert by_league['meatyboys'].get('skipped')
+    assert 'due' in by_league['ofds']

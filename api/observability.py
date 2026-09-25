@@ -395,10 +395,22 @@ def league_health(conn, league_id: int, slug: str, active_round: int,
     summaries = job_summaries(conn, league_id, now)
     freshness = output_freshness(conn, league_id, active_round)
 
-    warnings = (_job_checks(conn, league_id, summaries, now, competition,
-                            tz_name, live_now)
-                + _empty_success_checks(summaries, freshness, active_round,
-                                       competition, now, tz_name, live_now))
+    # A league with ingestion switched off has no schedule to be late for. Run
+    # none of the staleness checks against it -- every job would read as overdue
+    # and the page would sit permanently amber for something that is off ON
+    # PURPOSE, which is exactly how a health page stops being read.
+    enabled = bool(cfg.get('jobs_enabled', True))
+    if not enabled:
+        warnings = [{'level': INFO, 'code': 'jobs_disabled',
+                     'title': f'Ingestion is switched off for {slug}',
+                     'detail': "jobs_enabled is False in api/leagues.py, so the "
+                               "cron tick skips this league. Nothing below is "
+                               "stale -- it is not scheduled to run at all."}]
+    else:
+        warnings = (_job_checks(conn, league_id, summaries, now, competition,
+                                tz_name, live_now)
+                    + _empty_success_checks(summaries, freshness, active_round,
+                                           competition, now, tz_name, live_now))
     order = {ERROR: 0, WARN: 1, INFO: 2}
     warnings.sort(key=lambda w: order.get(w['level'], 3))
 
@@ -413,8 +425,10 @@ def league_health(conn, league_id: int, slug: str, active_round: int,
         'live_now': live_now,
         'in_lineup_window': scheduler.in_lineup_window(
             scheduler.to_local(now, tz_name), competition),
+        'jobs_enabled': enabled,
         'jobs': summaries,
         'outputs': freshness,
         'warnings': warnings,
-        'worst': (warnings[0]['level'] if warnings else 'ok'),
+        'worst': ('paused' if not enabled
+                  else (warnings[0]['level'] if warnings else 'ok')),
     }

@@ -3669,6 +3669,12 @@ def cron_tick():
 
     for slug, cfg in LEAGUES.items():
         league_id = _league_id_by_slug(conn, slug)
+        # A league with ingestion switched off is skipped entirely. Reported in
+        # the tick's response rather than dropped silently, so "no jobs ran for
+        # this league" is distinguishable from "the scheduler is broken".
+        if not cfg.get('jobs_enabled', True):
+            summary.append({'league': slug, 'skipped': 'jobs_enabled is False'})
+            continue
         competition = cfg['competition']
         active_round = get_next_round(conn, league_id)
 
@@ -3715,7 +3721,8 @@ def cron_tick():
     # do. Without this, a quiet weekday - nothing due, so nothing logged - looks
     # exactly like a cron that has stopped, and the pipeline page cannot tell the
     # difference between "idle" and "dead".
-    _log_tick(conn, sum(len(s['due']) for s in summary))
+    # .get: a skipped league's entry carries no 'due' key.
+    _log_tick(conn, sum(len(s.get('due', [])) for s in summary))
 
     conn.close()
     return jsonify({'now': now.isoformat(), 'leagues': summary})
