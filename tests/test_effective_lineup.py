@@ -27,7 +27,10 @@ def conn():
                               name TEXT, team TEXT, position TEXT);
         CREATE TABLE team_selections (league_id INTEGER, round INTEGER, team_name TEXT,
                                       player_id INTEGER, is_bench INTEGER,
-                                      is_captain INTEGER DEFAULT 0);
+                                      is_captain INTEGER DEFAULT 0,
+                                      -- jersey mirrors the real table: the bench
+                                      -- is covered in its own order, 16 -> 23.
+                                      jersey INTEGER);
         CREATE TABLE match_lineups (league_id INTEGER, round INTEGER, player_name TEXT,
                                     real_team TEXT, is_bench INTEGER);
     ''')
@@ -39,13 +42,21 @@ def _player(c, pid, name, team, pos):
     c.execute('INSERT INTO players VALUES (?, 2, ?, ?, ?)', (pid, name, team, pos))
 
 
-def _pick(c, pid, bench=0, cap=0):
-    c.execute('INSERT INTO team_selections VALUES (2, ?, ?, ?, ?, ?)',
-              (ROUND, TEAM, pid, bench, cap))
+def _pick(c, pid, bench=0, cap=0, jersey=None):
+    # jersey doubles as bench order (16 -> 23), which decides which of two
+    # eligible replacements covers a dropped starter. Defaults to the player id
+    # so the order is at least stable when a test does not care.
+    c.execute('INSERT INTO team_selections VALUES (2, ?, ?, ?, ?, ?, ?)',
+              (ROUND, TEAM, pid, bench, cap, jersey if jersey is not None else pid))
 
 
 def _really_starting(c, name, team):
     c.execute('INSERT INTO match_lineups VALUES (2, ?, ?, ?, 0)', (ROUND, name, team))
+
+
+def _really_benched(c, name, team):
+    """Named among his club's replacements - IN the matchday 23, not starting."""
+    c.execute('INSERT INTO match_lineups VALUES (2, ?, ?, ?, 1)', (ROUND, name, team))
 
 
 def _names(effective):
@@ -157,3 +168,76 @@ def test_a_substituted_captain_does_not_pass_the_armband_on(conn):
     eff = effective_lineup(conn, TEAM, ROUND)
     assert [p['name'] for p in eff] == ['Cover,B']
     assert eff[0]['cap'] is False
+
+
+# ---------------------------------------------------------------------------
+# What triggers a substitution, and what counts as cover
+#
+# Both tests below were impossible to express before: every existing case used a
+# player absent from the sheet ENTIRELY, so none of them distinguished "not
+# starting" from "not in the 23". That gap is exactly why the old behaviour went
+# unnoticed for a season - Sale named Dugdale,S at #20 in round 1, he came on and
+# scored 2, and he was substituted out anyway.
+# ---------------------------------------------------------------------------
+
+def test_a_starter_on_the_real_BENCH_is_kept(conn):
+    """Being among the replacements is not being out. He may yet come on - and in
+    the real round-1 case he did, and scored."""
+    _player(conn, 1, 'Dugdale,S', 'SAL', 'LF')
+    _player(conn, 2, 'Christie,T', 'NEW', 'LF')
+    _pick(conn, 1, bench=0)
+    _pick(conn, 2, bench=1)
+    _really_benched(conn, 'Dugdale,S', 'SAL')
+    _really_starting(conn, 'Christie,T', 'NEW')
+    conn.commit()
+
+    assert _names(effective_lineup(conn, TEAM, ROUND)) == ['Dugdale,S']
+
+
+def test_a_bench_player_on_the_real_BENCH_is_valid_cover(conn):
+    """Cover only has to be in the 23. A replacement who may come on is better
+    than a starter who is definitely not playing."""
+    _player(conn, 1, 'Out,A', 'BAT', 'FH')
+    _player(conn, 2, 'Cover,B', 'GLO', 'FH')
+    _pick(conn, 1, bench=0)
+    _pick(conn, 2, bench=1)
+    _really_starting(conn, 'Someone,E', 'EXE')     # a sheet exists; Out,A is absent
+    _really_benched(conn, 'Cover,B', 'GLO')
+    conn.commit()
+
+    assert _names(effective_lineup(conn, TEAM, ROUND)) == ['Cover,B']
+
+
+def test_only_absence_from_the_23_triggers_a_substitution(conn):
+    """The trigger is OUT, nothing weaker."""
+    _player(conn, 1, 'Starting,A', 'BAT', 'PR')
+    _player(conn, 2, 'Benched,B', 'SAL', 'PR')
+    _player(conn, 3, 'Absent,C', 'NEW', 'PR')
+    _player(conn, 9, 'Cover,Z', 'GLO', 'PR')
+    for pid in (1, 2, 3):
+        _pick(conn, pid, bench=0)
+    _pick(conn, 9, bench=1)
+    _really_starting(conn, 'Starting,A', 'BAT')
+    _really_benched(conn, 'Benched,B', 'SAL')
+    _really_starting(conn, 'Cover,Z', 'GLO')
+    conn.commit()                                   # Absent,C has no row at all
+
+    # Only Absent,C is replaced; the real-bench player keeps his place.
+    assert _names(effective_lineup(conn, TEAM, ROUND)) == ['Benched,B', 'Cover,Z', 'Starting,A']
+
+
+def test_cover_is_taken_in_bench_order(conn):
+    """Two eligible replacements: the lower bench number comes on, as on a real
+    bench. The query had no ORDER BY, so this used to be whichever row the
+    database happened to return first."""
+    _player(conn, 1, 'Absent,A', 'BAT', 'LK')
+    _player(conn, 2, 'First,B', 'GLO', 'LK')
+    _player(conn, 3, 'Second,C', 'NEW', 'LK')
+    _pick(conn, 1, bench=0)
+    _pick(conn, 3, bench=1, jersey=22)
+    _pick(conn, 2, bench=1, jersey=17)             # inserted second, lower number
+    _really_starting(conn, 'First,B', 'GLO')
+    _really_starting(conn, 'Second,C', 'NEW')
+    conn.commit()
+
+    assert _names(effective_lineup(conn, TEAM, ROUND)) == ['First,B']

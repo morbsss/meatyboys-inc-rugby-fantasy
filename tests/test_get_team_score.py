@@ -109,7 +109,8 @@ def _ofds_conn():
         CREATE TABLE weekly_stats (player_id INT, round INT, total_points REAL, kicking REAL);
         CREATE TABLE match_lineups (round INT, real_team TEXT, player_name TEXT, is_bench INT);
         CREATE TABLE team_selections (team_name TEXT, player_id INT, round INT,
-                                      is_captain INT, is_kicker INT, is_bench INT, league_id INT);
+                                      is_captain INT, is_kicker INT, is_bench INT,
+                                      league_id INT, jersey INT);
     ''')
     c.execute("INSERT INTO leagues VALUES (2, 'ofds')")
     c.executemany('INSERT INTO players VALUES (?,?,?,?,?)', [
@@ -120,8 +121,8 @@ def _ofds_conn():
         (1, 1, 0, 0), (1, 2, 100, 0),    # starter delta 100
         (2, 1, 0, 0), (2, 2, 5, 0),      # bench delta 5
     ])
-    c.execute("INSERT INTO team_selections VALUES ('T', 1, 2, 0, 0, 0, 2)")   # starter
-    c.execute("INSERT INTO team_selections VALUES ('T', 2, 2, 0, 0, 1, 2)")   # bench
+    c.execute("INSERT INTO team_selections VALUES ('T', 1, 2, 0, 0, 0, 2, 1)")   # starter
+    c.execute("INSERT INTO team_selections VALUES ('T', 2, 2, 0, 0, 1, 2, 16)")  # bench
     return c
 
 
