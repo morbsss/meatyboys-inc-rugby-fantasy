@@ -2031,17 +2031,68 @@ def _owner_of(conn, league_id, player_id, rnd):
     return row['team_name'] if isinstance(row, dict) else row[0]
 
 
-def _roster_round(conn, league_id, team, next_round):
-    """The round a team's current squad lives on - MAX(round <= next_round) -
-    matching what /api/my-picks loads, so trades write where the squad is shown."""
+def _ensure_round_squad(conn, league_id, round_num, team=None):
+    """Give every team a squad for `round_num`, copied from their previous one.
+
+    Only for teams that have NO rows at `round_num` yet. That per-team guard is
+    the whole point: a squad save is DELETE-then-INSERT for the round, so a
+    blanket `ON CONFLICT DO NOTHING` copy would re-insert any player a manager
+    had just dropped, and their squad would silently grow past its size limit.
+
+    Idempotent, so it is safe to call on every tick and from any write path.
+    """
+    if round_num is None or round_num <= 1:
+        return 0
     cursor = _get_cursor(conn)
-    cursor.execute('SELECT MAX(round) AS r FROM team_selections '
-                   'WHERE league_id = ? AND team_name = ? AND round <= ?',
-                   (league_id, team, next_round))
-    row = cursor.fetchone()
+    params = [league_id, round_num, league_id, round_num]
+    sql = ('SELECT DISTINCT team_name FROM team_selections '
+           'WHERE league_id = ? AND round < ? AND team_name NOT IN '
+           '  (SELECT team_name FROM team_selections '
+           '   WHERE league_id = ? AND round = ?)')
+    if team is not None:
+        sql += ' AND team_name = ?'
+        params.append(team)
+    cursor.execute(sql, params)
+    teams = [(r['team_name'] if isinstance(r, dict) else r[0])
+             for r in cursor.fetchall()]
+
+    now = datetime.now(timezone.utc).isoformat()
+    for t in teams:
+        # Copy that team's most recent squad, whichever round it was on - a team
+        # can miss a round entirely (no save, no trade) and must not be skipped.
+        cursor.execute(
+            'INSERT INTO team_selections '
+            '  (round, team_name, player_id, is_captain, is_kicker, is_bench, '
+            '   jersey, scraped_at, league_id) '
+            'SELECT ?, team_name, player_id, is_captain, is_kicker, is_bench, '
+            '       jersey, ?, league_id '
+            'FROM team_selections '
+            'WHERE league_id = ? AND team_name = ? AND round = '
+            '  (SELECT MAX(round) FROM team_selections '
+            '   WHERE league_id = ? AND team_name = ? AND round < ?) '
+            'ON CONFLICT (round, team_name, player_id) DO NOTHING',
+            (round_num, now, league_id, t, league_id, t, round_num))
+    if teams:
+        conn.commit()
     cursor.close()
-    r = (row['r'] if isinstance(row, dict) else row[0]) if row else None
-    return r if r is not None else next_round
+    return len(teams)
+
+
+def _roster_round(conn, league_id, team, next_round):
+    """The round a WRITE to a team's squad must target: always the active round.
+
+    This used to return MAX(round <= next_round), i.e. wherever the squad
+    happened to live. At a rollover that is the round that just FINISHED, because
+    nothing had yet created rows for the new one - so a trade made after Tuesday
+    noon rewrote the previous round's team sheet in place and that round's score
+    changed retrospectively. An UPDATE leaves scraped_at alone, so it did not even
+    leave a trace.
+
+    Materialising the squad here makes the active round the only writable one, and
+    every completed round immutable.
+    """
+    _ensure_round_squad(conn, league_id, next_round, team)
+    return next_round
 
 
 def _swap_player(conn, league_id, team, rnd, out_id, in_id):
@@ -3587,21 +3638,14 @@ def _log_run(conn, league_id, job, round_number, status, detail):
 
 
 def _carry_forward_picks(conn, league_id, round_num):
-    """Copy a league's previous-round squads forward as defaults so teams that
-    haven't edited still field a side."""
-    if round_num <= 1:
-        return
-    cursor = _get_cursor(conn)
-    cursor.execute('''
-        INSERT INTO team_selections
-            (round, team_name, player_id, is_captain, is_kicker, is_bench, jersey, scraped_at, league_id)
-        SELECT ?, team_name, player_id, is_captain, is_kicker, is_bench, jersey, ?, league_id
-        FROM team_selections
-        WHERE round = ? AND league_id = ?
-        ON CONFLICT (round, team_name, player_id) DO NOTHING
-    ''', (round_num, datetime.now(timezone.utc).isoformat(), round_num - 1, league_id))
-    conn.commit()
-    cursor.close()
+    """Default every team's squad for `round_num` to their previous one.
+
+    Thin wrapper on _ensure_round_squad, which skips teams that already have a
+    squad for the round. The previous version was a league-wide INSERT..SELECT
+    with ON CONFLICT DO NOTHING, so for a team that HAD already edited the new
+    round it re-inserted every player they had dropped.
+    """
+    _ensure_round_squad(conn, league_id, round_num)
 
 
 def _run_job(conn, league_id, competition, job, active_round):
@@ -3677,6 +3721,14 @@ def cron_tick():
             continue
         competition = cfg['competition']
         active_round = get_next_round(conn, league_id)
+
+        # Seed the new round's squads as soon as the round rolls, rather than
+        # waiting for live_scoring (which only fires once a match is underway).
+        # Until these rows exist the "current squad" resolves to the round that
+        # just finished, and a trade made in that gap rewrites a settled team
+        # sheet. Guarded per team and idempotent, so running it every tick is
+        # both cheap and self-healing.
+        _ensure_round_squad(conn, league_id, active_round)
 
         # Live detection (§4.2): any match in this round within its game window.
         try:
