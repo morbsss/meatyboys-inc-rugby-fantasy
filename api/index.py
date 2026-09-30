@@ -50,6 +50,7 @@ from .auth import (
 )
 from .competition import (
     calculate_table, get_team_score, _front_row_score,
+    effective_lineup, _team_model,
     get_league_teams, generate_regular_fixtures,
     build_playoffs, playoff_fixtures, standings_progression, REGULAR_ROUNDS,
     WINNER_BP_MARGIN, LOSER_BP_MARGIN,
@@ -1753,6 +1754,20 @@ def get_team_view():
     conn = get_db()
     ensure_schema(conn)
 
+    league_id = current_league_id(conn)
+    next_round = get_next_round(conn, league_id)
+    # ?round=N asks for the squad AS IT WAS that round (Match Up scrolling back).
+    # Without it, the caller wants the team as it stands now (the Squad page's
+    # team picker).
+    #
+    # This used to load MAX(round) whatever the caller asked for and only use the
+    # round to attach POINTS - so a past matchup showed the team's CURRENT squad
+    # beside that round's scores. After a trade the two disagreed outright: the
+    # round-1 Match Up listed players the manager had not owned in round 1.
+    round_param = request.args.get('round', type=int)
+    squad_round = round_param or _roster_round_readonly(conn, league_id, team_name,
+                                                        next_round)
+
     cursor = _get_cursor(conn)
     cursor.execute('''
         SELECT
@@ -1760,21 +1775,19 @@ def get_team_view():
             ts.is_captain, ts.is_kicker, ts.is_bench, ts.jersey
         FROM team_selections ts
         JOIN players p ON p.player_id = ts.player_id
-        WHERE ts.team_name = ?
-          AND ts.round = (
-              SELECT MAX(round) FROM team_selections WHERE team_name = ?
-          )
+        WHERE ts.team_name = ? AND ts.league_id = ? AND ts.round = ?
         ORDER BY ts.is_bench, ts.jersey
-    ''', (team_name, team_name))
+    ''', (team_name, league_id, squad_round))
 
     picks = [dict(r) for r in cursor.fetchall()]
     cursor.close()
-    league_id = current_league_id(conn)
-    next_round = get_next_round(conn, league_id)
-    # Optional ?round=N → attach each pick's points for that round (Match Up).
-    round_param = request.args.get('round', type=int)
     if round_param:
         _attach_round_points(conn, league_id, picks, round_param)
+        # Show the XV that actually SCORED, not the one that was named. A starter
+        # whose club left him out is replaced by same-position bench cover, and
+        # the total already reflects that - so without this the line-up on screen
+        # does not add up to the score printed under it.
+        _mark_auto_subs(conn, team_name, squad_round, picks)
     fr = _team_front_row_view(conn, league_id, team_name, next_round)
     # FR unit's points for the viewed round - computed the same way as the team
     # total's FR contribution, so the Match Up row matches the total exactly.
@@ -1790,6 +1803,52 @@ def get_team_view():
         'fr_is_bench': fr['is_bench'],
         'fr_points': fr_points,
     })
+
+
+def _roster_round_readonly(conn, league_id, team, next_round):
+    """The round a team's squad currently lives on, for READS.
+
+    Deliberately separate from _roster_round, which materialises the active
+    round's squad - a GET must not write.
+    """
+    cursor = _get_cursor(conn)
+    cursor.execute('SELECT MAX(round) AS r FROM team_selections '
+                   'WHERE league_id = ? AND team_name = ? AND round <= ?',
+                   (league_id, team, next_round))
+    row = cursor.fetchone()
+    cursor.close()
+    r = (row['r'] if isinstance(row, dict) else row[0]) if row else None
+    return r if r is not None else next_round
+
+
+def _mark_auto_subs(conn, team_name, round_num, picks):
+    """Flag each pick with how auto-substitution treated it that round.
+
+    Adds `subbed_in` / `subbed_out` and rewrites `is_bench` to the EFFECTIVE
+    line-up, so the XV on screen is the XV that scored. Leaves everything alone
+    for a league without auto-subs, or a round with no real line-ups scraped
+    (the normal case for a round not yet played).
+    """
+    try:
+        model = _team_model(conn, team_name)
+    except Exception:
+        return
+    if not model.get('auto_sub'):
+        return
+    try:
+        eff = {p['pid'] for p in effective_lineup(conn, team_name, round_num)}
+    except Exception:
+        return
+    named = {p['player_id'] for p in picks if not p.get('is_bench')}
+    if eff == named:
+        return          # nothing was substituted; leave the picks untouched
+    for p in picks:
+        pid = p.get('player_id')
+        was_starter = not p.get('is_bench')
+        now_starter = pid in eff
+        p['subbed_in'] = bool(now_starter and not was_starter)
+        p['subbed_out'] = bool(was_starter and not now_starter)
+        p['is_bench'] = 0 if now_starter else 1
 
 
 def _attach_round_points(conn, league_id, picks, round_num):

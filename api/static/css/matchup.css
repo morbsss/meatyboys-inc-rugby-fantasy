@@ -126,3 +126,16 @@
   .mu-team-name { font-size: 15px; }
   .mu-head, .mu-total { gap: 4px; }
 }
+
+/* Auto-substitution markers. The server sends the EFFECTIVE XV for a past round
+   - the side that actually scored - so without these the line-up silently
+   differs from the one the manager submitted, with no explanation. */
+.mu-p .sub-in, .mu-p .sub-out {
+  display: inline-block; margin: 0 3px; font-size: 11px; font-weight: 800;
+  line-height: 1; vertical-align: baseline;
+}
+.mu-p .sub-in  { color: var(--success); }
+.mu-p .sub-out { color: var(--danger); }
+/* The away column runs row-reverse, so the marker needs to sit on the other
+   side of the name to stay next to it rather than drifting to the far edge. */
+.mu-col.away .mu-p .sub-in, .mu-col.away .mu-p .sub-out { margin: 0 3px; }

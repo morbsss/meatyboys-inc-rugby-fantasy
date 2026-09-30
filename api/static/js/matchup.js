@@ -185,10 +185,17 @@ function orderStarters(starters) {
 
 function colHTML(team) {
   const all = (team.picks || []).filter(p => !p.is_bench);
+  // `subbed_in` marks a bench player promoted by auto-substitution because a
+  // named starter was left out of his club's real 23. The server sends the
+  // EFFECTIVE XV, so this row is in the starting list; the arrow says why it is
+  // there, otherwise the line-up silently disagrees with the team sheet the
+  // manager submitted.
   const playerRow = p => ({
     pid: p.player_id,
     inner: `<span class="mtyby-pos">${p.position}</span>`
-      + `<span class="nm"><b>${esc(p.name)}</b>${(p.is_captain && !IS_MTYBY) ? '<span class="ck">C</span>' : ''}</span>`
+      + `<span class="nm"><b>${esc(p.name)}</b>`
+      + (p.subbed_in ? '<span class="sub-in" title="Auto-substituted on - a named starter was left out of the matchday 23">&#8593;</span>' : '')
+      + `${(p.is_captain && !IS_MTYBY) ? '<span class="ck">C</span>' : ''}</span>`
       + ptsHTML(p),
   });
   const frRow = () => ({
@@ -220,10 +227,15 @@ function colHTML(team) {
 // their points don't count toward the score.
 function benchColHTML(team) {
   const bench = (team.picks || []).filter(p => p.is_bench);
+  // `subbed_out` is a named starter his club left out, so he dropped to the
+  // bench and his points did not count. Shown here rather than hidden: a manager
+  // scrolling back wants to see WHY their XV differs from the one they picked.
   const benchRow = p => ({
     pid: p.player_id,
     inner: `<span class="mtyby-pos">${p.position}</span>`
-      + `<span class="nm"><b>${esc(p.name)}</b></span>` + ptsHTML(p),
+      + `<span class="nm"><b>${esc(p.name)}</b>`
+      + (p.subbed_out ? '<span class="sub-out" title="Auto-substituted off - left out of the matchday 23">&#8595;</span>' : '')
+      + '</span>' + ptsHTML(p),
   });
 
   const rows = [];
