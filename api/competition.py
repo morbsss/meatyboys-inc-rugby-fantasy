@@ -256,12 +256,27 @@ def _front_row_score(conn, team_name: str, round_num: int) -> float:
 def effective_lineup(conn, team_name: str, round_num: int) -> list[dict]:
     """The XV that actually scores for an auto-sub (OFDS) team in a round.
 
-    A fantasy starter who isn't in the real starting line-up is replaced by a
-    same-position fantasy bench player who IS starting for real (rule 4); if no
-    such cover exists the starter stays (and scores whatever they got, ~0 if they
-    didn't play). Before any real line-up is published the named starters stand
-    as picked - which is the normal case when projecting a round that hasn't been
-    played yet, since lineups aren't scraped until the Thursday.
+    A fantasy starter who is OUT - not in his club's matchday 23 at all - is
+    replaced by a same-position fantasy bench player who IS in his own club's 23,
+    starting or on the bench. If no such cover exists the starter stays (and
+    scores whatever they got, normally nothing). Before any real line-up is
+    published the named starters stand as picked, which is the normal case when
+    projecting a round that has not been played yet, since line-ups are not
+    scraped until the Thursday.
+
+    Both halves of that test are about the REAL 23, not about points, and both
+    were previously stricter:
+
+      trigger  was "not in the real STARTING XV", so a player named among the
+               replacements was substituted out even though he came on and
+               scored. Sale's Dugdale,S was #20 in round 1, played, scored 2 -
+               and was still replaced.
+      cover    was "must be starting for real", so a bench player who was named
+               among his club's replacements could not come on, even though he
+               was far more likely to play than the man he would replace.
+
+    Being in the 23 is exactly the S/B distinction the squad page shows; OUT is
+    the absence of a match_lineups row.
 
     Returned dicts carry `cap`, so the caller can apply captain doubling.
 
@@ -273,7 +288,8 @@ def effective_lineup(conn, team_name: str, round_num: int) -> list[dict]:
     ph = _get_placeholder(conn)
     cur = conn.cursor()
     cur.execute(f'''
-        SELECT ts.player_id, ts.is_bench, ts.is_captain, p.position, p.name, p.team
+        SELECT ts.player_id, ts.is_bench, ts.is_captain, ts.jersey,
+               p.position, p.name, p.team
         FROM team_selections ts JOIN players p ON p.player_id = ts.player_id
         WHERE ts.team_name = {ph} AND ts.round = {ph}
     ''', (team_name, round_num))
@@ -282,22 +298,31 @@ def effective_lineup(conn, team_name: str, round_num: int) -> list[dict]:
         d = dict(r) if not isinstance(r, dict) else r
         rows.append({'pid': d['player_id'], 'bench': bool(d['is_bench']),
                      'cap': bool(d['is_captain']), 'pos': d['position'],
-                     'name': d['name'], 'team': d['team']})
+                     'jersey': d['jersey'], 'name': d['name'], 'team': d['team']})
 
-    # Real starting XV for the round (apostrophes stripped, matching ingestion).
+    # Everyone named in a matchday 23 this round - starters AND replacements
+    # (apostrophes stripped, matching ingestion). Absence from this set is what
+    # "OUT" means on the squad page, and it is the only thing that triggers a
+    # substitution.
     cur.execute(f'SELECT real_team, player_name FROM match_lineups '
-                f'WHERE round = {ph} AND is_bench = 0', (round_num,))
-    real = {((rt['real_team'] if isinstance(rt, dict) else rt[0]),
-             (rt['player_name'] if isinstance(rt, dict) else rt[1])) for rt in cur.fetchall()}
-    have_lineup = bool(real)
+                f'WHERE round = {ph}', (round_num,))
+    named = {((rt['real_team'] if isinstance(rt, dict) else rt[0]),
+              (rt['player_name'] if isinstance(rt, dict) else rt[1])) for rt in cur.fetchall()}
+    have_lineup = bool(named)
     cur.close()
 
-    def starting_real(pl):
-        return (pl['team'], (pl['name'] or '').replace("'", "")) in real
+    def in_matchday_23(pl):
+        return (pl['team'], (pl['name'] or '').replace("'", "")) in named
 
     starters = [r for r in rows if not r['bench']]
+    # Bench in the manager's own order. The old code took whichever row the DB
+    # happened to return first, from a query with no ORDER BY - so with two
+    # eligible replacements at one position the choice was arbitrary and a score
+    # was not strictly reproducible. A real bench covers 16 -> 23; this is the
+    # fantasy equivalent, and it is an order the manager set deliberately.
     bench_by_pos: dict[str, list] = defaultdict(list)
-    for b in (r for r in rows if r['bench']):
+    for b in sorted((r for r in rows if r['bench']),
+                    key=lambda x: (x['jersey'] is None, x['jersey'], x['pid'])):
         bench_by_pos[b['pos']].append(b)
 
     if not have_lineup:
@@ -305,11 +330,11 @@ def effective_lineup(conn, team_name: str, round_num: int) -> list[dict]:
 
     effective, used = [], set()
     for s in starters:
-        if starting_real(s):
-            effective.append(s)
+        if in_matchday_23(s):
+            effective.append(s)      # named in the 23 - he may yet come on
             continue
         sub = next((b for b in bench_by_pos[s['pos']]
-                    if id(b) not in used and starting_real(b)), None)
+                    if id(b) not in used and in_matchday_23(b)), None)
         if sub:
             used.add(id(sub))
             effective.append(sub)
