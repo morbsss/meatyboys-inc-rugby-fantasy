@@ -165,3 +165,61 @@ def test_every_earlier_round_stays_frozen_across_several_rollovers(conn):
     assert _squad(conn, 1) == snapshot_1
     assert _squad(conn, 2) == snapshot_2
     assert 994 in _squad(conn, 3)
+
+
+# --- finalize must not be blocked by a run that predates the round -----------
+
+@pytest.fixture
+def jobs_conn():
+    c = sqlite3.connect(':memory:')
+    c.row_factory = sqlite3.Row
+    c.executescript('''
+        CREATE TABLE job_runs (id INTEGER PRIMARY KEY AUTOINCREMENT,
+            league_id INTEGER, job TEXT, round_number INTEGER, status TEXT,
+            detail TEXT, run_at TEXT);
+        CREATE TABLE rounds (round_number INTEGER, first_kickoff TEXT,
+            last_kickoff TEXT, league_id INTEGER);
+    ''')
+    c.execute("INSERT INTO rounds VALUES (1, '2026-09-25T18:45:00+00:00',"
+              " '2026-09-27T14:00:00+00:00', ?)", (LEAGUE,))
+    c.commit()
+    return c
+
+
+def _finalize_run(conn, when, round_number=1, status='ok'):
+    conn.execute("INSERT INTO job_runs (league_id, job, round_number, status, run_at)"
+                 " VALUES (?, 'finalize', ?, ?, ?)", (LEAGUE, round_number, status, when))
+    conn.commit()
+
+
+def test_a_finalize_logged_before_the_round_does_not_count(jobs_conn):
+    """The live failure. A mock-era finalize from 24 August claimed round 1, so
+    the real one on Tuesday 29 September never ran — leaving round 1 frozen at a
+    scrape taken mid-match, and every later round carrying the correction."""
+    _finalize_run(jobs_conn, '2026-08-24T11:00:02+00:00')
+
+    assert idx._finalize_done(jobs_conn, LEAGUE, 1) is False
+
+
+def test_a_finalize_after_the_last_kickoff_does_count(jobs_conn):
+    _finalize_run(jobs_conn, '2026-09-29T11:00:00+00:00')
+
+    assert idx._finalize_done(jobs_conn, LEAGUE, 1) is True
+
+
+def test_no_finalize_at_all_is_not_done(jobs_conn):
+    assert idx._finalize_done(jobs_conn, LEAGUE, 1) is False
+
+
+def test_a_failed_finalize_does_not_count(jobs_conn):
+    _finalize_run(jobs_conn, '2026-09-29T11:00:00+00:00', status='error')
+
+    assert idx._finalize_done(jobs_conn, LEAGUE, 1) is False
+
+
+def test_an_unknown_round_falls_back_to_the_run_existing(jobs_conn):
+    """No calendar row to compare against — trust the log rather than re-running
+    a definitive scrape against a round we know nothing about."""
+    _finalize_run(jobs_conn, '2026-08-24T11:00:02+00:00', round_number=9)
+
+    assert idx._finalize_done(jobs_conn, LEAGUE, 9) is True

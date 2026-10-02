@@ -3667,14 +3667,34 @@ def _launch_predict(league_id, round_number) -> str:
 
 
 def _finalize_done(conn, league_id, round_number):
+    """Whether this round has already had its definitive scrape.
+
+    The run must have happened AFTER the round's last kickoff. A finalize logged
+    before the round was even played cannot have settled it, and treating it as
+    proof is not hypothetical: a mock-era run from 24 August claimed round 1, so
+    the real finalize on Tuesday 29 September was skipped. Round 1's totals stayed
+    frozen at a Sunday 15:55 scrape taken DURING the last match - and every later
+    round then carried the correction as a bogus delta, because scores are
+    cumulative.
+    """
     cursor = _get_cursor(conn)
+    cursor.execute('SELECT last_kickoff FROM rounds WHERE league_id = ? '
+                   'AND round_number = ?', (league_id, round_number))
+    row = cursor.fetchone()
+    last_ko = (row['last_kickoff'] if isinstance(row, dict) else row[0]) if row else None
+
     cursor.execute(
-        "SELECT 1 FROM job_runs WHERE league_id = ? AND job = 'finalize' "
-        "AND round_number = ? AND status = 'ok' LIMIT 1",
+        "SELECT MAX(run_at) AS m FROM job_runs WHERE league_id = ? AND job = 'finalize' "
+        "AND round_number = ? AND status = 'ok'",
         (league_id, round_number))
-    done = cursor.fetchone() is not None
+    row = cursor.fetchone()
     cursor.close()
-    return done
+    ran_at = (row['m'] if isinstance(row, dict) else row[0]) if row else None
+    if not ran_at:
+        return False
+    if not last_ko:
+        return True
+    return str(ran_at) > str(last_ko)
 
 
 def _rounds_known(conn, league_id):
