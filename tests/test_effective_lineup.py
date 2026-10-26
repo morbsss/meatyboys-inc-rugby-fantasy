@@ -59,6 +59,22 @@ def _really_benched(c, name, team):
     c.execute('INSERT INTO match_lineups VALUES (2, ?, ?, ?, 1)', (ROUND, name, team))
 
 
+def _club_published(c, team):
+    """Record that `team` named a 23 this round, with none of our picks in it.
+
+    Needed to express "left out". Absence from match_lineups only counts as OUT
+    for a club whose sheet we actually hold - see club_sheet_known in
+    api/competition.effective_lineup - because a club with no rows at all is
+    the sheet never having arrived, not twenty-three omissions.
+
+    These fixtures used to leave the dropped starter's club empty, so they were
+    really testing the missing-sheet case and would have passed whichever way
+    that was resolved.
+    """
+    c.execute('INSERT INTO match_lineups VALUES (2, ?, ?, ?, 0)',
+              (ROUND, f'Teammate,{team}', team))
+
+
 def _names(effective):
     return sorted(p['name'] for p in effective)
 
@@ -90,6 +106,7 @@ def test_a_dropped_starter_is_covered_by_a_bench_player_of_the_same_position(con
     _pick(conn, 3, bench=0)
     _really_starting(conn, 'Cover,B', 'BAT')
     _really_starting(conn, 'Other,C', 'SAR')
+    _club_published(conn, 'NOR')          # NOR named a 23 without Smith,F
     conn.commit()
     assert _names(effective_lineup(conn, TEAM, ROUND)) == ['Cover,B', 'Other,C']
 
@@ -100,6 +117,7 @@ def test_cover_must_match_the_position(conn):
     _pick(conn, 1, bench=0)
     _pick(conn, 2, bench=1)
     _really_starting(conn, 'Prop,P', 'BAT')
+    _club_published(conn, 'NOR')
     conn.commit()
     # No same-position cover, so the absent starter stays and scores ~0.
     assert _names(effective_lineup(conn, TEAM, ROUND)) == ['Smith,F']
@@ -113,6 +131,8 @@ def test_a_bench_player_covers_only_one_starter(conn):
     _pick(conn, 2, bench=0)
     _pick(conn, 3, bench=1)
     _really_starting(conn, 'Cover,C', 'BAT')
+    _club_published(conn, 'NOR')
+    _club_published(conn, 'SAR')
     conn.commit()
     eff = _names(effective_lineup(conn, TEAM, ROUND))
     assert eff.count('Cover,C') == 1, 'one bench player cannot cover two absentees'
@@ -124,7 +144,9 @@ def test_a_bench_player_who_is_not_really_starting_is_no_cover(conn):
     _player(conn, 2, 'Cover,B', 'BAT', 'FH')
     _pick(conn, 1, bench=0)
     _pick(conn, 2, bench=1)
-    _really_starting(conn, 'Someone,E', 'GLO')     # a lineup exists, neither is in it
+    _really_starting(conn, 'Someone,E', 'GLO')
+    _club_published(conn, 'NOR')          # both clubs named a 23,
+    _club_published(conn, 'BAT')          # and neither man is in it
     conn.commit()
     assert _names(effective_lineup(conn, TEAM, ROUND)) == ['Smith,F']
 
@@ -164,6 +186,7 @@ def test_a_substituted_captain_does_not_pass_the_armband_on(conn):
     _pick(conn, 1, bench=0, cap=1)
     _pick(conn, 2, bench=1)
     _really_starting(conn, 'Cover,B', 'BAT')
+    _club_published(conn, 'NOR')
     conn.commit()
     eff = effective_lineup(conn, TEAM, ROUND)
     assert [p['name'] for p in eff] == ['Cover,B']
@@ -201,7 +224,7 @@ def test_a_bench_player_on_the_real_BENCH_is_valid_cover(conn):
     _player(conn, 2, 'Cover,B', 'GLO', 'FH')
     _pick(conn, 1, bench=0)
     _pick(conn, 2, bench=1)
-    _really_starting(conn, 'Someone,E', 'EXE')     # a sheet exists; Out,A is absent
+    _club_published(conn, 'BAT')                   # BAT named a 23; Out,A is absent
     _really_benched(conn, 'Cover,B', 'GLO')
     conn.commit()
 
@@ -220,7 +243,8 @@ def test_only_absence_from_the_23_triggers_a_substitution(conn):
     _really_starting(conn, 'Starting,A', 'BAT')
     _really_benched(conn, 'Benched,B', 'SAL')
     _really_starting(conn, 'Cover,Z', 'GLO')
-    conn.commit()                                   # Absent,C has no row at all
+    _club_published(conn, 'NEW')                    # NEW named a 23 without him
+    conn.commit()                                   # Absent,C has no row of his own
 
     # Only Absent,C is replaced; the real-bench player keeps his place.
     assert _names(effective_lineup(conn, TEAM, ROUND)) == ['Benched,B', 'Cover,Z', 'Starting,A']
@@ -238,6 +262,7 @@ def test_cover_is_taken_in_bench_order(conn):
     _pick(conn, 2, bench=1, jersey=17)             # inserted second, lower number
     _really_starting(conn, 'First,B', 'GLO')
     _really_starting(conn, 'Second,C', 'NEW')
+    _club_published(conn, 'BAT')
     conn.commit()
 
     assert _names(effective_lineup(conn, TEAM, ROUND)) == ['First,B']

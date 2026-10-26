@@ -69,6 +69,15 @@ MATCH_WINDOW = timedelta(hours=2)
 # weekday(): Mon=0 .. Sun=6
 _MON, _TUE, _WED, _THU, _FRI, _SAT, _SUN = range(7)
 
+# The weekly break: Tuesday 12:00, league-local. At that moment the round rolls
+# to N+1, round N's table and fixtures go final, and squads reopen (README §1).
+#
+# Held here, where there is no DB access, so api/competition.py can ask "has
+# this round rolled over yet?" without importing api/index.py - index imports
+# competition, so that dependency can only run one way.
+ROLLOVER_WEEKDAY = _TUE
+ROLLOVER_HOUR, ROLLOVER_MINUTE = 12, 0
+
 
 def to_local(now_utc: datetime, tz_name: str) -> datetime:
     if now_utc.tzinfo is None:
@@ -118,7 +127,27 @@ def is_finalize_time(local: datetime) -> bool:
     to finalize is the one that just rolled, not the newly active one - see
     _round_to_finalize in api/index.py.
     """
-    return local.weekday() == _TUE and local.hour >= 12
+    return (local.weekday() == ROLLOVER_WEEKDAY
+            and local.hour >= ROLLOVER_HOUR)
+
+
+def rollover_at(last_kickoff: datetime, tz_name: str) -> datetime:
+    """The first Tuesday 12:00 league-local strictly after `last_kickoff`.
+
+    Timezone-aware so BST/GMT (and AEST/AEDT) switch on their own: the noon is
+    noon to the managers, whatever the UTC offset is that week.
+
+    This is the moment a round becomes immutable, so it is also the moment
+    auto-substitution is allowed to resolve - see effective_lineup in
+    api/competition.py.
+    """
+    local = to_local(last_kickoff, tz_name)
+    days = (ROLLOVER_WEEKDAY - local.weekday()) % 7
+    rollover = (local + timedelta(days=days)).replace(
+        hour=ROLLOVER_HOUR, minute=ROLLOVER_MINUTE, second=0, microsecond=0)
+    if rollover <= local:
+        rollover += timedelta(days=7)
+    return rollover
 
 
 def match_is_live(now_utc: datetime, kickoffs_iso: list[str]) -> bool:

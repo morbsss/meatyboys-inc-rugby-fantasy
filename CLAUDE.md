@@ -66,8 +66,16 @@ Tue 12:00 ──open──> first kickoff ──locked──> Tue 12:00 ──op
 
 `is_locked` is just `now >= first_kickoff(next_round)`; the behaviour comes from
 `get_next_round` rolling at the rollover rather than at the last kickoff. See
-`_rollover_at` in `api/index.py`, `is_finalize_time` in `api/scheduler.py`, and
+`scheduler.rollover_at`, `is_finalize_time` in `api/scheduler.py`, and
 README §1 (§5 is the ingestion schedule). The archived brief says Monday - it is wrong.
+
+**Auto-substitution resolves at the rollover too, never live** - see
+`effective_lineup` in `api/competition.py`. Team sheets arrive one match at a
+time from Thursday, so mid-round the set is incomplete by definition and a swap
+computed off it rearranges the table all weekend and can be wrong in both
+directions. The squad page still shows S/B/O live; only the swap waits. Anything
+needing the settled XV before the rollover passes `resolve_subs=True`
+explicitly, as `api/predict.py` does - it is projecting the post-rollover score.
 
 ## Jobs
 

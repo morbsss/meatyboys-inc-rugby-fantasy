@@ -614,8 +614,14 @@ def _win_probabilities(con, league_id, target, pct_cache, fr_pct, hist, fr_serie
         if use_auto_sub:
             # Before lineups are published (i.e. projecting an upcoming round)
             # this returns the named starters, exactly as the scorer would.
+            #
+            # resolve_subs=True on purpose. The scorer holds substitutions back
+            # until the rollover, but what it settles ON at the rollover is the
+            # substituted XV - and that final score is the thing being
+            # projected. Deferring here too would mean projecting a line-up we
+            # already know will not be the one that counts.
             picks = [{'pid': p['pid'], 'cap': p['cap']}
-                     for p in effective_lineup(con, team, rnd)]
+                     for p in effective_lineup(con, team, rnd, resolve_subs=True)]
         else:
             picks = [{'pid': r[0], 'cap': bool(r[1])} for r in con.execute(
                 'SELECT player_id, is_captain FROM team_selections '

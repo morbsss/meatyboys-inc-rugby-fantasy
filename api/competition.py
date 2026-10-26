@@ -20,8 +20,10 @@ import sqlite3
 import os
 from collections import defaultdict
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 
-from .leagues import roster_model, DEFAULT_MODEL
+from . import scheduler
+from .leagues import roster_model, DEFAULT_MODEL, LEAGUES, DEFAULT_LEAGUE
 
 DB_PATH      = 'fantasy_2025_26.db'
 FIXTURES_CSV = 'fixtures.csv'
@@ -119,12 +121,11 @@ def parse_fixtures(path: str) -> list[tuple[int, str, bool, str, bool]]:
 # Score lookup
 # ---------------------------------------------------------------------------
 
-def _team_model(conn, team_name: str) -> dict:
-    """Resolve the roster model for a team via its league. Falls back to the
-    default model when the league can't be determined (e.g. test fixtures)."""
+def _team_league(conn, team_name: str):
+    """(league_id, slug) for a team, or (None, None) if it can't be resolved."""
     ph = _get_placeholder(conn)
     cur = conn.cursor()
-    slug = None
+    lid, slug = None, None
     try:
         cur.execute(f'SELECT league_id FROM team_selections WHERE team_name = {ph} LIMIT 1', (team_name,))
         row = cur.fetchone()
@@ -134,10 +135,66 @@ def _team_model(conn, team_name: str) -> dict:
             r2 = cur.fetchone()
             slug = (r2['slug'] if isinstance(r2, dict) else r2[0]) if r2 else None
     except Exception:
-        slug = None
+        lid, slug = None, None
     finally:
         cur.close()
+    return lid, slug
+
+
+def _team_model(conn, team_name: str) -> dict:
+    """Resolve the roster model for a team via its league. Falls back to the
+    default model when the league can't be determined (e.g. test fixtures)."""
+    _, slug = _team_league(conn, team_name)
     return roster_model(slug) if slug else DEFAULT_MODEL
+
+
+def round_has_rolled_over(conn, round_num: int, team_name: str | None = None,
+                          now: datetime | None = None) -> bool:
+    """Whether `round_num`'s Tuesday-noon rollover has already passed.
+
+    True means the round is settled: its scores are final and its line-up can
+    no longer change. That is the only point at which auto-substitution is
+    allowed to resolve - see effective_lineup.
+
+    Returns True when the round's calendar entry is missing, which keeps the
+    rule testable without a `rounds` fixture and preserves the old behaviour
+    rather than silently dropping substitutions from a finished round.
+    """
+    ph = _get_placeholder(conn)
+    cur = conn.cursor()
+    last_str, slug = None, None
+    try:
+        lid, slug = (_team_league(conn, team_name) if team_name else (None, None))
+        if lid is not None:
+            cur.execute(f'SELECT last_kickoff FROM rounds '
+                        f'WHERE round_number = {ph} AND league_id = {ph}',
+                        (round_num, lid))
+            row = cur.fetchone()
+            last_str = (row['last_kickoff'] if isinstance(row, dict) else row[0]) if row else None
+        if last_str is None:
+            # Either no league could be resolved, or the calendar predates the
+            # league_id column being backfilled.
+            cur.execute(f'SELECT last_kickoff FROM rounds WHERE round_number = {ph}',
+                        (round_num,))
+            row = cur.fetchone()
+            last_str = (row['last_kickoff'] if isinstance(row, dict) else row[0]) if row else None
+    except Exception:
+        return True
+    finally:
+        cur.close()
+
+    if not last_str:
+        return True
+    try:
+        last_ko = datetime.fromisoformat(str(last_str))
+    except ValueError:
+        return True
+    if last_ko.tzinfo is None:
+        last_ko = last_ko.replace(tzinfo=timezone.utc)
+
+    tz_name = (LEAGUES.get(slug) or LEAGUES[DEFAULT_LEAGUE])['timezone']
+    rollover = scheduler.rollover_at(last_ko, tz_name)
+    return (now or datetime.now(timezone.utc)) >= rollover
 
 
 def get_team_score(conn, team_name: str, round_num: int) -> float:
@@ -253,7 +310,8 @@ def _front_row_score(conn, team_name: str, round_num: int) -> float:
     return float((row['s'] if isinstance(row, dict) else row[0]) or 0)
 
 
-def effective_lineup(conn, team_name: str, round_num: int) -> list[dict]:
+def effective_lineup(conn, team_name: str, round_num: int,
+                     resolve_subs: bool | None = None) -> list[dict]:
     """The XV that actually scores for an auto-sub (OFDS) team in a round.
 
     A fantasy starter who is OUT - not in his club's matchday 23 at all - is
@@ -263,6 +321,21 @@ def effective_lineup(conn, team_name: str, round_num: int) -> list[dict]:
     published the named starters stand as picked, which is the normal case when
     projecting a round that has not been played yet, since line-ups are not
     scraped until the Thursday.
+
+    WHEN this resolves matters as much as how. Substitutions are applied only
+    once the round has ROLLED OVER - Tuesday 12:00 league-local, the same break
+    that makes the round's scores final. Until then the named starters stand as
+    picked. `resolve_subs` overrides that test; leave it None to decide from the
+    calendar.
+
+    Resolving live looked helpful and was not. The sheets arrive one match at a
+    time from Thursday to Sunday, so mid-round the set is incomplete by
+    definition, and a substitution computed off a partial set moves points
+    around the table all weekend and can be wrong in both directions: a starter
+    at a club that had not published yet reads as OUT and loses his place to a
+    bench player at a club that had, and the swap then silently reverses when
+    his own sheet lands. Deciding once, when every 23 for the round is known
+    and the round is closing anyway, is both stable and correct.
 
     Both halves of that test are about the REAL 23, not about points, and both
     were previously stricter:
@@ -300,21 +373,44 @@ def effective_lineup(conn, team_name: str, round_num: int) -> list[dict]:
                      'cap': bool(d['is_captain']), 'pos': d['position'],
                      'jersey': d['jersey'], 'name': d['name'], 'team': d['team']})
 
+    starters = [r for r in rows if not r['bench']]
+
+    # The rollover gate. Mid-round the squad scores exactly as it was picked.
+    if resolve_subs is None:
+        resolve_subs = round_has_rolled_over(conn, round_num, team_name)
+    if not resolve_subs:
+        cur.close()
+        return starters
+
     # Everyone named in a matchday 23 this round - starters AND replacements
     # (apostrophes stripped, matching ingestion). Absence from this set is what
     # "OUT" means on the squad page, and it is the only thing that triggers a
     # substitution.
     cur.execute(f'SELECT real_team, player_name FROM match_lineups '
                 f'WHERE round = {ph}', (round_num,))
-    named = {((rt['real_team'] if isinstance(rt, dict) else rt[0]),
-              (rt['player_name'] if isinstance(rt, dict) else rt[1])) for rt in cur.fetchall()}
+    named, clubs_with_sheet = set(), set()
+    for rt in cur.fetchall():
+        club = rt['real_team'] if isinstance(rt, dict) else rt[0]
+        pname = rt['player_name'] if isinstance(rt, dict) else rt[1]
+        named.add((club, pname))
+        clubs_with_sheet.add(club)
     have_lineup = bool(named)
     cur.close()
 
     def in_matchday_23(pl):
         return (pl['team'], (pl['name'] or '').replace("'", "")) in named
 
-    starters = [r for r in rows if not r['bench']]
+    def club_sheet_known(pl):
+        """Whether we hold a matchday 23 for this player's club at all.
+
+        Only a club whose sheet we have can leave a player OUT. Absence is read
+        as omission everywhere else in here, and for a club with no sheet that
+        reading is simply wrong - it would omit the entire squad. `lineups` has
+        written "ok / 0 entries" for weeks behind an ESPN 403, so this is a real
+        state, and without this test a manager loses points for players who did
+        in fact start.
+        """
+        return pl['team'] in clubs_with_sheet
     # Bench in the manager's own order. The old code took whichever row the DB
     # happened to return first, from a query with no ORDER BY - so with two
     # eligible replacements at one position the choice was arbitrary and a score
@@ -330,7 +426,7 @@ def effective_lineup(conn, team_name: str, round_num: int) -> list[dict]:
 
     effective, used = [], set()
     for s in starters:
-        if in_matchday_23(s):
+        if not club_sheet_known(s) or in_matchday_23(s):
             effective.append(s)      # named in the 23 - he may yet come on
             continue
         sub = next((b for b in bench_by_pos[s['pos']]
