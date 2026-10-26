@@ -291,6 +291,13 @@
 
   function setCaptain(p) {
     const makeCaptain = !p.is_captain;     // tapping the current captain clears it
+    // Only a starter can captain: the doubling is applied over the effective XV,
+    // so an armband on the bench scores nothing and quietly costs the manager
+    // their captain. Say so rather than accepting a pick that cannot pay out.
+    if (makeCaptain && p.is_bench) {
+      window.mtybyToast('Your captain has to be in the starting XV', 'err');
+      return;
+    }
     picks.forEach((x) => { x.is_captain = false; });
     p.is_captain = makeCaptain;
   }
@@ -522,8 +529,20 @@
       x.position === p.position && x.is_bench !== p.is_bench
       && String(x.player_id) !== String(p.player_id));
     if (j === -1) return false;
+    const q = picks[j];
     [picks[i].is_bench, picks[j].is_bench] = [picks[j].is_bench, picks[i].is_bench];
     [picks[i], picks[j]] = [picks[j], picks[i]];
+
+    // The armband belongs to the SHIRT, not the man. Benching the captain used
+    // to carry the badge to the bench with him, and a benched captain is not in
+    // the effective XV - so the team silently lost its doubling altogether
+    // rather than gaining a new captain. Hand it to whoever takes the place.
+    if (p.is_captain || q.is_captain) {
+      const onField = p.is_bench ? q : p;
+      const onBench = p.is_bench ? p : q;
+      onField.is_captain = true;
+      onBench.is_captain = false;
+    }
     return true;
   }
 
@@ -541,11 +560,15 @@
   function positionedValidity(starters, bench, captains) {
     const startersOk = sameCounts(countByPos(starters), MODEL.starters);
     const benchOk = sameCounts(countByPos(bench), MODEL.bench);
+    // Counting captains alone let a BENCHED one through, and that squad saved
+    // happily while scoring no doubling at all.
+    const captainStarts = starters.some((p) => p.is_captain);
     let msg = '';
     if (captains !== 1) msg = 'Pick exactly one captain.';
+    else if (!captainStarts) msg = 'Your captain is on the bench - captain a starter.';
     else if (!startersOk) msg = `Starting XV must be ${fmtCounts(MODEL.starters)}.`;
     else if (!benchOk) msg = `Bench must be ${fmtCounts(MODEL.bench)}.`;
-    return { valid: captains === 1 && startersOk && benchOk, msg };
+    return { valid: captains === 1 && captainStarts && startersOk && benchOk, msg };
   }
 
   // =========================================================================

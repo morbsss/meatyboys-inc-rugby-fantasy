@@ -1956,6 +1956,17 @@ def save_picks(team_name):
         conn.close()
         return jsonify({'error': 'No players selected.'}), 400
 
+    # The captain must be starting. Doubling is applied over the EFFECTIVE XV
+    # (see competition._ofds_team_score), so an armband on the bench pays out
+    # nothing - the manager does not get a benched captain, they get no captain.
+    # Rejected rather than silently cleared: losing the doubling without being
+    # told is exactly the failure this is here to stop. The browser blocks it
+    # too; this catches a stale cached client.
+    if captain_id is not None and captain_id in bench_ids:
+        conn.close()
+        return jsonify({'error': 'Your captain is on the bench. '
+                                 'Captain one of your starting XV.'}), 400
+
     next_round = get_next_round(conn, league_id)
 
     # Validate the individual roster (spec §6.2): exactly ROSTER_SIZE players,
