@@ -234,8 +234,13 @@ def _get_cursor(conn):
 # Deliberately NOT the last kickoff: rolling over there reopened squads on Sunday
 # afternoon, before Monday's finalize scrape had settled the scores, and left the
 # round's final match being scored against the *next* round's fixture list.
-ROLLOVER_WEEKDAY = 1                     # Tuesday (Mon=0, as in api/scheduler.py)
-ROLLOVER_HOUR, ROLLOVER_MINUTE = 12, 0
+# Defined in api/scheduler.py, which api/competition.py also reads so that
+# auto-substitution can be held back until the rollover without competition
+# importing this module. Re-exported here because a lot of code says
+# ROLLOVER_HOUR and the constant has only ever had one meaning.
+ROLLOVER_WEEKDAY = scheduler.ROLLOVER_WEEKDAY   # Tuesday (Mon=0)
+ROLLOVER_HOUR    = scheduler.ROLLOVER_HOUR
+ROLLOVER_MINUTE  = scheduler.ROLLOVER_MINUTE
 
 
 def _league_tz(conn, league_id=None) -> str:
@@ -251,14 +256,7 @@ def _rollover_at(last_kickoff: datetime, tz_name: str) -> datetime:
     Timezone-aware so BST/GMT (and AEST/AEDT) switch on their own: the noon is
     noon to the managers, whatever the UTC offset is that week.
     """
-    local = scheduler.to_local(last_kickoff, tz_name)
-    days = (ROLLOVER_WEEKDAY - local.weekday()) % 7
-    rollover = (local + timedelta(days=days)).replace(
-        hour=ROLLOVER_HOUR, minute=ROLLOVER_MINUTE,
-        second=0, microsecond=0)
-    if rollover <= local:
-        rollover += timedelta(days=7)
-    return rollover
+    return scheduler.rollover_at(last_kickoff, tz_name)
 
 
 def round_rollover(conn, round_num, league_id=None):
@@ -1955,6 +1953,17 @@ def save_picks(team_name):
     if not player_ids:
         conn.close()
         return jsonify({'error': 'No players selected.'}), 400
+
+    # The captain must be starting. Doubling is applied over the EFFECTIVE XV
+    # (see competition._ofds_team_score), so an armband on the bench pays out
+    # nothing - the manager does not get a benched captain, they get no captain.
+    # Rejected rather than silently cleared: losing the doubling without being
+    # told is exactly the failure this is here to stop. The browser blocks it
+    # too; this catches a stale cached client.
+    if captain_id is not None and captain_id in bench_ids:
+        conn.close()
+        return jsonify({'error': 'Your captain is on the bench. '
+                                 'Captain one of your starting XV.'}), 400
 
     next_round = get_next_round(conn, league_id)
 
